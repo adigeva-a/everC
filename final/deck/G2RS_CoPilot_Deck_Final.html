@@ -172,12 +172,15 @@ body{font-family:'Poppins',sans-serif;background:#f7f7fb;color:#1a1a2e}
   .pipe-box{flex:0 0 calc(50% - 20px);border-radius:12px!important;padding:12px}
   .pipe-box .ci-xs{width:32px;height:32px}
   .pipe-arr{display:none}
-  .timeline{flex-direction:column;gap:20px;padding-left:28px}
+  .timeline{flex-direction:column;gap:16px;padding-left:0}
   .timeline::before{display:none}
-  .tl-node{flex-direction:row;align-items:flex-start;text-align:left;gap:16px}
-  .tl-node .ci-sm{margin-bottom:0}
+  .tl-node{flex-direction:row;align-items:flex-start;text-align:left;gap:14px;background:#fff;border-radius:14px;padding:14px 16px;box-shadow:2px 2px 10px rgba(0,0,0,.04)}
+  .tl-node .ci-sm{margin-bottom:0;flex-shrink:0;width:42px;height:42px}
+  .tl-node .ci-sm svg{width:18px;height:18px}
   .tl-dot{display:none}
-  .tl-gate{margin-top:4px}
+  .tl-title{font-size:14px}
+  .tl-sub{font-size:11px}
+  .tl-gate{margin-top:4px;font-size:10px}
   .vs{grid-template-columns:1fr;gap:14px}
   .vs-mid{flex-direction:row;padding:0;justify-content:center}
   .vs-mid span{font-size:14px}
@@ -188,9 +191,17 @@ body{font-family:'Poppins',sans-serif;background:#f7f7fb;color:#1a1a2e}
   .al-card{padding:10px 14px;gap:8px}
   .al-dom{font-size:13px}
   .al-typ{font-size:11px}
+  .slide[data-s="4"] .nc{padding:14px 18px;gap:14px}
+  .slide[data-s="4"] .ci-sm{width:40px;height:40px}
+  .slide[data-s="5"] [style*="grid-template-columns"]{grid-template-columns:1fr!important}
+  .slide[data-s="5"] .nc-sm{padding:14px 16px}
+  .slide[data-s="11"] .nc{padding:18px 14px}
+  .slide[data-s="12"] .tl-node .ci-sm[style*="margin-bottom"]{margin-bottom:0!important}
   .res-table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
   .res-table th,.res-table td{white-space:nowrap;padding:8px 10px;font-size:11px}
+  .slide[data-s="13"] .t2{font-size:22px}
   .fte-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .fte-card{padding:12px 10px;border-radius:12px}
   .met{padding:20px 14px}
   .met-row{font-size:11px}
   .met-row .mv{font-size:11px}
@@ -240,16 +251,38 @@ body{font-family:'Poppins',sans-serif;background:#f7f7fb;color:#1a1a2e}
   .progress{height:2px}
   .slide[data-s="0"] .ci{width:72px!important;height:72px!important}
   .slide[data-s="0"] .ci svg{width:32px;height:32px}
-  .slide[data-s="14"] .ci{width:72px!important;height:72px!important}
-  .slide[data-s="14"] .ci svg{width:30px;height:30px}
-  .slide[data-s="14"] .si p{font-size:16px!important}
-  .slide[data-s="14"] .si p:last-child{font-size:9px!important}
-  .slide[data-s="4"] .nc,.slide[data-s="4"] .nc-flat{padding:14px 16px}
+  .slide[data-s="15"] .ci{width:72px!important;height:72px!important}
+  .slide[data-s="15"] .ci svg{width:30px;height:30px}
+  .slide[data-s="15"] .si p{font-size:16px!important}
+  .slide[data-s="15"] .si p:last-child{font-size:9px!important}
+  .slide[data-s="4"] .nc,.slide[data-s="4"] .nc-flat{padding:12px 14px;gap:12px}
   .slide[data-s="4"] .ci-sm{width:36px;height:36px}
   .slide[data-s="4"] .ci-sm svg{width:18px;height:18px}
-  .slide[data-s="9"] .nc{padding:12px 14px}
-  .slide[data-s="9"] .ci-sm{width:36px;height:36px}
-  .slide[data-s="12"] .res-table th,.slide[data-s="12"] .res-table td{font-size:10px;padding:6px 8px}
+  .slide[data-s="4"] .body-sm{font-size:11px;line-height:1.45}
+  .slide[data-s="5"] [style*="grid-template-columns"]{grid-template-columns:1fr!important;gap:10px!important}
+  .slide[data-s="5"] .nc-sm{padding:12px 14px;gap:10px}
+  .slide[data-s="5"] .ci-sm{width:34px;height:34px}
+  .slide[data-s="5"] .ci-sm svg{width:16px;height:16px}
+  .slide[data-s="10"] .nc{padding:12px 14px}
+  .slide[data-s="10"] .ci-sm{width:36px;height:36px}
+  .slide[data-s="11"] .nc{padding:14px 12px}
+  .slide[data-s="11"] .ci-sm{width:36px;height:36px}
+  .slide[data-s="12"] .timeline{gap:10px}
+  .slide[data-s="12"] .tl-node{gap:8px;padding:10px 12px;border-radius:12px}
+  .slide[data-s="12"] .tl-node .ci-sm{width:36px;height:36px}
+  .slide[data-s="12"] .tl-node .ci-sm svg{width:16px;height:16px}
+  .slide[data-s="12"] .tl-node .ci-sm[style*="margin-bottom"]{margin-bottom:0!important}
+  .slide[data-s="12"] .tl-title{font-size:13px}
+  .slide[data-s="12"] .tl-sub{font-size:10px}
+  .slide[data-s="12"] .tl-gate{font-size:8px;padding:2px 6px}
+  .slide[data-s="12"] .tl-node p{font-size:10px!important;margin-top:4px!important;line-height:1.3!important}
+  .slide[data-s="13"] .t2{font-size:18px}
+  .slide[data-s="13"] .res-table th,.slide[data-s="13"] .res-table td{font-size:10px;padding:6px 8px}
+  .slide[data-s="13"] .fte-grid{grid-template-columns:1fr 1fr;gap:6px}
+  .slide[data-s="13"] .fte-card{padding:10px 8px;border-radius:10px}
+  .slide[data-s="13"] .fte-n{font-size:18px}
+  .slide[data-s="13"] .fte-l{font-size:9px}
+  .slide[data-s="13"] p[style*="font-size:11px"]{font-size:10px!important}
 }
 @media print{.progress,.nav{display:none!important}.slide{position:relative;opacity:1!important;pointer-events:auto!important;page-break-after:always}.an{opacity:1!important}}
 
@@ -372,47 +405,78 @@ body{font-family:'Poppins',sans-serif;background:#f7f7fb;color:#1a1a2e}
   </div>
 </section>
 
-<!-- Slide 5 — What the Co-Pilot Does -->
+<!-- Slide 5 — Alternatives Considered -->
 <section class="slide" data-s="4">
   <div class="si">
-    <p class="label an au d0">HOW IT WORKS</p>
-    <h2 class="t2 an au d1" style="font-size:30px">The Co-Pilot walks the analyst through <span class="purple">every step</span>.</h2>
-    <p class="body an au d2" style="font-size:15px;max-width:700px;margin-bottom:16px">From the moment an alert arrives to the final decision — here's what changes.</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="nc-sm an al d2" style="display:flex;align-items:flex-start;gap:16px">
-        <div class="ci ci-sm purple-g" style="flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div>
-        <div><p style="font-size:14px;font-weight:700;color:#1a1a2e;margin:0 0 4px"><span class="badge badge-purple" style="margin-right:6px">1</span>Group by violation type</p><p class="body-sm" style="margin:0;font-size:12px;line-height:1.55">Connects to G2's detection output and clusters incoming alerts — gambling, prescription, counterfeit — so the analyst works one type at a time instead of context-switching across a random queue.</p></div>
+    <p class="label an au d0">ALTERNATIVES CONSIDERED</p>
+    <h2 class="t2 an au d1" style="font-size:32px">Three paths. <span class="purple">One recommendation.</span></h2>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+      <div class="nc an al d2" style="display:flex;align-items:flex-start;gap:20px;border-left:4px solid #dc2626;padding:18px 26px">
+        <div class="ci ci-sm red-g" style="flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span class="badge badge-red">REJECTED</span><strong style="font-size:15px">Automate Investigation</strong></div>
+          <p class="body-sm" style="margin:0;line-height:1.65">× Security boundary: banks will not allow third-party access to internal transaction data — full stop.<br>× Legal liability: customer is legally liable for merchant decisions. Automation removes required human sign-off.<br>× Wrong problem: removes humans from the loop instead of making human review faster and better.</p>
+        </div>
       </div>
-      <div class="nc-sm an ar d3" style="display:flex;align-items:flex-start;gap:16px">
-        <div class="ci ci-sm teal-g" style="flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
-        <div><p style="font-size:14px;font-weight:700;color:#1a1a2e;margin:0 0 4px"><span class="badge badge-green" style="margin-right:6px">2</span>Pre-load evidence pack</p><p class="body-sm" style="margin:0;font-size:12px;line-height:1.55">Pulls merchant data from G2 and EverC signals — domain age, risk graph connections, traffic vs. transaction volume, adverse media — so the analyst never manually looks anything up across 3+ tools.</p></div>
+      <div class="nc an al d3" style="display:flex;align-items:flex-start;gap:20px;border-left:4px solid #d97706;padding:18px 26px">
+        <div class="ci ci-sm amber-g" style="flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span class="badge badge-amber">COMPLEMENTARY</span><strong style="font-size:15px">Risk-Based Monitoring Tiers</strong></div>
+          <p class="body-sm" style="margin:0;line-height:1.65">+ Reduces alert volume at source — fewer alerts enter the system<br>– Reduces count, not per-case effort: each alert still takes 40–60 min regardless<br>→ Deploy as second layer once Co-Pilot proves workflow efficiency. Sequence matters.</p>
+        </div>
       </div>
-      <div class="nc-sm an al d4" style="display:flex;align-items:flex-start;gap:16px">
-        <div class="ci ci-sm amber-g" style="flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2a10 10 0 110 20 10 10 0 010-20z"/><path d="M12 6v6l4 2"/></svg></div>
-        <div><p style="font-size:14px;font-weight:700;color:#1a1a2e;margin:0 0 4px"><span class="badge badge-amber" style="margin-right:6px">3</span>AI case summary in ~20s</p><p class="body-sm" style="margin:0;font-size:12px;line-height:1.55">Generates a plain-language brief: who the merchant is, what was detected, what the pattern means, and what the risk implication is. The analyst reads instead of researching.</p></div>
-      </div>
-      <div class="nc-sm an ar d5" style="display:flex;align-items:flex-start;gap:16px">
-        <div class="ci ci-sm indigo-g" style="flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
-        <div><p style="font-size:14px;font-weight:700;color:#1a1a2e;margin:0 0 4px"><span class="badge badge-purple" style="margin-right:6px">4</span>Verification checklist</p><p class="body-sm" style="margin:0;font-size:12px;line-height:1.55">Pre-built and violation-specific: exactly what to check internally — transaction volume, chargeback rate, prior warnings, license docs. No more rebuilding guidance from scratch.</p></div>
-      </div>
-      <div class="nc-sm an al d6" style="display:flex;align-items:flex-start;gap:16px">
-        <div class="ci ci-sm" style="flex-shrink:0;background:linear-gradient(135deg,#6366f1,#a78bfa);box-shadow:0 8px 28px rgba(99,102,241,.2)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-        <div><p style="font-size:14px;font-weight:700;color:#1a1a2e;margin:0 0 4px"><span class="badge badge-purple" style="margin-right:6px">5</span>Violation history timeline</p><p class="body-sm" style="margin:0;font-size:12px;line-height:1.55">Past flags, warnings, acknowledgments, remediation attempts, and recurrences — the merchant's full compliance story in one place, no digging through separate systems.</p></div>
-      </div>
-      <div class="nc-sm an ar d7" style="display:flex;align-items:flex-start;gap:16px">
-        <div class="ci ci-sm" style="flex-shrink:0;background:linear-gradient(135deg,#0891b2,#22d3ee);box-shadow:0 8px 28px rgba(8,145,178,.2)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></div>
-        <div><p style="font-size:14px;font-weight:700;color:#1a1a2e;margin:0 0 4px"><span class="badge badge-green" style="margin-right:6px">6</span>AI insights from similar cases</p><p class="body-sm" style="margin:0;font-size:12px;line-height:1.55">Shows what percentage of historically similar cases resulted in terminate, engage, or accept — and why. The analyst sees precedent, not a blank page.</p></div>
-      </div>
-      <div class="nc-sm an au d8" style="display:flex;align-items:flex-start;gap:16px;grid-column:1/-1;background:rgba(13,148,136,.03);border:1px solid rgba(13,148,136,.12)">
-        <div class="ci ci-sm red-g" style="flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <div><p style="font-size:14px;font-weight:700;color:#1a1a2e;margin:0 0 4px"><span class="badge badge-green" style="margin-right:6px">7</span>Risk-tier routing + one-click decision</p><p class="body-sm" style="margin:0;font-size:12px;line-height:1.55">Critical and High surface first with SLA timers. When the analyst decides, one click auto-populates a pre-drafted rationale for the audit trail. No blank-page writing. Investigation complete.</p></div>
+      <div class="nc an al d4" style="display:flex;align-items:flex-start;gap:20px;border-left:4px solid #0d9488;padding:18px 26px;background:rgba(13,148,136,.03)">
+        <div class="ci ci-sm teal-g" style="flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span class="badge badge-green">CHOSEN ✓</span><strong style="font-size:15px">Merchant Risk Co-Pilot</strong></div>
+          <p class="body-sm" style="margin:0;line-height:1.65">✓ Attacks root cause: structural mismatch and blank-slate context<br>✓ Scales as software — no headcount required on G2RS or customer side<br>✓ Respects the data boundary entirely — guides analysts, never accesses internal data</p>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Slide 6 — The Solution -->
+<!-- Slide 6 — What the Co-Pilot Does -->
 <section class="slide" data-s="5">
+  <div class="si">
+    <p class="label an au d0">HOW IT WORKS</p>
+    <h2 class="t2 an au d1" style="font-size:30px">The Co-Pilot walks the analyst through <span class="purple">every step</span>.</h2>
+    <p class="body an au d2" style="font-size:15px;max-width:700px;margin-bottom:16px">From alert to decision — here's what changes.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="nc-sm an al d2" style="display:flex;align-items:flex-start;gap:16px">
+        <div class="ci ci-sm purple-g" style="flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div>
+        <div><p style="font-size:14px;font-weight:700;color:#1a1a2e;margin:0 0 4px"><span class="badge badge-purple" style="margin-right:6px">1</span>Group by violation type</p><p class="body-sm" style="margin:0;font-size:12px;line-height:1.55">Clusters alerts by type — gambling, prescription, counterfeit — so analysts work one category at a time, no context-switching.</p></div>
+      </div>
+      <div class="nc-sm an ar d3" style="display:flex;align-items:flex-start;gap:16px">
+        <div class="ci ci-sm teal-g" style="flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+        <div><p style="font-size:14px;font-weight:700;color:#1a1a2e;margin:0 0 4px"><span class="badge badge-green" style="margin-right:6px">2</span>Pre-load evidence pack</p><p class="body-sm" style="margin:0;font-size:12px;line-height:1.55">Pulls G2 + EverC signals — domain age, risk graph, traffic vs. transactions, adverse media — no manual lookup across 3+ tools.</p></div>
+      </div>
+      <div class="nc-sm an al d4" style="display:flex;align-items:flex-start;gap:16px">
+        <div class="ci ci-sm amber-g" style="flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2a10 10 0 110 20 10 10 0 010-20z"/><path d="M12 6v6l4 2"/></svg></div>
+        <div><p style="font-size:14px;font-weight:700;color:#1a1a2e;margin:0 0 4px"><span class="badge badge-amber" style="margin-right:6px">3</span>AI case summary in ~20s</p><p class="body-sm" style="margin:0;font-size:12px;line-height:1.55">Generates a brief: who the merchant is, what was detected, the pattern, and risk implication. Read, don't research.</p></div>
+      </div>
+      <div class="nc-sm an ar d5" style="display:flex;align-items:flex-start;gap:16px">
+        <div class="ci ci-sm indigo-g" style="flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+        <div><p style="font-size:14px;font-weight:700;color:#1a1a2e;margin:0 0 4px"><span class="badge badge-purple" style="margin-right:6px">4</span>Verification checklist</p><p class="body-sm" style="margin:0;font-size:12px;line-height:1.55">Violation-specific: transaction volume, chargeback rate, prior warnings, license docs. No rebuilding guidance from scratch.</p></div>
+      </div>
+      <div class="nc-sm an al d6" style="display:flex;align-items:flex-start;gap:16px">
+        <div class="ci ci-sm" style="flex-shrink:0;background:linear-gradient(135deg,#6366f1,#a78bfa);box-shadow:0 8px 28px rgba(99,102,241,.2)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div><p style="font-size:14px;font-weight:700;color:#1a1a2e;margin:0 0 4px"><span class="badge badge-purple" style="margin-right:6px">5</span>Violation history timeline</p><p class="body-sm" style="margin:0;font-size:12px;line-height:1.55">Flags, warnings, remediation, recurrences — the merchant's full compliance story in one view.</p></div>
+      </div>
+      <div class="nc-sm an ar d7" style="display:flex;align-items:flex-start;gap:16px">
+        <div class="ci ci-sm" style="flex-shrink:0;background:linear-gradient(135deg,#0891b2,#22d3ee);box-shadow:0 8px 28px rgba(8,145,178,.2)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></div>
+        <div><p style="font-size:14px;font-weight:700;color:#1a1a2e;margin:0 0 4px"><span class="badge badge-green" style="margin-right:6px">6</span>AI insights from similar cases</p><p class="body-sm" style="margin:0;font-size:12px;line-height:1.55">Shows % of similar cases that ended in terminate, engage, or accept — and why. Precedent, not a blank page.</p></div>
+      </div>
+      <div class="nc-sm an au d8" style="display:flex;align-items:flex-start;gap:16px;grid-column:1/-1;background:rgba(13,148,136,.03);border:1px solid rgba(13,148,136,.12)">
+        <div class="ci ci-sm red-g" style="flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div><p style="font-size:14px;font-weight:700;color:#1a1a2e;margin:0 0 4px"><span class="badge badge-green" style="margin-right:6px">7</span>Risk-tier routing + one-click decision</p><p class="body-sm" style="margin:0;font-size:12px;line-height:1.55">Critical and High surface first with SLA timers. One click auto-populates the rationale for audit trail. Done.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 7 — The Solution -->
+<section class="slide" data-s="6">
   <div class="si">
     <p class="label an au d0">THE SOLUTION</p>
     <h2 class="t2 an au d1">Four layers. Each one <span class="purple">compounds</span>.</h2>
@@ -438,8 +502,8 @@ body{font-family:'Poppins',sans-serif;background:#f7f7fb;color:#1a1a2e}
   </div>
 </section>
 
-<!-- Slide 7 — Diagnosis -->
-<section class="slide" data-s="6">
+<!-- Slide 8 — Diagnosis -->
+<section class="slide" data-s="7">
   <div class="si center">
     <div class="an ap d0" style="margin-bottom:20px"><div class="ci purple-g"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div></div>
     <span class="an au d1" style="display:inline-block;font-size:13px;font-weight:600;color:#999;background:rgba(0,0,0,.04);border-radius:8px;padding:4px 14px;margin-bottom:12px;letter-spacing:.5px">Hypothesis</span>
@@ -453,8 +517,8 @@ body{font-family:'Poppins',sans-serif;background:#f7f7fb;color:#1a1a2e}
   </div>
 </section>
 
-<!-- Slide 8 — Before/After -->
-<section class="slide" data-s="7">
+<!-- Slide 9 — Before/After -->
+<section class="slide" data-s="8">
   <div class="si center">
     <div class="an ap d0" style="margin-bottom:20px"><div class="ci teal-g"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div></div>
     <h2 class="t2 an au d1">Group by type. Load context once.<br><span class="teal">Work the batch.</span></h2>
@@ -473,8 +537,8 @@ body{font-family:'Poppins',sans-serif;background:#f7f7fb;color:#1a1a2e}
   </div>
 </section>
 
-<!-- Slide 9 — Transformation -->
-<section class="slide" data-s="8">
+<!-- Slide 10 — Transformation -->
+<section class="slide" data-s="9">
   <div class="si">
     <p class="label an au d0">THE TRANSFORMATION</p>
     <h2 class="t2 an au d1">Same analyst. Same Monday. <span class="teal">Different outcome.</span></h2>
@@ -505,8 +569,8 @@ body{font-family:'Poppins',sans-serif;background:#f7f7fb;color:#1a1a2e}
   </div>
 </section>
 
-<!-- Slide 10 — MVP -->
-<section class="slide" data-s="9">
+<!-- Slide 11 — MVP -->
+<section class="slide" data-s="10">
   <div class="si">
     <p class="label an au d0">MVP</p>
     <h2 class="t2 an au d1">Five features. Sequenced by <span class="purple">dependency</span>.</h2>
@@ -520,8 +584,8 @@ body{font-family:'Poppins',sans-serif;background:#f7f7fb;color:#1a1a2e}
   </div>
 </section>
 
-<!-- Slide 11 — Customer Segments -->
-<section class="slide" data-s="10">
+<!-- Slide 12 — Customer Segments -->
+<section class="slide" data-s="11">
   <div class="si">
     <p class="label an au d0">CUSTOMER SEGMENTS</p>
     <h2 class="t2 an au d1">Same platform. Different <span class="purple">lever</span>.</h2>
@@ -546,8 +610,8 @@ body{font-family:'Poppins',sans-serif;background:#f7f7fb;color:#1a1a2e}
   </div>
 </section>
 
-<!-- Slide 12 — Execution -->
-<section class="slide" data-s="11">
+<!-- Slide 13 — Execution -->
+<section class="slide" data-s="12">
   <div class="si">
     <p class="label an au d0">EXECUTION</p>
     <h2 class="t2 an au d1">Four phases. Gated by <span class="purple">signal</span> — not date.</h2>
@@ -592,8 +656,8 @@ body{font-family:'Poppins',sans-serif;background:#f7f7fb;color:#1a1a2e}
   </div>
 </section>
 
-<!-- Slide 13 — Resources & Effort -->
-<section class="slide" data-s="12">
+<!-- Slide 14 — Resources & Effort -->
+<section class="slide" data-s="13">
   <div class="si">
     <p class="label an au d0">RESOURCES &amp; EFFORT</p>
     <h2 class="t2 an au d1" style="font-size:30px">What the build requires. <span class="teal">Phased, lean, right-sized.</span></h2>
@@ -627,8 +691,8 @@ body{font-family:'Poppins',sans-serif;background:#f7f7fb;color:#1a1a2e}
   </div>
 </section>
 
-<!-- Slide 14 — Metrics -->
-<section class="slide" data-s="13">
+<!-- Slide 15 — Metrics -->
+<section class="slide" data-s="14">
   <div class="si">
     <p class="label an au d0">METRICS</p>
     <h2 class="t2 an au d1">One north star. One guardrail. One <span class="purple">growth signal</span>.</h2>
@@ -673,8 +737,8 @@ body{font-family:'Poppins',sans-serif;background:#f7f7fb;color:#1a1a2e}
   </div>
 </section>
 
-<!-- Slide 15 — Closing -->
-<section class="slide" data-s="14" style="background:linear-gradient(135deg,#1a1a2e 0%,#2d1b69 100%)">
+<!-- Slide 16 — Closing -->
+<section class="slide" data-s="15" style="background:linear-gradient(135deg,#1a1a2e 0%,#2d1b69 100%)">
   <div class="si center">
     <div class="an ap d0" style="margin-bottom:28px;position:relative">
       <div class="ci" style="width:96px;height:96px;background:linear-gradient(135deg,#7c3aed,#a855f7);box-shadow:0 0 60px rgba(124,58,237,.4)"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
@@ -691,7 +755,7 @@ body{font-family:'Poppins',sans-serif;background:#f7f7fb;color:#1a1a2e}
 </div>
 
 <div class="nav">
-  <span class="counter" id="ctr">01 / 15</span>
+  <span class="counter" id="ctr">01 / 16</span>
   <div class="nav-btns">
     <button class="nb" id="pb" disabled>←</button>
     <button class="nb" id="xb">→</button>
