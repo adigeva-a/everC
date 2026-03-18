@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>G2RS Merchant Risk Co-Pilot — Product Deck</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --purple-900: #1a0a2e;
+  --purple-800: #2d1b4e;
+  --purple-700: #3f2b6b;
+  --purple-600: #5b3e9e;
+  --purple-500: #7c5cbf;
+  --purple-400: #9d7ed8;
+  --purple-300: #beaaed;
+  --purple-200: #ddd2f5;
+  --purple-100: #eee8fa;
+  --purple-50: #f7f4fc;
+  --white: #ffffff;
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #e5e5e5;
+  --gray-300: #d4d4d4;
+  --gray-400: #a3a3a3;
+  --gray-500: #737373;
+  --gray-600: #525252;
+  --gray-700: #404040;
+  --gray-800: #262626;
+  --text: #1a1a2e;
+  --accent: #e74c8b;
+  --accent-light: #fce4f0;
+  --teal: #06d6a0;
+  --teal-light: #e6fbf4;
+  --red: #ef476f;
+  --red-light: #fde8ed;
+  --amber: #ffa62b;
+  --amber-light: #fff5e6;
+}
+
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--gray-100);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.deck { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+
+.slide {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateX(40px);
+  overflow: hidden;
+}
+.slide.active {
+  opacity: 1; visibility: visible; transform: translateX(0);
+}
+.slide.prev {
+  opacity: 0; visibility: hidden; transform: translateX(-40px);
+}
+
+/* SLIDE LAYOUTS */
+.slide-dark {
+  background: linear-gradient(135deg, var(--purple-900) 0%, var(--purple-800) 40%, var(--purple-700) 100%);
+  color: white;
+}
+.slide-light {
+  background: var(--white);
+  color: var(--text);
+}
+.slide-soft {
+  background: var(--purple-50);
+  color: var(--text);
+}
+.slide-gradient {
+  background: linear-gradient(135deg, var(--purple-600) 0%, var(--purple-800) 100%);
+  color: white;
+}
+.slide-accent {
+  background: linear-gradient(135deg, var(--purple-900) 0%, #1a0a2e 50%, #0d0520 100%);
+  color: white;
+}
+
+.slide-inner {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 60px 80px;
+  max-width: 1400px; margin: 0 auto; width: 100%;
+}
+.slide-inner.center { justify-content: center; align-items: center; text-align: center; }
+.slide-inner.vcenter { justify-content: center; }
+
+/* TYPOGRAPHY */
+h1 { font-size: 56px; font-weight: 800; line-height: 1.1; letter-spacing: -1.5px; }
+h2 { font-size: 42px; font-weight: 700; line-height: 1.2; letter-spacing: -1px; }
+h3 { font-size: 28px; font-weight: 700; line-height: 1.3; letter-spacing: -0.5px; }
+h4 { font-size: 20px; font-weight: 600; line-height: 1.4; }
+p { font-size: 18px; line-height: 1.7; font-weight: 400; }
+.subtitle { font-size: 22px; font-weight: 400; opacity: 0.75; line-height: 1.6; max-width: 700px; }
+.label {
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2.5px;
+}
+.label-purple { color: var(--purple-400); }
+.label-white { color: rgba(255,255,255,0.5); }
+.label-accent { color: var(--accent); }
+
+mark {
+  background: linear-gradient(120deg, rgba(124,92,191,0.2) 0%, rgba(124,92,191,0.2) 100%);
+  color: var(--purple-600); font-weight: 700; padding: 0 4px; border-radius: 3px;
+}
+.dark-mark {
+  background: linear-gradient(120deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.1) 100%);
+  color: #beaaed; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+}
+strong { font-weight: 700; }
+.text-purple { color: var(--purple-500); }
+.text-accent { color: var(--accent); }
+.text-teal { color: var(--teal); }
+.text-muted { opacity: 0.6; }
+.text-sm { font-size: 14px; }
+.text-xs { font-size: 12px; }
+
+.spacer { height: 32px; }
+.spacer-sm { height: 16px; }
+.spacer-lg { height: 48px; }
+
+/* ICON SYSTEM */
+.icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
+}
+.icon-lg { width: 64px; height: 64px; border-radius: 18px; font-size: 28px; }
+.icon-sm { width: 36px; height: 36px; border-radius: 10px; font-size: 16px; }
+.icon-purple { background: rgba(124,92,191,0.15); color: var(--purple-500); }
+.icon-white { background: rgba(255,255,255,0.1); color: white; }
+.icon-accent { background: var(--accent-light); color: var(--accent); }
+.icon-teal { background: var(--teal-light); color: #059669; }
+.icon-red { background: var(--red-light); color: var(--red); }
+.icon-amber { background: var(--amber-light); color: #d97706; }
+
+.icon svg { width: 24px; height: 24px; }
+.icon-lg svg { width: 32px; height: 32px; }
+.icon-sm svg { width: 18px; height: 18px; }
+
+/* GRID LAYOUTS */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+.grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; }
+.flex-row { display: flex; align-items: center; gap: 16px; }
+.flex-col { display: flex; flex-direction: column; gap: 16px; }
+.flex-1 { flex: 1; }
+.gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; }
+.gap-24 { gap: 24px; }
+.gap-32 { gap: 32px; }
+.gap-40 { gap: 40px; }
+
+/* CARDS */
+.card {
+  background: white; border-radius: 16px; padding: 28px;
+  border: 1px solid var(--gray-200);
+}
+.card-dark {
+  background: rgba(255,255,255,0.06); border-radius: 16px; padding: 28px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.card-purple {
+  background: var(--purple-50); border-radius: 16px; padding: 28px;
+  border: 1px solid var(--purple-200);
+}
+.card-accent {
+  background: var(--accent-light); border-radius: 16px; padding: 28px;
+  border: 1px solid rgba(231,76,139,0.2);
+}
+.card-glass {
+  background: rgba(255,255,255,0.07); border-radius: 16px; padding: 28px;
+  border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(10px);
+}
+
+/* PILL / BADGE */
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 100px;
+  font-size: 13px; font-weight: 600;
+}
+.pill-purple { background: rgba(124,92,191,0.12); color: var(--purple-600); }
+.pill-white { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); }
+.pill-accent { background: var(--accent-light); color: var(--accent); }
+.pill-teal { background: var(--teal-light); color: #059669; }
+.pill-red { background: var(--red-light); color: var(--red); }
+
+/* STAT */
+.stat { display: flex; flex-direction: column; }
+.stat-value { font-size: 48px; font-weight: 800; line-height: 1; letter-spacing: -1px; }
+.stat-value-sm { font-size: 36px; }
+.stat-label-below { font-size: 14px; font-weight: 500; opacity: 0.6; margin-top: 8px; }
+
+/* FLOW DIAGRAM */
+.flow { display: flex; align-items: center; gap: 0; }
+.flow-step {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 10px; padding: 16px 12px; flex: 1; text-align: center;
+}
+.flow-arrow {
+  color: var(--purple-300); font-size: 20px; flex-shrink: 0; margin-top: -20px;
+}
+.flow-arrow-dark { color: rgba(255,255,255,0.3); }
+.flow-num {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+}
+.flow-num-purple { background: var(--purple-500); color: white; }
+.flow-num-white { background: rgba(255,255,255,0.15); color: white; }
+
+/* COMPARISON TABLE */
+.compare-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.compare-cell {
+  padding: 14px 20px; font-size: 15px; display: flex; align-items: center; gap: 10px;
+}
+.compare-header {
+  font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;
+  padding: 12px 20px; border-bottom: 2px solid rgba(255,255,255,0.15);
+}
+.compare-before { background: rgba(239,71,111,0.08); color: rgba(255,255,255,0.7); }
+.compare-after { background: rgba(6,214,160,0.08); color: rgba(255,255,255,0.95); }
+
+/* LAYER DIAGRAM */
+.layer {
+  display: flex; align-items: center; gap: 20px;
+  padding: 20px 24px; border-radius: 14px; margin-bottom: 8px;
+}
+.layer-num {
+  width: 40px; height: 40px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; flex-shrink: 0;
+}
+
+/* TIMELINE VERTICAL */
+.vtimeline { position: relative; padding-left: 40px; }
+.vtimeline::before {
+  content: ''; position: absolute; left: 15px; top: 4px; bottom: 4px;
+  width: 2px; background: var(--purple-200);
+}
+.vt-item { position: relative; margin-bottom: 20px; }
+.vt-dot {
+  position: absolute; left: -33px; top: 4px;
+  width: 12px; height: 12px; border-radius: 50%; border: 3px solid white;
+}
+.vt-dot-purple { background: var(--purple-500); box-shadow: 0 0 0 3px var(--purple-200); }
+.vt-dot-red { background: var(--red); box-shadow: 0 0 0 3px var(--red-light); }
+.vt-dot-teal { background: var(--teal); box-shadow: 0 0 0 3px var(--teal-light); }
+
+/* NAVIGATION */
+.nav-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(26,10,46,0.95); backdrop-filter: blur(12px);
+  padding: 12px 40px; display: flex; align-items: center; justify-content: space-between;
+  z-index: 100; border-top: 1px solid rgba(255,255,255,0.08);
+}
+.nav-progress {
+  display: flex; align-items: center; gap: 4px;
+}
+.nav-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); transition: all 0.3s;
+  cursor: pointer;
+}
+.nav-dot.active { background: var(--purple-400); width: 24px; border-radius: 4px; }
+.nav-dot:hover:not(.active) { background: rgba(255,255,255,0.3); }
+.nav-counter {
+  font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.5);
+  font-family: 'Poppins', sans-serif;
+  min-width: 60px;
+}
+.nav-arrows { display: flex; gap: 8px; }
+.nav-btn {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.6); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; font-size: 18px;
+}
+.nav-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+.nav-brand {
+  font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.3);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+
+/* DECORATIVE */
+.blob {
+  position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3;
+  pointer-events: none;
+}
+.line-accent {
+  width: 60px; height: 4px; border-radius: 2px; background: var(--purple-400);
+  margin-bottom: 20px;
+}
+.line-accent-white {
+  width: 60px; height: 4px; border-radius: 2px;
+  background: rgba(255,255,255,0.3); margin-bottom: 20px;
+}
+.divider { width: 100%; height: 1px; background: var(--gray-200); margin: 24px 0; }
+.divider-dark { width: 100%; height: 1px; background: rgba(255,255,255,0.1); margin: 24px 0; }
+
+.quote {
+  font-size: 24px; font-weight: 600; line-height: 1.5;
+  font-style: italic; position: relative; padding-left: 24px;
+  border-left: 4px solid var(--purple-400);
+}
+.quote-dark {
+  font-size: 22px; font-weight: 500; line-height: 1.6;
+  font-style: italic; position: relative; padding-left: 24px;
+  border-left: 4px solid rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.8);
+}
+
+/* PROCESS STEP */
+.pstep {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: 12px 0; border-bottom: 1px solid var(--gray-100);
+}
+.pstep:last-child { border-bottom: none; }
+.pstep-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--purple-100); color: var(--purple-600);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 2px;
+}
+.pstep-pain {
+  font-size: 13px; color: var(--red); font-weight: 500; margin-top: 2px;
+}
+
+/* SPLIT LAYOUT */
+.split { display: flex; flex: 1; gap: 60px; align-items: center; }
+.split-left { flex: 1; }
+.split-right { flex: 1; }
+
+/* RESPONSIVE INNER */
+@media (max-width: 1200px) {
+  .slide-inner { padding: 40px 48px; }
+  h1 { font-size: 44px; }
+  h2 { font-size: 34px; }
+  .grid-4 { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+<!-- ================= SLIDE 1: TITLE ================= -->
+<div class="slide slide-dark active" data-index="0">
+  <div class="blob" style="width:500px;height:500px;background:var(--purple-600);top:-100px;right:-100px;"></div>
+  <div class="blob" style="width:400px;height:400px;background:var(--accent);bottom:-150px;left:-100px;opacity:0.15;"></div>
+  <div class="slide-inner center" style="position:relative;z-index:1;">
+    <div class="pill pill-white" style="margin-bottom:32px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      G2 Risk Solutions · EverC
+    </div>
+    <h1 style="max-width:800px;">Merchant Risk<br><span style="color:var(--purple-300);">Co-Pilot</span></h1>
+    <div class="spacer-sm"></div>
+    <p class="subtitle" style="color:rgba(255,255,255,0.55);max-width:600px;">
+      From detection to decision —<br>transforming how risk analysts investigate merchant violations
+    </p>
+    <div class="spacer-lg"></div>
+    <div class="flex-row gap-24" style="opacity:0.4;">
+      <span class="text-sm">Senior PM Case Study</span>
+      <span style="width:4px;height:4px;background:rgba(255,255,255,0.3);border-radius:50%;"></span>
+      <span class="text-sm">March 2026</span>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SLIDE 2: AGENDA ================= -->
+<div class="slide slide-light" data-index="1">
+  <div class="slide-inner vcenter">
+    <div class="label label-purple" style="margin-bottom:16px;">AGENDA</div>
+    <h2 style="margin-bottom:48px;">What we'll cover</h2>
+    <div class="grid-2" style="max-width:900px;">
+      <div class="flex-row gap-12" style="padding:16px 0;border-bottom:1px solid var(--gray-100);">
+        <div class="icon icon-sm icon-purple"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <div><h4 style="font-size:16px;">The Problem</h4><p class="text-sm text-muted">Why detection alone isn't enough</p></div>
+      </div>
+      <div class="flex-row gap-12" style="padding:16px 0;border-bottom:1px solid var(--gray-100);">
+        <div class="icon icon-sm icon-purple"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <div><h4 style="font-size:16px;">Key Insight</h4><p class="text-sm text-muted">The structural mismatch</p></div>
+      </div>
+      <div class="flex-row gap-12" style="padding:16px 0;border-bottom:1px solid var(--gray-100);">
+        <div class="icon icon-sm icon-purple"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
+        <div><h4 style="font-size:16px;">The Solution</h4><p class="text-sm text-muted">4-layer Co-Pilot architecture</p></div>
+      </div>
+      <div class="flex-row gap-12" style="padding:16px 0;border-bottom:1px solid var(--gray-100);">
+        <div class="icon icon-sm icon-purple"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <div><h4 style="font-size:16px;">Transformation</h4><p class="text-sm text-muted">Before vs. after, metrics</p></div>
+      </div>
+      <div class="flex-row gap-12" style="padding:16px 0;">
+        <div class="icon icon-sm icon-purple"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+        <div><h4 style="font-size:16px;">MVP & Demo</h4><p class="text-sm text-muted">5 features, live prototype</p></div>
+      </div>
+      <div class="flex-row gap-12" style="padding:16px 0;">
+        <div class="icon icon-sm icon-purple"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div><h4 style="font-size:16px;">Impact</h4><p class="text-sm text-muted">Business case & scalability</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SLIDE 3: CONTEXT ================= -->
+<div class="slide slide-soft" data-index="2">
+  <div class="slide-inner vcenter">
+    <div class="label label-purple" style="margin-bottom:16px;">CONTEXT</div>
+    <h2 style="margin-bottom:12px;">G2RS <span class="text-purple">detects</span> merchant violations</h2>
+    <p style="max-width:700px;color:var(--gray-500);margin-bottom:40px;">Gambling, counterfeit goods, prescription drugs, IP infringement — across merchant portfolios for banks, fintechs, and payment facilitators.</p>
+    <div class="grid-3">
+      <div class="card" style="text-align:center;">
+        <div class="icon icon-lg icon-purple" style="margin:0 auto 16px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
+        </div>
+        <h4 style="margin-bottom:4px;">EverC Scanning</h4>
+        <p class="text-sm text-muted">Deep web scanning, Compass Score, risk graph, behavioral signals</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="icon icon-lg icon-amber" style="margin:0 auto 16px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <h4 style="margin-bottom:4px;">Violation Alerts</h4>
+        <p class="text-sm text-muted">Findings sent to customers with >90% precision on detection</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="icon icon-lg icon-red" style="margin:0 auto 16px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>
+        </div>
+        <h4 style="margin-bottom:4px;">Customer Investigation</h4>
+        <p class="text-sm text-muted">Risk analysts must investigate every finding before taking action</p>
+      </div>
+    </div>
+    <div style="margin-top:32px;padding:16px 24px;background:rgba(124,92,191,0.08);border-radius:12px;border-left:4px solid var(--purple-500);max-width:750px;">
+      <p style="font-size:15px;color:var(--gray-600);"><strong style="color:var(--purple-600);">Key constraint:</strong> G2RS cannot access customer transaction data. All intelligence comes from external scanning only.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SLIDE 4: THE BRIEF ================= -->
+<div class="slide slide-dark" data-index="3">
+  <div class="slide-inner vcenter">
+    <div class="label label-white" style="margin-bottom:16px;">THE ASSIGNMENT</div>
+    <div class="line-accent-white"></div>
+    <h2 style="max-width:800px;margin-bottom:32px;">
+      "Solve the <span class="dark-mark">operational overhead</span> caused by large numbers of detected violations reaching the customer."
+    </h2>
+    <p style="color:rgba(255,255,255,0.5);max-width:600px;font-size:16px;">
+      The first instinct: too many alerts = too much work. Reduce alerts, improve precision, triage harder.
+    </p>
+    <div class="spacer"></div>
+    <div class="pill pill-white" style="border:1px solid rgba(255,255,255,0.15);">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+      That framing leads to the wrong solutions
+    </div>
+  </div>
+</div>
+
+<!-- ================= SLIDE 5: CURRENT WORKFLOW ================= -->
+<div class="slide slide-light" data-index="4">
+  <div class="slide-inner" style="justify-content:center;">
+    <div class="label label-accent" style="margin-bottom:16px;">THE REAL WORKFLOW</div>
+    <h2 style="margin-bottom:8px;">What happens <mark>after</mark> a violation is detected?</h2>
+    <p class="text-muted" style="margin-bottom:28px;font-size:15px;">Every case starts from zero. Every time. 7 manual steps.</p>
+    <div class="grid-2" style="gap:20px;">
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <div class="pstep"><div class="pstep-num">1</div><div><p style="font-size:14px;font-weight:600;">Open alert</p><p class="pstep-pain">No context pre-loaded — starts completely cold</p></div></div>
+        <div class="pstep"><div class="pstep-num">2</div><div><p style="font-size:14px;font-weight:600;">Locate merchant history</p><p class="pstep-pain">Manual lookup across 3+ separate tools</p></div></div>
+        <div class="pstep"><div class="pstep-num">3</div><div><p style="font-size:14px;font-weight:600;">Identify violation type</p><p class="pstep-pain">Read and interpret G2RS output manually</p></div></div>
+        <div class="pstep"><div class="pstep-num">4</div><div><p style="font-size:14px;font-weight:600;">Recall AUP policy clause</p><p class="pstep-pain">Open policy doc, search for relevant section</p></div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <div class="pstep"><div class="pstep-num">5</div><div><p style="font-size:14px;font-weight:600;">Build investigation checklist</p><p class="pstep-pain">No guidance — constructed from experience</p></div></div>
+        <div class="pstep"><div class="pstep-num">6</div><div><p style="font-size:14px;font-weight:600;">Run full investigation</p><p class="pstep-pain">Transaction logs, chargebacks, invoices, portal</p></div></div>
+        <div class="pstep"><div class="pstep-num">7</div><div><p style="font-size:14px;font-weight:600;">Write rationale from scratch</p><p class="pstep-pain">Blank page — no template, no pre-draft</p></div></div>
+        <div style="margin-top:8px;padding:16px 20px;background:var(--red-light);border-radius:12px;border:1px solid rgba(239,71,111,0.2);display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <p style="font-size:14px;font-weight:600;color:var(--red);">Then full reset</p>
+            <p style="font-size:12px;color:var(--gray-500);">Same 7 steps repeat for next case</p>
+          </div>
+          <span style="font-size:28px;font-weight:800;color:var(--red);">40–60 min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SLIDE 6: THE REPETITION INSIGHT ================= -->
+<div class="slide slide-gradient" data-index="5">
+  <div class="slide-inner vcenter" style="position:relative;z-index:1;">
+    <div class="label label-white" style="margin-bottom:16px;">THE BREAKTHROUGH</div>
+    <div class="line-accent-white"></div>
+    <div class="quote-dark" style="font-size:26px;max-width:850px;margin-bottom:40px;">
+      "The investigation for a gambling violation is essentially the same process every time. The merchant changes. The process doesn't. But the analyst starts from zero every single time."
+    </div>
+    <div class="spacer-sm"></div>
+    <div class="grid-2" style="max-width:800px;gap:40px;">
+      <div class="card-glass">
+        <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.4);margin-bottom:12px;">Alerts arrive by</div>
+        <div style="font-size:32px;font-weight:800;">Merchant</div>
+        <p style="font-size:14px;color:rgba(255,255,255,0.5);margin-top:6px;">Each alert = one merchant, one URL</p>
+      </div>
+      <div class="card-glass">
+        <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.4);margin-bottom:12px;">Investigation logic lives by</div>
+        <div style="font-size:32px;font-weight:800;">Violation Type</div>
+        <p style="font-size:14px;color:rgba(255,255,255,0.5);margin-top:6px;">Same policy, same checks, same data</p>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="pill pill-white" style="font-size:15px;font-weight:700;padding:10px 24px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);">
+      This is not a volume problem. It is a <span style="color:var(--purple-300);">structure</span> problem.
+    </div>
+  </div>
+</div>
+
+<!-- ================= SLIDE 7: SCALABILITY GAP ================= -->
+<div class="slide slide-light" data-index="6">
+  <div class="slide-inner vcenter">
+    <div class="label label-accent" style="margin-bottom:16px;">WHY IT MATTERS</div>
+    <h2 style="margin-bottom:8px;">G2RS gives customers <mark>detection</mark>.</h2>
+    <h2 style="margin-bottom:32px;color:var(--gray-400);">It does not give them <mark>scalability</mark>.</h2>
+    <div class="grid-2" style="max-width:900px;gap:32px;">
+      <div class="card" style="border-left:4px solid var(--red);border-radius:0 16px 16px 0;">
+        <div class="flex-row gap-12" style="margin-bottom:16px;">
+          <div class="icon icon-sm icon-red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+          <h4>Existing customers self-limit</h4>
+        </div>
+        <p style="font-size:14px;color:var(--gray-500);line-height:1.7;">They stop expanding portfolios because they've hit <strong>analyst capacity</strong>. G2RS revenue growth plateaus with them.</p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--amber);border-radius:0 16px 16px 0;">
+        <div class="flex-row gap-12" style="margin-bottom:16px;">
+          <div class="icon icon-sm icon-amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          </div>
+          <h4>Prospects don't adopt</h4>
+        </div>
+        <p style="font-size:14px;color:var(--gray-500);line-height:1.7;">They do the math — 50K merchants × violation rate × investigation time — and the <strong>workload is unmanageable</strong>. Deals don't close.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SLIDE 8: ALTERNATIVES ================= -->
+<div class="slide slide-soft" data-index="7">
+  <div class="slide-inner vcenter">
+    <div class="label label-purple" style="margin-bottom:16px;">ALTERNATIVES CONSIDERED</div>
+    <h2 style="margin-bottom:36px;">Three paths evaluated</h2>
+    <div class="grid-3" style="gap:20px;">
+      <div class="card" style="border-top:4px solid var(--gray-300);opacity:0.7;">
+        <div class="pill pill-red" style="font-size:11px;margin-bottom:16px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+          Rejected
+        </div>
+        <h4 style="margin-bottom:8px;">Improve detection precision</h4>
+        <p class="text-sm" style="color:var(--gray-500);line-height:1.7;">Push from >90% toward 99%. Even 100% precision still generates alerts. Every true positive still requires investigation. <strong>Doesn't touch investigation time.</strong></p>
+      </div>
+      <div class="card" style="border-top:4px solid var(--amber);">
+        <div class="pill pill-accent" style="font-size:11px;margin-bottom:16px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/></svg>
+          Complementary
+        </div>
+        <h4 style="margin-bottom:8px;">Risk-based monitoring tiers</h4>
+        <p class="text-sm" style="color:var(--gray-500);line-height:1.7;">Segment by risk, screen less often. Reduces upstream volume but <strong>doesn't fix what happens when alerts arrive</strong>. Deploy alongside, not instead.</p>
+      </div>
+      <div class="card-purple" style="border-top:4px solid var(--purple-500);">
+        <div class="pill pill-purple" style="font-size:11px;margin-bottom:16px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Chosen
+        </div>
+        <h4 style="margin-bottom:8px;">Merchant Risk Co-Pilot</h4>
+        <p class="text-sm" style="color:var(--gray-600);line-height:1.7;">Attacks the <strong>root cause</strong> — the structural mismatch. Scales as software. Works within the data constraint. Near-zero cost per new violation type.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SLIDE 9: SOLUTION TITLE ================= -->
+<div class="slide slide-accent" data-index="8">
+  <div class="blob" style="width:600px;height:600px;background:var(--purple-600);top:-200px;right:-200px;opacity:0.2;"></div>
+  <div class="slide-inner center" style="position:relative;z-index:1;">
+    <div class="pill pill-white" style="margin-bottom:24px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      The Solution
+    </div>
+    <h1 style="margin-bottom:16px;">The 4-Layer<br><span style="color:var(--purple-300);">Architecture</span></h1>
+    <p class="subtitle" style="color:rgba(255,255,255,0.45);">Group by violation type. Pre-load context.<br>Guide the investigation. Draft the rationale.</p>
+  </div>
+</div>
+
+<!-- ================= SLIDE 10: 4 LAYERS ================= -->
+<div class="slide slide-light" data-index="9">
+  <div class="slide-inner vcenter">
+    <div class="label label-purple" style="margin-bottom:16px;">ARCHITECTURE</div>
+    <h2 style="margin-bottom:32px;">Four layers, one workflow</h2>
+    <div style="display:flex;flex-direction:column;gap:12px;max-width:920px;">
+      <div class="layer" style="background:var(--purple-50);border:1px solid var(--purple-200);">
+        <div class="layer-num" style="background:var(--purple-500);color:white;">1</div>
+        <div style="flex:1;">
+          <h4 style="color:var(--purple-700);margin-bottom:2px;">Violation-type grouping</h4>
+          <p style="font-size:14px;color:var(--gray-500);">All gambling cases together, then prescription, then counterfeit. Context loads <strong>once</strong>.</p>
+        </div>
+        <div class="pill pill-purple" style="font-size:11px;">Foundation</div>
+      </div>
+      <div class="layer" style="background:var(--purple-50);border:1px solid var(--purple-200);">
+        <div class="layer-num" style="background:var(--purple-500);color:white;">2</div>
+        <div style="flex:1;">
+          <h4 style="color:var(--purple-700);margin-bottom:2px;">Violation-type checklist</h4>
+          <p style="font-size:14px;color:var(--gray-500);">Pre-defined list of exactly <strong>what internal data to verify</strong> and why. Analyst executes, not invents.</p>
+        </div>
+        <div class="pill pill-purple" style="font-size:11px;">Guidance</div>
+      </div>
+      <div class="layer" style="background:var(--purple-50);border:1px solid var(--purple-200);">
+        <div class="layer-num" style="background:var(--purple-500);color:white;">3</div>
+        <div style="flex:1;">
+          <h4 style="color:var(--purple-700);margin-bottom:2px;">Evidence pack</h4>
+          <p style="font-size:14px;color:var(--gray-500);">Compass Score, risk graph, merchant history, behavioral delta — <strong>assembled automatically</strong>.</p>
+        </div>
+        <div class="pill pill-purple" style="font-size:11px;">Context</div>
+      </div>
+      <div class="layer" style="background:linear-gradient(135deg,var(--purple-100),var(--purple-50));border:1px solid var(--purple-300);">
+        <div class="layer-num" style="background:var(--purple-600);color:white;">4</div>
+        <div style="flex:1;">
+          <h4 style="color:var(--purple-700);margin-bottom:2px;">AI case summary</h4>
+          <p style="font-size:14px;color:var(--gray-500);">Plain-language paragraph: who is the merchant, what was detected, what pattern this suggests. <strong>On-demand</strong> to prevent anchoring bias.</p>
+        </div>
+        <div class="pill pill-purple" style="font-size:11px;">Intelligence</div>
+      </div>
+    </div>
+    <div style="margin-top:24px;padding:12px 20px;background:var(--gray-50);border-radius:10px;border:1px solid var(--gray-200);max-width:920px;">
+      <p style="font-size:13px;color:var(--gray-500);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--purple-500)" stroke-width="2" style="vertical-align:-2px;margin-right:6px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <strong style="color:var(--purple-600);">Constraint respected:</strong> Checklist tells analysts what to verify — never pulls their data. Decisions remain entirely with the customer.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SLIDE 11: BEFORE VS AFTER ================= -->
+<div class="slide slide-dark" data-index="10">
+  <div class="slide-inner vcenter">
+    <div class="label label-white" style="margin-bottom:16px;">TRANSFORMATION</div>
+    <h2 style="margin-bottom:28px;">Same analyst. Same 47 alerts.<br><span style="color:var(--purple-300);">Completely different experience.</span></h2>
+    <div style="max-width:900px;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);">
+      <div class="compare-row">
+        <div class="compare-header compare-before" style="color:rgba(255,255,255,0.5);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+          Without Co-Pilot
+        </div>
+        <div class="compare-header compare-after" style="color:rgba(255,255,255,0.8);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><polyline points="20 6 9 17 4 12"/></svg>
+          With Co-Pilot
+        </div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell compare-before">47 unstructured alerts, random order</div>
+        <div class="compare-cell compare-after"><strong>3 grouped batches</strong> by violation type</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell compare-before">No context on open — starts cold</div>
+        <div class="compare-cell compare-after">AI summary loads in <strong>20 seconds</strong></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell compare-before">Pull history from 3+ tools manually</div>
+        <div class="compare-cell compare-after">Evidence pack <strong>pre-assembled</strong></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell compare-before">Figure out what to check — guesses</div>
+        <div class="compare-cell compare-after">Checklist: exactly <strong>which 3 things</strong> to verify</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell compare-before">Write rationale from blank page</div>
+        <div class="compare-cell compare-after">Edit <strong>pre-drafted rationale</strong> and approve</div>
+      </div>
+      <div class="compare-row" style="border-bottom:none;">
+        <div class="compare-cell compare-before" style="font-weight:700;font-size:18px;color:var(--red);">40–60 min per case</div>
+        <div class="compare-cell compare-after" style="font-weight:700;font-size:18px;color:var(--teal);">8–12 min per case</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SLIDE 12: METRICS ================= -->
+<div class="slide slide-light" data-index="11">
+  <div class="slide-inner vcenter">
+    <div class="label label-purple" style="margin-bottom:16px;">IMPACT</div>
+    <h2 style="margin-bottom:40px;">The numbers that matter</h2>
+    <div class="grid-4">
+      <div class="card" style="text-align:center;">
+        <div class="stat-value" style="color:var(--purple-600);">75%</div>
+        <p class="stat-label-below" style="font-weight:600;">Time reduction</p>
+        <p class="text-xs text-muted" style="margin-top:4px;">40–60 min → 8–12 min per case</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="stat-value" style="color:var(--purple-600);">0</div>
+        <p class="stat-label-below" style="font-weight:600;">Context switches</p>
+        <p class="text-xs text-muted" style="margin-top:4px;">Batch by type, load once</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="stat-value" style="color:var(--purple-600);">3→1</div>
+        <p class="stat-label-below" style="font-weight:600;">Tools needed</p>
+        <p class="text-xs text-muted" style="margin-top:4px;">Evidence pack auto-assembled</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="stat-value" style="color:var(--purple-600);">~0</div>
+        <p class="stat-label-below" style="font-weight:600;">Blank pages</p>
+        <p class="text-xs text-muted" style="margin-top:4px;">Pre-drafted rationale every time</p>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div style="display:flex;gap:20px;max-width:100%;">
+      <div style="flex:1;padding:24px;background:linear-gradient(135deg,var(--purple-50),white);border-radius:16px;border:1px solid var(--purple-200);">
+        <div class="flex-row gap-12" style="margin-bottom:12px;">
+          <div class="icon icon-sm icon-purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+          </div>
+          <h4>Queue empty by noon</h4>
+        </div>
+        <p style="font-size:14px;color:var(--gray-500);">Instead of SLA pressure all day, analysts clear the queue and have <strong>capacity for portfolio growth</strong>.</p>
+      </div>
+      <div style="flex:1;padding:24px;background:linear-gradient(135deg,var(--purple-50),white);border-radius:16px;border:1px solid var(--purple-200);">
+        <div class="flex-row gap-12" style="margin-bottom:12px;">
+          <div class="icon icon-sm icon-purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <h4>Scalability unlocked</h4>
+        </div>
+        <p style="font-size:14px;color:var(--gray-500);">Customers can <strong>grow their portfolios</strong> without linearly growing their risk teams. G2RS grows with them.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SLIDE 13: MVP FEATURES ================= -->
+<div class="slide slide-soft" data-index="12">
+  <div class="slide-inner vcenter">
+    <div class="label label-purple" style="margin-bottom:16px;">MVP</div>
+    <h2 style="margin-bottom:32px;">Five features, one workflow</h2>
+    <div style="display:flex;flex-direction:column;gap:10px;max-width:960px;">
+      <div style="display:flex;align-items:stretch;gap:16px;">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div style="width:44px;height:44px;border-radius:50%;background:var(--purple-500);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0;">1</div>
+          <div style="flex:1;width:2px;background:var(--purple-200);margin-top:8px;"></div>
+        </div>
+        <div class="card" style="flex:1;padding:20px 24px;">
+          <div class="flex-row" style="justify-content:space-between;">
+            <h4>Violation-type queue grouping</h4>
+            <div class="pill pill-purple" style="font-size:11px;">Foundation</div>
+          </div>
+          <p class="text-sm text-muted" style="margin-top:4px;">Alerts auto-organized into batches: Gambling → Prescription → Counterfeit. One mental model per batch.</p>
+        </div>
+      </div>
+      <div style="display:flex;align-items:stretch;gap:16px;">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div style="width:44px;height:44px;border-radius:50%;background:var(--purple-500);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0;">2</div>
+          <div style="flex:1;width:2px;background:var(--purple-200);margin-top:8px;"></div>
+        </div>
+        <div class="card" style="flex:1;padding:20px 24px;">
+          <div class="flex-row" style="justify-content:space-between;">
+            <h4>Pre-loaded evidence pack</h4>
+            <div class="pill pill-purple" style="font-size:11px;">Context</div>
+          </div>
+          <p class="text-sm text-muted" style="margin-top:4px;">Compass Score, risk graph, history, behavioral delta — on case open. No manual tool-switching.</p>
+        </div>
+      </div>
+      <div style="display:flex;align-items:stretch;gap:16px;">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div style="width:44px;height:44px;border-radius:50%;background:var(--purple-500);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0;">3</div>
+          <div style="flex:1;width:2px;background:var(--purple-200);margin-top:8px;"></div>
+        </div>
+        <div class="card" style="flex:1;padding:20px 24px;">
+          <div class="flex-row" style="justify-content:space-between;">
+            <h4>Investigation checklist by violation type</h4>
+            <div class="pill pill-purple" style="font-size:11px;">Guidance</div>
+          </div>
+          <p class="text-sm text-muted" style="margin-top:4px;">Exactly which internal data to check, why it matters, with auto-loaded AUP policy clause.</p>
+        </div>
+      </div>
+      <div style="display:flex;align-items:stretch;gap:16px;">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div style="width:44px;height:44px;border-radius:50%;background:var(--purple-500);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0;">4</div>
+          <div style="flex:1;width:2px;background:var(--purple-200);margin-top:8px;"></div>
+        </div>
+        <div class="card" style="flex:1;padding:20px 24px;">
+          <div class="flex-row" style="justify-content:space-between;">
+            <h4>AI case summary</h4>
+            <div class="pill pill-purple" style="font-size:11px;">Intelligence</div>
+          </div>
+          <p class="text-sm text-muted" style="margin-top:4px;">Plain-language analysis: merchant profile, violation, pattern. On-demand to prevent anchoring bias.</p>
+        </div>
+      </div>
+      <div style="display:flex;align-items:stretch;gap:16px;">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div style="width:44px;height:44px;border-radius:50%;background:var(--purple-600);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0;">5</div>
+        </div>
+        <div class="card" style="flex:1;padding:20px 24px;">
+          <div class="flex-row" style="justify-content:space-between;">
+            <h4>Pre-drafted rationale & document</h4>
+            <div class="pill pill-purple" style="font-size:11px;">Output</div>
+          </div>
+          <p class="text-sm text-muted" style="margin-top:4px;">Edit and approve — not write from scratch. Decision recorded to audit trail.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SLIDE 14: DEMO WALKTHROUGH ================= -->
+<div class="slide slide-dark" data-index="13">
+  <div class="slide-inner vcenter">
+    <div class="label label-white" style="margin-bottom:16px;">DEMO OVERVIEW</div>
+    <h2 style="margin-bottom:32px;">Interactive prototype</h2>
+    <div class="grid-3" style="gap:16px;">
+      <div class="card-glass" style="padding:20px;">
+        <div style="font-size:24px;margin-bottom:12px;">🎰</div>
+        <h4 style="font-size:15px;margin-bottom:4px;">Gambling</h4>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:13px;">
+            <span style="color:rgba(255,255,255,0.6);">betwin365.com</span>
+            <span style="color:#ffa62b;font-weight:600;">HIGH</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;">
+            <span style="color:rgba(255,255,255,0.6);">jackpotstore.io</span>
+            <span style="color:rgba(255,255,255,0.4);font-weight:600;">MEDIUM</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-glass" style="padding:20px;">
+        <div style="font-size:24px;margin-bottom:12px;">💊</div>
+        <h4 style="font-size:15px;margin-bottom:4px;">Prescription Drugs</h4>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:13px;">
+            <span style="color:rgba(255,255,255,0.6);">pharmadir.com</span>
+            <span style="color:#ef476f;font-weight:600;">CRITICAL</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;">
+            <span style="color:rgba(255,255,255,0.6);">cleanmeds.co</span>
+            <span style="color:rgba(255,255,255,0.4);font-weight:600;">MEDIUM</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-glass" style="padding:20px;">
+        <div style="font-size:24px;margin-bottom:12px;">👜</div>
+        <h4 style="font-size:15px;margin-bottom:4px;">Counterfeit Goods</h4>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:13px;">
+            <span style="color:rgba(255,255,255,0.6);">luxreplica.co</span>
+            <span style="color:#ef476f;font-weight:600;">CRITICAL</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;">
+            <span style="color:rgba(255,255,255,0.6);">sportzgear.com</span>
+            <span style="color:#ffa62b;font-weight:600;">HIGH</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="flow" style="max-width:800px;">
+      <div class="flow-step">
+        <div class="flow-num flow-num-white">1</div>
+        <p style="font-size:12px;color:rgba(255,255,255,0.6);font-weight:500;">Without Co-Pilot<br><span style="font-size:11px;opacity:0.6;">Manual, cold, slow</span></p>
+      </div>
+      <div class="flow-arrow flow-arrow-dark">→</div>
+      <div class="flow-step">
+        <div class="flow-num flow-num-white">2</div>
+        <p style="font-size:12px;color:rgba(255,255,255,0.6);font-weight:500;">Toggle to Co-Pilot<br><span style="font-size:11px;opacity:0.6;">See the structural change</span></p>
+      </div>
+      <div class="flow-arrow flow-arrow-dark">→</div>
+      <div class="flow-step">
+        <div class="flow-num flow-num-white">3</div>
+        <p style="font-size:12px;color:rgba(255,255,255,0.6);font-weight:500;">Open a case<br><span style="font-size:11px;opacity:0.6;">Evidence, checklist, AI</span></p>
+      </div>
+      <div class="flow-arrow flow-arrow-dark">→</div>
+      <div class="flow-step">
+        <div class="flow-num flow-num-white">4</div>
+        <p style="font-size:12px;color:rgba(255,255,255,0.6);font-weight:500;">Decide & document<br><span style="font-size:11px;opacity:0.6;">8–12 min, done</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SLIDE 15: CASE DEEP DIVE ================= -->
+<div class="slide slide-light" data-index="14">
+  <div class="slide-inner vcenter">
+    <div class="label label-accent" style="margin-bottom:16px;">CASE EXAMPLE</div>
+    <h2 style="margin-bottom:28px;">pharmadir.com — <span style="color:var(--red);">Recurring violation</span></h2>
+    <div class="grid-2" style="gap:28px;">
+      <div>
+        <div class="card" style="margin-bottom:16px;border-left:4px solid var(--purple-500);border-radius:0 16px 16px 0;">
+          <div class="flex-row gap-8" style="margin-bottom:12px;">
+            <div class="pill pill-red" style="font-size:11px;">CRITICAL</div>
+            <div class="pill pill-purple" style="font-size:11px;">↻ Recurring</div>
+          </div>
+          <p style="font-size:14px;color:var(--gray-600);line-height:1.7;">Declared as health supplements retailer. Prescription drug content detected, warned, remediated, cleared — <strong>now returned with higher volume</strong>. Classic bad-faith compliance pattern.</p>
+        </div>
+        <div class="card" style="padding:20px;">
+          <p style="font-size:11px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">AI-Generated Insight</p>
+          <p style="font-size:13px;color:var(--gray-600);line-height:1.7;font-style:italic;">"Returning to the same violation after formal acknowledgment and confirmed remediation is the clearest indicator of bad-faith compliance."</p>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:11px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Violation Timeline</p>
+        <div class="vtimeline">
+          <div class="vt-item">
+            <div class="vt-dot vt-dot-teal"></div>
+            <p style="font-size:11px;color:var(--gray-400);">Mar 2024</p>
+            <p style="font-size:14px;font-weight:600;">Onboarded — clean</p>
+          </div>
+          <div class="vt-item">
+            <div class="vt-dot vt-dot-red"></div>
+            <p style="font-size:11px;color:var(--gray-400);">Jun 2024</p>
+            <p style="font-size:14px;font-weight:600;">Prescription drugs detected</p>
+            <p class="text-xs text-muted">Warning sent · Merchant acknowledged</p>
+          </div>
+          <div class="vt-item">
+            <div class="vt-dot vt-dot-teal"></div>
+            <p style="font-size:11px;color:var(--gray-400);">Jul 2024 – Feb 2025</p>
+            <p style="font-size:14px;font-weight:600;">Remediation confirmed · 7 clean scans</p>
+          </div>
+          <div class="vt-item">
+            <div class="vt-dot vt-dot-purple"></div>
+            <p style="font-size:11px;color:var(--purple-500);font-weight:600;">May 2025 · NOW</p>
+            <p style="font-size:14px;font-weight:600;">Prescription drugs — multiple pages</p>
+            <p class="text-xs" style="color:var(--red);">Higher volume · Recurring · Critical</p>
+          </div>
+        </div>
+        <div style="margin-top:16px;padding:14px 18px;background:var(--purple-900);border-radius:12px;">
+          <p style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Co-Pilot Recommendation</p>
+          <p style="font-size:13px;color:rgba(255,255,255,0.85);line-height:1.6;">Terminate — AUP Section 4.1 · Recurring violation following formal warning. Bad-faith compliance.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SLIDE 16: PATTERN LOGIC ================= -->
+<div class="slide slide-soft" data-index="15">
+  <div class="slide-inner vcenter">
+    <div class="label label-purple" style="margin-bottom:16px;">INTELLIGENCE</div>
+    <h2 style="margin-bottom:32px;">Pattern recognition drives <mark>decisions</mark></h2>
+    <div class="grid-2" style="gap:20px;max-width:920px;">
+      <div class="card" style="border-top:3px solid var(--amber);">
+        <div class="flex-row gap-12" style="margin-bottom:12px;">
+          <div class="icon icon-sm icon-amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+          </div>
+          <div>
+            <h4 style="font-size:15px;">Escalating</h4>
+            <p class="text-xs text-muted">Severity growing over time</p>
+          </div>
+        </div>
+        <p class="text-sm" style="color:var(--gray-500);">3rd violation in 90 days, sidebar → front page. <strong>Deliberate pattern, not oversight.</strong></p>
+      </div>
+      <div class="card" style="border-top:3px solid var(--red);">
+        <div class="flex-row gap-12" style="margin-bottom:12px;">
+          <div class="icon icon-sm icon-red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+          </div>
+          <div>
+            <h4 style="font-size:15px;">Recurring</h4>
+            <p class="text-xs text-muted">Fixed, then returned</p>
+          </div>
+        </div>
+        <p class="text-sm" style="color:var(--gray-500);">Previously resolved, now back with higher volume. <strong>Bad-faith compliance.</strong></p>
+      </div>
+      <div class="card" style="border-top:3px solid var(--red);">
+        <div class="flex-row gap-12" style="margin-bottom:12px;">
+          <div class="icon icon-sm icon-red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div>
+            <h4 style="font-size:15px;">New + High Risk</h4>
+            <p class="text-xs text-muted">New merchant, immediate red flags</p>
+          </div>
+        </div>
+        <p class="text-sm" style="color:var(--gray-500);">Active brand enforcement filed. Multiple categories. <strong>91% terminate rate.</strong></p>
+      </div>
+      <div class="card" style="border-top:3px solid var(--gray-300);">
+        <div class="flex-row gap-12" style="margin-bottom:12px;">
+          <div class="icon icon-sm" style="background:var(--gray-100);color:var(--gray-500);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </div>
+          <div>
+            <h4 style="font-size:15px;">First Occurrence</h4>
+            <p class="text-xs text-muted">Clean history, new flag</p>
+          </div>
+        </div>
+        <p class="text-sm" style="color:var(--gray-500);">14 months clean, single product page. <strong>72% resolve through engagement.</strong></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SLIDE 17: EVIDENCE PACK ================= -->
+<div class="slide slide-dark" data-index="16">
+  <div class="slide-inner vcenter">
+    <div class="label label-white" style="margin-bottom:16px;">EVIDENCE PACK</div>
+    <h2 style="margin-bottom:12px;">Everything an analyst needs,<br><span style="color:var(--purple-300);">pre-loaded on case open</span></h2>
+    <p style="color:rgba(255,255,255,0.45);margin-bottom:32px;font-size:15px;">No more switching between 3+ tools. Everything from EverC in one panel.</p>
+    <div class="grid-4" style="gap:16px;">
+      <div class="card-glass" style="padding:22px;text-align:center;">
+        <div style="font-size:32px;margin-bottom:12px;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--purple-300)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <h4 style="font-size:14px;margin-bottom:4px;">Compass Score</h4>
+        <p style="font-size:12px;color:rgba(255,255,255,0.4);">Composite risk score 0–100</p>
+      </div>
+      <div class="card-glass" style="padding:22px;text-align:center;">
+        <div style="font-size:32px;margin-bottom:12px;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--purple-300)" stroke-width="1.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </div>
+        <h4 style="font-size:14px;margin-bottom:4px;">Risk Graph</h4>
+        <p style="font-size:12px;color:rgba(255,255,255,0.4);">Network connections to known bad actors</p>
+      </div>
+      <div class="card-glass" style="padding:22px;text-align:center;">
+        <div style="font-size:32px;margin-bottom:12px;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--purple-300)" stroke-width="1.5"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+        </div>
+        <h4 style="font-size:14px;margin-bottom:4px;">Behavioral Delta</h4>
+        <p style="font-size:12px;color:rgba(255,255,255,0.4);">Traffic vs transaction anomalies</p>
+      </div>
+      <div class="card-glass" style="padding:22px;text-align:center;">
+        <div style="font-size:32px;margin-bottom:12px;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--purple-300)" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <h4 style="font-size:14px;margin-bottom:4px;">Full History</h4>
+        <p style="font-size:12px;color:rgba(255,255,255,0.4);">Timeline of all scans, warnings, actions</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SLIDE 18: BUSINESS CASE ================= -->
+<div class="slide slide-light" data-index="17">
+  <div class="slide-inner vcenter">
+    <div class="label label-purple" style="margin-bottom:16px;">BUSINESS CASE</div>
+    <h2 style="margin-bottom:32px;">Why this matters <mark>for G2RS</mark></h2>
+    <div class="grid-2" style="gap:28px;max-width:900px;">
+      <div>
+        <div style="margin-bottom:24px;">
+          <div class="flex-row gap-12" style="margin-bottom:10px;">
+            <div class="icon icon-sm icon-teal">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            <h4>Expand existing accounts</h4>
+          </div>
+          <p style="font-size:14px;color:var(--gray-500);line-height:1.7;">Customers can grow portfolios <strong>without growing risk teams</strong>. G2RS revenue scales with their portfolio, not their headcount.</p>
+        </div>
+        <div style="margin-bottom:24px;">
+          <div class="flex-row gap-12" style="margin-bottom:10px;">
+            <div class="icon icon-sm icon-teal">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+            <h4>Win new deals</h4>
+          </div>
+          <p style="font-size:14px;color:var(--gray-500);line-height:1.7;">Prospects see workload as <strong>manageable</strong>, not terrifying. The Co-Pilot removes the "what happens after detection?" objection.</p>
+        </div>
+        <div>
+          <div class="flex-row gap-12" style="margin-bottom:10px;">
+            <div class="icon icon-sm icon-teal">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h4>Deepen competitive moat</h4>
+          </div>
+          <p style="font-size:14px;color:var(--gray-500);line-height:1.7;">Moves G2RS from "detection vendor" to <strong>investigation platform</strong>. Much stickier. Much harder to replace.</p>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="padding:28px;background:linear-gradient(135deg,var(--purple-900),var(--purple-800));border-radius:16px;color:white;">
+          <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.4);margin-bottom:16px;">Revenue Impact</p>
+          <div style="font-size:42px;font-weight:800;line-height:1;">3–5×</div>
+          <p style="font-size:14px;color:rgba(255,255,255,0.6);margin-top:8px;">More merchants processable per analyst, without additional G2RS cost</p>
+        </div>
+        <div style="padding:28px;background:var(--purple-50);border-radius:16px;border:1px solid var(--purple-200);">
+          <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--purple-400);margin-bottom:16px;">Retention Signal</p>
+          <div style="font-size:42px;font-weight:800;color:var(--purple-600);line-height:1;">High</div>
+          <p style="font-size:14px;color:var(--gray-500);margin-top:8px;">Embedded workflow = high switching cost. Detection is replaceable. Process is not.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SLIDE 19: CLOSING ================= -->
+<div class="slide slide-accent" data-index="18">
+  <div class="blob" style="width:500px;height:500px;background:var(--purple-500);bottom:-200px;right:-100px;opacity:0.15;"></div>
+  <div class="blob" style="width:400px;height:400px;background:var(--accent);top:-150px;left:-100px;opacity:0.1;"></div>
+  <div class="slide-inner center" style="position:relative;z-index:1;">
+    <div class="pill pill-white" style="margin-bottom:24px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Summary
+    </div>
+    <h1 style="font-size:48px;max-width:850px;margin-bottom:24px;">
+      From <span style="color:rgba(255,255,255,0.4);">detection</span> to <span style="color:var(--purple-300);">decision</span>
+    </h1>
+    <div class="spacer-sm"></div>
+    <div style="display:flex;gap:40px;margin-bottom:48px;">
+      <div style="text-align:center;">
+        <div style="font-size:36px;font-weight:800;color:var(--purple-300);">75%</div>
+        <p style="font-size:13px;color:rgba(255,255,255,0.45);">faster case resolution</p>
+      </div>
+      <div style="width:1px;background:rgba(255,255,255,0.1);"></div>
+      <div style="text-align:center;">
+        <div style="font-size:36px;font-weight:800;color:var(--purple-300);">0</div>
+        <p style="font-size:13px;color:rgba(255,255,255,0.45);">context switches</p>
+      </div>
+      <div style="width:1px;background:rgba(255,255,255,0.1);"></div>
+      <div style="text-align:center;">
+        <div style="font-size:36px;font-weight:800;color:var(--purple-300);">4</div>
+        <p style="font-size:13px;color:rgba(255,255,255,0.45);">layers of intelligence</p>
+      </div>
+      <div style="width:1px;background:rgba(255,255,255,0.1);"></div>
+      <div style="text-align:center;">
+        <div style="font-size:36px;font-weight:800;color:var(--purple-300);">1</div>
+        <p style="font-size:13px;color:rgba(255,255,255,0.45);">unified workflow</p>
+      </div>
+    </div>
+    <div class="quote-dark" style="font-size:20px;max-width:700px;text-align:left;margin-bottom:40px;">
+      "Alerts arrive by merchant. Investigation logic lives by violation type. The Co-Pilot bridges the gap."
+    </div>
+    <div style="display:flex;gap:12px;">
+      <div class="pill pill-white" style="padding:10px 20px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Live Demo Available
+      </div>
+      <div class="pill pill-white" style="padding:10px 20px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Questions?
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<!-- NAVIGATION BAR -->
+<div class="nav-bar">
+  <span class="nav-brand">G2RS Co-Pilot</span>
+  <div class="nav-progress" id="navProgress"></div>
+  <div class="flex-row gap-12">
+    <span class="nav-counter" id="navCounter">1 / 19</span>
+    <div class="nav-arrows">
+      <button class="nav-btn" id="prevBtn" onclick="prev()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="nav-btn" id="nextBtn" onclick="next()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let current = 0;
+
+function renderNav() {
+  const prog = document.getElementById('navProgress');
+  prog.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'nav-dot' + (i === current ? ' active' : '');
+    dot.onclick = () => goTo(i);
+    prog.appendChild(dot);
+  }
+  document.getElementById('navCounter').textContent = `${current + 1} / ${total}`;
+}
+
+function goTo(idx) {
+  if (idx < 0 || idx >= total || idx === current) return;
+  slides[current].classList.remove('active');
+  slides[current].classList.add(idx > current ? 'prev' : '');
+  setTimeout(() => slides[current === idx ? current : Array.from(slides).indexOf(document.querySelector('.slide.prev'))].classList.remove('prev'), 500);
+  const old = current;
+  current = idx;
+  slides[current].style.transform = idx > old ? 'translateX(40px)' : 'translateX(-40px)';
+  slides[current].classList.add('active');
+  requestAnimationFrame(() => {
+    slides[current].style.transform = '';
+  });
+  setTimeout(() => {
+    slides.forEach((s, i) => {
+      if (i !== current) { s.classList.remove('active', 'prev'); }
+    });
+  }, 550);
+  renderNav();
+}
+
+function next() { goTo(current + 1); }
+function prev() { goTo(current - 1); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+  if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+  if (e.key === 'End') { e.preventDefault(); goTo(total - 1); }
+});
+
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+document.addEventListener('touchend', e => {
+  const diff = touchStartX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 50) { diff > 0 ? next() : prev(); }
+});
+
+renderNav();
+</script>
+</body>
+</html>

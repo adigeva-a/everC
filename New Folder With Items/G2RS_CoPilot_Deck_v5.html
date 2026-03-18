@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<!--
+  G2RS Merchant Risk Co-Pilot — Senior PM Case Interview Deck
+  EverC / G2RS · March 2026
+  Design: Light theme, Poppins, purple-teal accent palette
+  Navigation: Keyboard (arrows, space, home/end), touch swipe, prev/next buttons
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Merchant Risk Co-Pilot — The scalability layer G2RS is missing. Senior PM Case Interview deck.">
+  <title>Merchant Risk Co-Pilot — G2RS / EverC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /*
+      G2RS Co-Pilot Deck — Design System
+      Light theme palette:
+      - Backgrounds: #ffffff, #f8f7fc, #f5f0ff, #faf9ff
+      - Primary text: #1a1a2e
+      - Secondary: #555 | Tertiary: #888
+      - Purple: #7c3aed, #8b5cf6, #a78bfa, #5b3e9e
+      - Teal: #00A878, #0d9488
+      - Status: Red #ef4444, Amber #f59e0b, Green #10b981
+    */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; font-family: 'Poppins', sans-serif; background: #f8f7fc; }
+    
+    .deck { position: relative; width: 100%; height: 100%; }
+    .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 48px 60px; opacity: 0; pointer-events: none; transition: opacity 0.35s ease; }
+    .slide.active { opacity: 1; pointer-events: auto; z-index: 2; }
+    .slide.prev { z-index: 1; pointer-events: none; }
+    
+    .progress-bar { position: fixed; top: 0; left: 0; right: 0; height: 4px; background: rgba(0,0,0,0.06); z-index: 100; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #7c3aed, #0d9488); transition: width 0.3s ease; }
+    
+    .nav-btns { position: fixed; bottom: 32px; right: 48px; display: flex; gap: 12px; z-index: 100; }
+    .nav-btn { width: 48px; height: 48px; border-radius: 12px; border: 1px solid rgba(124,58,237,0.3); background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); color: #7c3aed; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-weight: 600; }
+    .nav-btn:hover { background: #7c3aed; color: white; border-color: #7c3aed; }
+    .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    
+    .slide-counter { position: fixed; bottom: 32px; left: 48px; font-size: 13px; color: #888; z-index: 100; }
+    
+    .label { font-size: 11px; font-weight: 600; letter-spacing: 3px; color: #7c3aed; text-transform: uppercase; margin-bottom: 12px; }
+    .slide-title { font-size: 36px; font-weight: 800; color: #1a1a2e; margin-bottom: 20px; line-height: 1.2; }
+    .slide-subtitle { font-size: 18px; color: #555; margin-bottom: 24px; }
+    .body-text { font-size: 17px; color: #1a1a2e; line-height: 1.6; margin-bottom: 24px; max-width: 900px; }
+    
+    .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 20px 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+    .card-purple { border-left: 4px solid #7c3aed; background: #faf9ff; }
+    .card-teal { border-left: 4px solid #0d9488; background: #f0fdfa; }
+    .card-red { border-left: 4px solid #ef4444; }
+    .card-amber { border-left: 4px solid #f59e0b; }
+    
+    .container { max-width: 1100px; width: 100%; }
+    
+    /* Slide 1 — Title */
+    .slide-1 { background: linear-gradient(135deg, #f5f0ff, #ece6f8); }
+    .slide-1::before { content: ''; position: absolute; width: 400px; height: 400px; border-radius: 50%; border: 1px solid rgba(124,58,237,0.06); top: -100px; right: -100px; }
+    .slide-1::after { content: ''; position: absolute; width: 300px; height: 300px; border-radius: 50%; border: 1px solid rgba(124,58,237,0.06); bottom: -80px; left: -80px; }
+    .slide-1 .main-title { font-size: 56px; font-weight: 800; color: #1a1a2e; margin-bottom: 16px; }
+    .slide-1 .main-subtitle { font-size: 20px; font-weight: 400; color: #555; margin-bottom: 48px; }
+    .slide-1 .footer-text { font-size: 12px; color: #aaa; }
+    
+    /* Slide 2 — Alert cards */
+    .alert-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 24px; }
+    .alert-card { display: flex; align-items: center; gap: 16px; padding: 14px 18px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; border-left: 4px solid; }
+    .alert-card .severity { font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+    .alert-card .domain { font-weight: 600; color: #1a1a2e; }
+    .alert-card .type { font-size: 13px; color: #555; }
+    .alert-card .meta { font-size: 12px; color: #888; font-style: italic; }
+    
+    /* Slide 3 — Flow diagram */
+    .flow-row { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 24px 0; flex-wrap: wrap; }
+    .flow-box { padding: 20px 28px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; font-weight: 600; color: #1a1a2e; }
+    .flow-box.red { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+    .flow-arrow { font-size: 24px; color: #7c3aed; }
+    
+    /* Slide 4 — Unit of work */
+    .work-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .work-step { background: #7c3aed; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+    .work-reset { background: #ef4444; color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; margin: 8px 0; }
+    
+    /* Slide 5 — Diagnosis icons */
+    .diag-row { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
+    .diag-row svg { flex-shrink: 0; margin-top: 2px; }
+    
+    /* Slide 6 — Before/After */
+    .before-after { display: flex; align-items: stretch; gap: 24px; margin-top: 24px; flex-wrap: wrap; justify-content: center; }
+    .ba-panel { flex: 1; min-width: 220px; max-width: 320px; }
+    .ba-panel.before .panel-title { color: #ef4444; }
+    .ba-panel.after .panel-title { color: #0d9488; }
+    .ba-panel .panel-title { font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-bottom: 16px; }
+    .ba-panel .item { padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+    .ba-panel .item:last-child { border-bottom: none; }
+    .ba-arrow { display: flex; align-items: center; font-weight: 700; color: #7c3aed; font-size: 14px; }
+    
+    /* Slide 7 — Alternatives */
+    .alt-cards { display: flex; gap: 20px; margin-top: 24px; flex-wrap: wrap; justify-content: center; }
+    .alt-card { flex: 1; min-width: 280px; max-width: 360px; padding: 24px; border-radius: 12px; background: #fff; border: 1px solid #e5e5e5; position: relative; }
+    .alt-card .accent { position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 12px 12px 0 0; }
+    .alt-card .badge { font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+    .alt-card h3 { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px; }
+    .alt-card .section { margin-top: 16px; }
+    .alt-card .section-title { font-size: 12px; font-weight: 600; color: #555; margin-bottom: 8px; }
+    .alt-card ul { list-style: none; }
+    .alt-card li { font-size: 14px; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 8px; }
+    
+    /* Slide 8 — Complementary */
+    .comp-row { display: flex; align-items: center; justify-content: center; gap: 24px; margin: 24px 0; flex-wrap: wrap; }
+    .comp-card { padding: 28px 32px; border-radius: 12px; text-align: center; min-width: 200px; }
+    .comp-card.purple { background: #f5f0ff; border: 1px solid #e9e0ff; }
+    .comp-card.teal { background: #f0fdfa; border: 1px solid #99f6e4; }
+    .comp-plus { font-size: 32px; font-weight: 700; color: #7c3aed; }
+    
+    /* Slide 9 — Solution grid */
+    .sol-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 24px; }
+    .sol-card { padding: 24px; border-radius: 12px; background: #fff; border: 1px solid #e5e5e5; }
+    .sol-card .letter { font-size: 14px; font-weight: 800; color: #7c3aed; margin-bottom: 8px; }
+    .sol-card .sol-icon { margin-bottom: 8px; display: block; }
+    .sol-card h4 { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
+    .sol-card p { font-size: 14px; color: #555; line-height: 1.5; }
+    
+    /* Slide 10 — Comparison table */
+    .comp-table { width: 100%; max-width: 900px; margin-top: 24px; border-collapse: collapse; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    .comp-table th { padding: 16px 20px; font-size: 14px; font-weight: 700; text-align: left; }
+    .comp-table th:first-child { background: #fef2f2; color: #b91c1c; }
+    .comp-table th:last-child { background: #f0fdfa; color: #0d9488; }
+    .comp-table td { padding: 14px 20px; font-size: 14px; border-top: 1px solid #eee; }
+    .comp-table td:first-child { color: #555; }
+    .comp-table td:last-child { color: #1a1a2e; font-weight: 500; }
+    .comp-table .arrow-cell { width: 40px; text-align: center; color: #7c3aed; font-size: 18px; }
+    
+    /* Slide 11 — Demo mockup */
+    .demo-mockup { margin-top: 24px; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 40px rgba(124,58,237,0.1); max-width: 900px; }
+    .demo-topbar { background: #0B1F3A; padding: 14px 20px; display: flex; align-items: center; gap: 12px; }
+    .demo-topbar .g2 { color: #0d9488; font-weight: 800; font-size: 18px; }
+    .demo-topbar .title { color: white; font-size: 15px; font-weight: 600; }
+    .demo-body { display: flex; min-height: 320px; }
+    .demo-sidebar { width: 180px; background: #f5f5f5; padding: 20px; border-right: 1px solid #e5e5e5; }
+    .demo-sidebar .group { padding: 10px 14px; margin-bottom: 8px; border-radius: 8px; font-size: 13px; color: #555; }
+    .demo-sidebar .group.active { background: #0d9488; color: white; font-weight: 600; }
+    .demo-main { flex: 1; padding: 24px; background: #fff; }
+    .demo-main h3 { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px; }
+    .demo-merchant { padding: 16px; background: #faf9ff; border: 1px solid #e5e5e5; border-radius: 10px; margin-bottom: 12px; }
+    .demo-merchant .row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+    .demo-merchant .domain { font-weight: 600; color: #1a1a2e; }
+    .demo-merchant .score { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+    .demo-merchant .score.red { background: #fef2f2; color: #b91c1c; }
+    .demo-merchant .score.orange { background: #fff7ed; color: #c2410c; }
+    .demo-merchant .ai-btn { padding: 6px 12px; background: #0d9488; color: white; border-radius: 6px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; }
+    .demo-merchant .check-item { font-size: 13px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .demo-right { width: 200px; background: #fafafa; padding: 20px; border-left: 1px solid #e5e5e5; }
+    .demo-right h4 { font-size: 12px; font-weight: 700; color: #555; margin-bottom: 12px; }
+    .demo-right .placeholder { height: 60px; background: #eee; border-radius: 8px; margin-bottom: 12px; }
+    .demo-label { font-size: 13px; font-style: italic; color: #888; margin-top: 12px; text-align: center; }
+    
+    /* Slide 12 — MVP sequence */
+    .mvp-sequence { margin-top: 24px; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .mvp-item { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 20px; position: relative; }
+    .mvp-item::before { content: ''; position: absolute; left: 17px; top: 44px; bottom: -24px; width: 2px; border-left: 2px dotted #7c3aed; opacity: 0.5; }
+    .mvp-item:last-child::before { display: none; }
+    .mvp-num { width: 36px; height: 36px; border-radius: 50%; background: #7c3aed; color: white; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .mvp-item h4 { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+    .mvp-item p { font-size: 14px; color: #555; line-height: 1.5; }
+    
+    /* Slide 13 — Roadmap */
+    .roadmap-row { display: flex; gap: 16px; margin-top: 24px; overflow-x: auto; padding-bottom: 16px; justify-content: center; flex-wrap: wrap; }
+    .phase-card { min-width: 200px; max-width: 240px; padding: 20px; background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; }
+    .phase-card h4 { font-size: 14px; font-weight: 800; color: #7c3aed; margin-bottom: 4px; }
+    .phase-card .duration { font-size: 12px; color: #888; margin-bottom: 12px; }
+    .phase-card .build { font-size: 13px; color: #1a1a2e; margin-bottom: 8px; }
+    .phase-card .learn { font-size: 13px; color: #555; margin-bottom: 12px; }
+    .phase-card .gate { font-size: 12px; font-weight: 600; color: #0d9488; }
+    .phase-arrow { display: flex; align-items: center; color: #7c3aed; font-size: 20px; }
+    
+    /* Slide 14 — Why wins */
+    .wins-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+    .win-card { padding: 20px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; text-align: center; }
+    .win-card svg { margin-bottom: 12px; }
+    .win-card p { font-size: 14px; font-weight: 500; color: #1a1a2e; }
+    
+    /* Slide 15 — Metrics */
+    .metrics-row { display: flex; gap: 20px; margin-top: 24px; flex-wrap: wrap; justify-content: center; }
+    .metric-card { flex: 1; min-width: 260px; max-width: 340px; padding: 24px; border-radius: 12px; background: #fff; border: 1px solid #e5e5e5; }
+    .metric-card .accent { height: 4px; border-radius: 12px 12px 0 0; margin: -24px -24px 16px -24px; }
+    .metric-card h4 { font-size: 14px; font-weight: 800; letter-spacing: 1px; color: #1a1a2e; margin-bottom: 12px; }
+    .metric-card .name { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
+    .metric-card p { font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 8px; }
+    .metric-card .how { font-size: 12px; color: #888; font-style: italic; }
+    
+    /* Slide 16 — Closing */
+    .slide-16 { background: linear-gradient(135deg, #f5f0ff, #ece6f8); text-align: center; }
+    .slide-16 .quote { font-size: 28px; font-weight: 600; color: #1a1a2e; margin-bottom: 24px; line-height: 1.4; max-width: 700px; }
+    .slide-16 .punch { font-size: 24px; font-weight: 700; color: #7c3aed; margin-bottom: 24px; }
+    .slide-16 .final { font-size: 20px; font-weight: 800; color: #1a1a2e; margin-bottom: 48px; }
+    .slide-16 .footer-text { font-size: 13px; color: #888; }
+    
+    /* Icons */
+    .icon-teal { color: #0d9488; }
+    .icon-red { color: #ef4444; }
+    .icon-purple { color: #7c3aed; }
+
+    /* Print styles — slides as pages */
+    @media print {
+      body { background: #fff; }
+      .progress-bar, .nav-btns, .slide-counter { display: none !important; }
+      .slide { position: relative !important; page-break-after: always; opacity: 1 !important; }
+      .slide:last-child { page-break-after: auto; }
+      .deck { display: block; }
+    }
+
+    /* Responsive adjustments for smaller viewports */
+    @media (max-width: 900px) {
+      .slide { padding: 32px 24px; }
+      .slide-title { font-size: 28px; }
+      .slide-1 .main-title { font-size: 40px; }
+      .flow-row { flex-direction: column; }
+      .sol-grid { grid-template-columns: 1fr; }
+      .wins-grid { grid-template-columns: repeat(2, 1fr); }
+      .roadmap-row { flex-direction: column; align-items: center; }
+      .phase-arrow { transform: rotate(90deg); }
+    }
+
+    /* Focus states for accessibility */
+    .nav-btn:focus { outline: 2px solid #7c3aed; outline-offset: 2px; }
+    .nav-btn:focus:not(:focus-visible) { outline: none; }
+
+    /* Metric card icon alignment */
+    .metric-card .accent + svg { display: block; }
+    .metric-card h4 { margin-top: 0; }
+
+    /* Slide-specific overrides for consistent spacing */
+    .slide .container > *:last-child { margin-bottom: 0; }
+    .slide .container > .label + .slide-title { margin-top: 0; }
+
+    /* High-contrast text for readability on light backgrounds */
+    .slide-title, .body-text, .card p, .comp-table td { color: #1a1a2e; }
+    .slide-subtitle, .ba-panel .item { color: #555; }
+
+    /* Decorative ring positioning for slide 1 */
+    .slide-1::before, .slide-1::after { pointer-events: none; }
+
+    /* Ensure cards have sufficient contrast */
+    .card { color: #1a1a2e; }
+    .alt-card, .phase-card, .win-card { color: inherit; }
+
+    /* Smooth transitions for slide changes */
+    .slide { will-change: opacity; }
+    .slide.active { will-change: auto; }
+  </style>
+</head>
+<body>
+  <div class="progress-bar" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="16" aria-label="Slide progress"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="slide-counter" id="slideCounter" aria-live="polite">1 / 16</div>
+  <div class="nav-btns">
+    <button class="nav-btn" id="btnPrev" onclick="goTo(current - 1)" aria-label="Previous slide">←</button>
+    <button class="nav-btn" id="btnNext" onclick="goTo(current + 1)" aria-label="Next slide">→</button>
+  </div>
+
+  <main class="deck" role="application" aria-label="Merchant Risk Co-Pilot presentation">
+    <!-- SLIDE 1: TITLE
+         Opening hook. Establishes the product name and core value proposition.
+         Soft purple gradient with decorative rings creates executive polish. -->
+    <section class="slide slide-1 active" aria-label="Slide 1: Title">
+      <div class="container" style="text-align: center;">
+        <h1 class="main-title">Merchant Risk Co-Pilot</h1>
+        <p class="main-subtitle">The scalability layer G2RS is missing.</p>
+        <p class="footer-text">SENIOR PM CASE INTERVIEW · G2RS / EVERC · March 2026 · Ishai Froind + Panel</p>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: THE PROBLEM
+         Establishes the visceral pain: analyst overwhelmed by unstructured alerts.
+         Each card represents a cold-start investigation with no context. -->
+    <section class="slide">
+      <div class="container">
+        <p class="label">THE PROBLEM</p>
+        <h2 class="slide-title">47 alerts. Monday morning. Where do you start?</h2>
+        <p class="body-text">A risk analyst opens their inbox. 47 violations. Different merchant for each one. No structure, no context, no prioritization. Just a list.</p>
+        <div class="alert-grid" role="list">
+          <div class="alert-card" style="border-left-color: #ef4444;" role="listitem">
+            <div><span class="severity" style="color: #ef4444;">CRITICAL</span><br><span class="domain">betwin365.com</span><br><span class="type">Gambling</span><br><span class="meta">No context loaded</span></div>
+          </div>
+          <div class="alert-card" style="border-left-color: #ef4444;" role="listitem">
+            <div><span class="severity" style="color: #ef4444;">CRITICAL</span><br><span class="domain">pharmadir.com</span><br><span class="type">Prescription</span><br><span class="meta">No context loaded</span></div>
+          </div>
+          <div class="alert-card" style="border-left-color: #f59e0b;" role="listitem">
+            <div><span class="severity" style="color: #f59e0b;">HIGH</span><br><span class="domain">luxreplica.co</span><br><span class="type">Counterfeit</span><br><span class="meta">No context loaded</span></div>
+          </div>
+          <div class="alert-card" style="border-left-color: #f59e0b;" role="listitem">
+            <div><span class="severity" style="color: #f59e0b;">HIGH</span><br><span class="domain">jackpotstore.io</span><br><span class="type">Gambling</span><br><span class="meta">No context loaded</span></div>
+          </div>
+          <div class="alert-card" style="border-left-color: #eab308;" role="listitem">
+            <div><span class="severity" style="color: #eab308;">MEDIUM</span><br><span class="domain">cleanmeds.co</span><br><span class="type">Prescription</span><br><span class="meta">No context loaded</span></div>
+          </div>
+          <div class="alert-card" style="border-left-color: #f59e0b;" role="listitem">
+            <div><span class="severity" style="color: #f59e0b;">HIGH</span><br><span class="domain">sportzgear.com</span><br><span class="type">Counterfeit</span><br><span class="meta">No context loaded</span></div>
+          </div>
+        </div>
+        <p style="font-weight: 700; color: #1a1a2e; margin-top: 24px;">Every alert opens cold. Full reset. No structure. No context.</p>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: THE BROKEN EQUATION
+         Systems constraint: volume grows, capacity is fixed.
+         Flow diagram shows causal chain; red box highlights the bottleneck. -->
+    <section class="slide" aria-label="Slide 3: The constraint">
+      <div class="container">
+        <p class="label">THE CONSTRAINT</p>
+        <h2 class="slide-title">Volume scales. Capacity doesn't.</h2>
+        <div class="flow-row">
+          <div class="flow-box">Merchant portfolios ↑</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box">Violation volume ↑</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box">Required investigations ↑</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box red">Analyst hours = FIXED</div>
+        </div>
+        <div class="card card-purple" style="margin-top: 24px;">
+          <p style="font-size: 15px; color: #1a1a2e;">G2RS controls detection quality. But the binding constraint is investigation capacity — and G2RS does not touch it today.</p>
+        </div>
+        <div style="display: flex; gap: 20px; margin-top: 24px; flex-wrap: wrap;">
+          <div class="card card-red" style="flex: 1; min-width: 280px;"><p style="font-size: 15px;">Existing customers breach SLAs as queues overflow</p></div>
+          <div class="card card-amber" style="flex: 1; min-width: 280px;"><p style="font-size: 15px;">Prospective customers suppress demand — refusing to send full portfolios</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: UNIT-OF-WORK MISMATCH
+         Root cause: alerts arrive per merchant, investigations run by violation type.
+         Visual shows repeated work (Open→Lookup→Policy→Checklist→Write) with FULL RESET between each merchant.
+         Same cognitive work done 3× for 3 Gambling alerts. -->
+    <section class="slide" aria-label="Slide 4: Unit-of-work mismatch">
+      <div class="container">
+        <p class="label">ROOT CAUSE</p>
+        <h2 class="slide-title">Alerts arrive per merchant. Investigations run by violation type.</h2>
+        <div style="margin-top: 24px;">
+          <div class="work-row">
+            <span style="font-weight: 600;">Merchant A · Gambling</span>
+            <span>→</span>
+            <span class="work-step">Open</span><span class="work-step">Lookup</span><span class="work-step">Policy</span><span class="work-step">Checklist</span><span class="work-step">Write</span>
+          </div>
+          <div class="work-reset">FULL RESET</div>
+          <div class="work-row">
+            <span style="font-weight: 600;">Merchant B · Gambling</span>
+            <span>→</span>
+            <span class="work-step">Open</span><span class="work-step">Lookup</span><span class="work-step">Policy</span><span class="work-step">Checklist</span><span class="work-step">Write</span>
+          </div>
+          <div class="work-reset">FULL RESET</div>
+          <div class="work-row">
+            <span style="font-weight: 600;">Merchant C · Gambling</span>
+            <span>→</span>
+            <span class="work-step">Open</span><span class="work-step">Lookup</span><span class="work-step">Policy</span><span class="work-step">Checklist</span><span class="work-step">Write</span>
+          </div>
+        </div>
+        <div class="card card-purple" style="margin-top: 24px;">
+          <p style="font-size: 15px; color: #1a1a2e;">The analyst does the same cognitive work three times because the system delivers three separate alerts instead of one grouped case. This is a unit-of-work mismatch.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: THE DIAGNOSIS
+         System is optimized for detection, not decision-making.
+         One check (detection scales), three X's (investigation bottlenecks).
+         Punchline: need fewer investigations per decision, not fewer findings. -->
+    <section class="slide" aria-label="Slide 5: Diagnosis">
+      <div class="container">
+        <p class="label">DIAGNOSIS</p>
+        <h2 class="slide-title">The system is optimized for detection, not decision-making.</h2>
+        <div style="margin-top: 24px;">
+          <div class="diag-row">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            <p style="font-size: 16px;">Detection scales — G2RS processes millions of merchants</p>
+          </div>
+          <div class="diag-row">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <p style="font-size: 16px;">Investigation does not — every finding requires manual analyst work</p>
+          </div>
+          <div class="diag-row">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <p style="font-size: 16px;">The wrong unit of work is passed to the analyst — raw findings, not structured cases</p>
+          </div>
+          <div class="diag-row">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <p style="font-size: 16px;">G2RS gives findings. It does not give a scalable workflow for acting on them.</p>
+          </div>
+        </div>
+        <div class="card card-teal" style="margin-top: 24px;">
+          <p style="font-size: 16px; font-weight: 600; color: #1a1a2e;">You do not need fewer findings only. You need fewer investigations per decision.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: THE STRUCTURAL FIX
+         Before: 6 items by merchant. After: 3 grouped by violation type.
+         Context loads once per type instead of per merchant. -->
+    <section class="slide" aria-label="Slide 6: The fix">
+      <div class="container">
+        <p class="label">THE FIX</p>
+        <h2 class="slide-title">Group by violation type. Context loads once.</h2>
+        <div class="before-after">
+          <div class="ba-panel before card">
+            <div class="panel-title">BEFORE</div>
+            <div class="item">betwin365.com · Gambling</div>
+            <div class="item">pharmadir.com · Prescription</div>
+            <div class="item">luxreplica.co · Counterfeit</div>
+            <div class="item">jackpotstore.io · Gambling</div>
+            <div class="item">cleanmeds.co · Prescription</div>
+            <div class="item">sportzgear.com · Counterfeit</div>
+          </div>
+          <div class="ba-arrow">GROUP BY TYPE →</div>
+          <div class="ba-panel after card card-teal">
+            <div class="panel-title">AFTER</div>
+            <div class="item"><strong>Gambling</strong> · Context loaded once → betwin365.com, jackpotstore.io</div>
+            <div class="item"><strong>Prescription</strong> · Context loaded once → pharmadir.com, cleanmeds.co</div>
+            <div class="item"><strong>Counterfeit</strong> · Context loaded once → luxreplica.co, sportzgear.com</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: ALTERNATIVES
+         Three paths: Better precision (rejected), Risk tiers (complementary — tier descriptions, strengths, demand suppression, limitations), Co-Pilot (chosen).
+         Middle card has tier descriptions, WHY STRONG, demand suppression callout, WHERE FALLS SHORT. Card C is the recommendation. -->
+    <section class="slide" aria-label="Slide 7: Alternatives analysis">
+      <div class="container">
+        <p class="label">ALTERNATIVES ANALYSIS</p>
+        <h2 class="slide-title">Three credible paths. One recommendation.</h2>
+        <div class="alt-cards">
+          <div class="alt-card">
+            <div class="accent" style="background: #ef4444;"></div>
+            <div class="badge" style="color: #ef4444;">REJECTED</div>
+            <h3>Better Detection Precision</h3>
+            <p style="font-size: 14px; color: #555;">Even 100% precision still generates alerts. Every true positive still requires manual investigation. Improves signal quality — does not touch operational scalability.</p>
+          </div>
+          <div class="alt-card">
+            <div class="accent" style="background: #f59e0b;"></div>
+            <div class="badge" style="color: #f59e0b;">COMPLEMENTARY</div>
+            <h3>Risk-Based Monitoring Tiers</h3>
+            <p style="font-size: 13px; color: #555; margin-bottom: 12px;">Instead of monitoring all merchants equally, segment the portfolio into dynamic risk tiers: <strong>High risk</strong> → continuous deep monitoring, all violations surfaced; <strong>Medium risk</strong> → monthly monitoring, violations batched weekly; <strong>Low risk</strong> → quarterly monitoring, only significant violations surfaced. If 60–70% of merchants are genuinely low risk — which customers already assume — this dramatically reduces violation volume at the source.</p>
+            <div class="section">
+              <div class="section-title">WHY IT'S STRONG:</div>
+              <ul>
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" style="flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg> Directly reduces alert volume at the source</li>
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" style="flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg> No workflow or behavior change required</li>
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" style="flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg> No adoption friction</li>
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" style="flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg> Fully respects the internal data constraint</li>
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" style="flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg> Can be deployed quickly as a monitoring strategy shift</li>
+              </ul>
+            </div>
+            <div class="section" style="background: rgba(124,58,237,0.06); padding: 10px 12px; border-radius: 8px; margin: 8px 0;">
+              <div style="font-size: 13px; color: #1a1a2e;">It also directly addresses <strong>demand suppression</strong>: A customer afraid to send 50,000 merchants now hears: "Your low-risk portfolio will generate minimal alerts." → They send more merchants → G2RS unlocks growth.</div>
+            </div>
+            <div class="section">
+              <div class="section-title">WHERE IT FALLS SHORT:</div>
+              <ul>
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="flex-shrink:0;"><path d="M18 6L6 18M6 6l12 12"/></svg> Reduces volume — but not investigation time. Each surfaced violation still requires the same manual investigation. Queue is smaller → but each item is equally expensive.</li>
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="flex-shrink:0;"><path d="M18 6L6 18M6 6l12 12"/></svg> Introduces miscategorization risk. Incorrect tiering = missed violations for months → regulatory exposure → customer trust risk. Risk-averse customers may hesitate to adopt.</li>
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="flex-shrink:0;"><path d="M18 6L6 18M6 6l12 12"/></svg> Does not create a learning system. Tiering is largely static. No feedback loop. No compounding intelligence over time.</li>
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="flex-shrink:0;"><path d="M18 6L6 18M6 6l12 12"/></svg> Does not evolve the workflow. API and UI customers experience no change in investigation process. Only fewer alerts — not better handling.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="alt-card">
+            <div class="accent" style="background: #10b981;"></div>
+            <div class="badge" style="color: #10b981;">CHOSEN ✓</div>
+            <h3>Merchant Risk Co-Pilot</h3>
+            <p style="font-size: 14px; color: #555;">Attacks the root cause: structural mismatch between how alerts arrive and how investigations run. Solves investigation throughput, workflow inefficiency, context reconstruction, and cognitive switching. Compounds in value via learning loop.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 8: COMPLEMENTARY INSIGHT
+         Tiers + Co-Pilot are complementary. Recommended approach: Co-Pilot first, then risk tiers. -->
+    <section class="slide">
+      <div class="container">
+        <p class="label">STRATEGIC INSIGHT</p>
+        <h2 class="slide-title">These are not competing solutions.</h2>
+        <p style="font-size: 24px; font-weight: 600; color: #1a1a2e; text-align: center; margin: 24px 0;">They are complementary layers in the same system.</p>
+        <div class="comp-row">
+          <div class="comp-card purple">
+            <!-- Filter icon -->
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 12px;"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <div style="font-weight: 700; color: #7c3aed; margin-bottom: 4px;">Risk-based tiers</div>
+            <div style="font-size: 14px; color: #555;">→ reduce incoming volume</div>
+          </div>
+          <div class="comp-plus">+</div>
+          <div class="comp-card teal">
+            <!-- Rocket icon -->
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 12px;"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+            <div style="font-weight: 700; color: #0d9488; margin-bottom: 4px;">Co-Pilot</div>
+            <div style="font-size: 14px; color: #555;">→ maximize efficiency of remaining investigations</div>
+          </div>
+        </div>
+        <div class="card card-teal" style="margin-top: 24px; text-align: center;">
+          <p style="font-size: 16px; font-weight: 600;">Together: fewer alerts × faster investigation per alert = full-system scalability.</p>
+          <p style="font-size: 15px; font-weight: 600; margin-top: 16px; color: #0d9488;">Recommended Approach:</p>
+          <ol style="font-size: 14px; text-align: left; max-width: 520px; margin: 12px auto 0; padding-left: 20px;">
+            <li>Launch Co-Pilot first → prove investigation efficiency gains → establish baseline metrics</li>
+            <li>Introduce risk-based monitoring tiers as a second layer → reduce incoming volume → amplify Co-Pilot impact</li>
+          </ol>
+        </div>
+        <p style="font-weight: 700; color: #1a1a2e; margin-top: 16px; text-align: center;">This is a systems-level solution, not a feature.</p>
+      </div>
+    </section>
+
+    <!-- SLIDE 9: SOLUTION -->
+    <section class="slide">
+      <div class="container">
+        <p class="label">THE SOLUTION</p>
+        <h2 class="slide-title">A new operating model for investigations.</h2>
+        <p class="slide-subtitle">Not a feature list. A workflow redesign.</p>
+        <div class="sol-grid">
+          <div class="sol-card">
+            <div class="letter">A.</div>
+            <!-- Layers icon -->
+            <svg class="sol-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg>
+            <h4>Change the unit of work</h4>
+            <p>Raw alerts → structured merchant cases grouped by violation type. The analyst works one investigation logic across multiple merchants.</p>
+          </div>
+          <div class="sol-card">
+            <div class="letter">B.</div>
+            <!-- Box/package icon -->
+            <svg class="sol-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            <h4>Pre-load context</h4>
+            <p>Evidence pack auto-assembled on case open: Compass Score, EverC risk graph, merchant history. No manual lookup across 3+ tools.</p>
+          </div>
+          <div class="sol-card">
+            <div class="letter">C.</div>
+            <!-- Checklist icon -->
+            <svg class="sol-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <h4>Constrain the decision</h4>
+            <p>Targeted verification checklist: exactly what internal data to verify for this violation type. No guessing. Just execute.</p>
+          </div>
+          <div class="sol-card">
+            <div class="letter">D.</div>
+            <!-- Brain icon -->
+            <svg class="sol-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+            <h4>Accelerate understanding</h4>
+            <p>AI case summary on demand. Plain-language context in 20 seconds. On-click only — prevents anchoring bias.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 10: TRANSFORMATION
+         Side-by-side comparison: without vs with Co-Pilot.
+         7 rows showing before→after for each dimension. 3× output claim. -->
+    <section class="slide" aria-label="Slide 10: The transformation">
+      <div class="container">
+        <p class="label">THE TRANSFORMATION</p>
+        <h2 class="slide-title">Same alerts. Different system. 3× output.</h2>
+        <table class="comp-table">
+          <thead>
+            <tr><th>WITHOUT CO-PILOT</th><th class="arrow-cell"></th><th>WITH CO-PILOT</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>47 unstructured alerts, random order</td><td class="arrow-cell">→</td><td>3 grouped batches by violation type</td></tr>
+            <tr><td>Opens cold — no context</td><td class="arrow-cell">→</td><td>AI summary loads in 20 seconds</td></tr>
+            <tr><td>Pull history from 3+ tools manually</td><td class="arrow-cell">→</td><td>Evidence pack pre-assembled</td></tr>
+            <tr><td>Figure out what to check — guesses</td><td class="arrow-cell">→</td><td>Checklist: exactly 3 things to verify</td></tr>
+            <tr><td>40–60 minutes per case</td><td class="arrow-cell">→</td><td>8–12 minutes per case</td></tr>
+            <tr><td>Write rationale from blank page</td><td class="arrow-cell">→</td><td>Edit pre-drafted rationale and approve</td></tr>
+            <tr><td>Queue never empties — SLA pressure</td><td class="arrow-cell">→</td><td>Queue empty by noon — capacity for more</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SLIDE 11: DEMO
+         CSS-based UI mockup: navy top bar, sidebar with violation groups,
+         main area with merchant cards and checklists, right Evidence Pack panel.
+         Built during discovery as live prototype. -->
+    <section class="slide" aria-label="Slide 11: Co-Pilot demo">
+      <div class="container">
+        <p class="label">PROTOTYPE</p>
+        <h2 class="slide-title">Co-Pilot Demo</h2>
+        <p class="slide-subtitle">From alert queue to decision in minutes.</p>
+        <div class="demo-mockup">
+          <div class="demo-topbar">
+            <span class="g2">G2</span>
+            <span class="title">Merchant Risk Co-Pilot</span>
+          </div>
+          <div class="demo-body">
+            <div class="demo-sidebar">
+              <div class="group active">Gambling (2)</div>
+              <div class="group">Prescription (2)</div>
+              <div class="group">Counterfeit (2)</div>
+            </div>
+            <div class="demo-main">
+              <h3>Gambling Violations</h3>
+              <div class="demo-merchant">
+                <div class="row"><span class="domain">betwin365.com</span><span class="score red">Score 87</span><button class="ai-btn">AI Summary</button></div>
+                <div class="check-item">☐ Verify merchant category in internal system</div>
+                <div class="check-item">☐ Confirm no licensed gambling exception</div>
+                <div class="check-item">☐ Document decision rationale</div>
+              </div>
+              <div class="demo-merchant">
+                <div class="row"><span class="domain">jackpotstore.io</span><span class="score orange">Score 72</span></div>
+                <div class="check-item">☐ Verify merchant category in internal system</div>
+                <div class="check-item">☐ Confirm no licensed gambling exception</div>
+                <div class="check-item">☐ Document decision rationale</div>
+              </div>
+            </div>
+            <div class="demo-right">
+              <h4>Evidence Pack</h4>
+              <div class="placeholder" title="Risk graph visualization"></div>
+              <div class="placeholder" title="Merchant history timeline"></div>
+              <div class="placeholder" style="height: 40px;" title="Compass Score"></div>
+            </div>
+          </div>
+        </div>
+        <p class="demo-label">Live prototype — built during discovery</p>
+      </div>
+    </section>
+
+    <!-- SLIDE 12: MVP
+         Build sequence by dependency: grouping → evidence pack → checklist → routing → AI summary.
+         Each layer enables the next. AI last because it needs structured data. -->
+    <section class="slide" aria-label="Slide 12: MVP build logic">
+      <div class="container">
+        <p class="label">MVP</p>
+        <h2 class="slide-title">Sequenced by dependency, not priority.</h2>
+        <p class="slide-subtitle">Each layer enables the next.</p>
+        <div class="mvp-sequence">
+          <div class="mvp-item">
+            <div class="mvp-num">1</div>
+            <div><h4>Violation-Type Grouping</h4><p>Foundation. Without this, nothing else delivers full value.</p></div>
+          </div>
+          <div class="mvp-item">
+            <div class="mvp-num">2</div>
+            <div><h4>Evidence Pack</h4><p>Pre-loads context. Eliminates 3-tool manual lookup.</p></div>
+          </div>
+          <div class="mvp-item">
+            <div class="mvp-num">3</div>
+            <div><h4>Verification Checklist</h4><p>Constrains the decision. Tells analyst exactly what to check.</p></div>
+          </div>
+          <div class="mvp-item">
+            <div class="mvp-num">4</div>
+            <div><h4>Risk-Tier Routing + Audit</h4><p>Critical/High surface first. Full audit trail for compliance.</p></div>
+          </div>
+          <div class="mvp-item">
+            <div class="mvp-num">5</div>
+            <div><h4>AI Case Summary</h4><p>Last because it depends on structured data from layers 1–4.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 13: ROADMAP
+         Four phases: Discover → MVP → Deepen → Scale.
+         Each gated by signal, not date. Learning-driven. -->
+    <section class="slide" aria-label="Slide 13: Roadmap">
+      <div class="container">
+        <p class="label">ROADMAP</p>
+        <h2 class="slide-title">Four phases. Each gated by a signal — not a date.</h2>
+        <div class="roadmap-row">
+          <div class="phase-card">
+            <h4>Phase 0 — Discover</h4>
+            <div class="duration">4–6 wks</div>
+            <div class="build"><strong>Build:</strong> Shadow analysts, capture baselines, 2–3 design partners</div>
+            <div class="learn"><strong>Learn:</strong> How analysts actually work, real time-per-case, tool usage</div>
+            <div class="gate">Gate → Partners committed + baselines captured</div>
+          </div>
+          <div class="phase-arrow" aria-hidden="true">→</div>
+          <div class="phase-card">
+            <h4>Phase 1 — MVP</h4>
+            <div class="duration">3–4 mo</div>
+            <div class="build"><strong>Build:</strong> 5 MVP features, design partners only</div>
+            <div class="learn"><strong>Learn:</strong> Does grouping reduce context switches? Does checklist reduce investigation time?</div>
+            <div class="gate">Gate → Measurable improvement + "we could handle more"</div>
+          </div>
+          <div class="phase-arrow" aria-hidden="true">→</div>
+          <div class="phase-card">
+            <h4>Phase 2 — Deepen</h4>
+            <div class="duration">4–6 mo</div>
+            <div class="build"><strong>Build:</strong> AI insights, remediation workflow, broader rollout</div>
+            <div class="learn"><strong>Learn:</strong> Do customers increase monitoring volume?</div>
+            <div class="gate">Gate → Screening requests rising</div>
+          </div>
+          <div class="phase-arrow" aria-hidden="true">→</div>
+          <div class="phase-card">
+            <h4>Phase 3 — Scale</h4>
+            <div class="duration">Ongoing</div>
+            <div class="build"><strong>Build:</strong> Full rollout, Co-Pilot priced distinct, learning loop</div>
+            <div class="learn"><strong>Learn:</strong> Does the system compound?</div>
+            <div class="gate">Gate → Portfolio expansion across customer base</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 14: WHY WINS
+         Six strategic advantages: volume+time, internal-data, workflow, compounds, UI+API, amplified by tiers. -->
+    <section class="slide" aria-label="Slide 14: Strategic advantage">
+      <div class="container">
+        <p class="label">STRATEGIC ADVANTAGE</p>
+        <h2 class="slide-title">Why the Co-Pilot wins.</h2>
+        <div class="wins-grid">
+          <div class="win-card">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            <p>Solves both volume and investigation time</p>
+          </div>
+          <div class="win-card">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <p>Works within the internal-data constraint</p>
+          </div>
+          <div class="win-card">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            <p>Improves workflow — doesn't shift work to the customer</p>
+          </div>
+          <div class="win-card">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M21 12a9 9 0 11-9-9"/><path d="M21 3v9h-9"/></svg>
+            <p>Compounds in value via feedback loop</p>
+          </div>
+          <div class="win-card">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            <p>Supports both UI and API customers</p>
+          </div>
+          <div class="win-card">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <p>Amplified by risk-based monitoring tiers as a second layer</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 15: METRICS
+         North star: alerts per analyst per week. Guardrail: decision time by tier. Growth: screening requests. -->
+    <section class="slide" aria-label="Slide 15: Success metrics">
+      <div class="container">
+        <p class="label">METRICS</p>
+        <h2 class="slide-title">One north star. One guardrail. One growth signal.</h2>
+        <div class="metrics-row">
+          <div class="metric-card">
+            <div class="accent" style="background: #0d9488;"></div>
+            <!-- Speedometer icon -->
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" style="margin-bottom: 12px;"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+            <h4>NORTH STAR</h4>
+            <div class="name">Alerts investigated per analyst per week</div>
+            <p>Direct expression of the scalability problem. If this moves — the Co-Pilot is working.</p>
+            <div class="how">HOW: Case open → decision timestamp, per analyst.</div>
+          </div>
+          <div class="metric-card">
+            <div class="accent" style="background: #7c3aed;"></div>
+            <!-- Shield icon -->
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" style="margin-bottom: 12px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <h4>GUARDRAIL</h4>
+            <div class="name">Case creation to decision time, by tier</div>
+            <p>Speed gains must not come at the cost of SLA discipline or decision quality.</p>
+            <div class="how">HOW: Both timestamps owned by G2RS. Per tier.</div>
+          </div>
+          <div class="metric-card">
+            <div class="accent" style="background: #0d9488;"></div>
+            <!-- Chart-up icon -->
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" style="margin-bottom: 12px;"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            <h4>GROWTH SIGNAL</h4>
+            <div class="name">Screening requests per customer per week</div>
+            <p>If customers self-limited before, this rises as Co-Pilot gives them confidence to grow.</p>
+            <div class="how">HOW: Measured directly in G2RS API. Baseline from Phase 0.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 16: CLOSING
+         Memorable close: without Co-Pilot, growth capped by analyst capacity.
+         With it, growth capped by market size. Category shift, not feature improvement. -->
+    <section class="slide slide-16" aria-label="Slide 16: Closing">
+      <div class="container">
+        <p class="quote">"Without the Co-Pilot, G2RS growth is capped by analyst capacity."</p>
+        <p class="punch">With it, growth is capped by market size.</p>
+        <p class="final">That is a category shift — not a feature improvement.</p>
+        <p class="footer-text">Merchant Risk Co-Pilot · G2RS / EverC · March 2026</p>
+      </div>
+    </section>
+  </main>
+
+  <!--
+    PRESENTATION NOTES (hidden, for presenter reference)
+    ==================================================
+    Slide 1: Open with the scalability gap. G2RS detects; it doesn't scale investigation.
+    Slide 2: Paint the picture — 47 alerts, no structure. Analyst pain is visceral.
+    Slide 3: The math doesn't work. Volume ↑, capacity = fixed. Two consequences.
+    Slide 4: Root cause — unit-of-work mismatch. Same work repeated per merchant.
+    Slide 5: Diagnosis — detection scales, investigation doesn't. Wrong unit of work.
+    Slide 6: The fix — group by type. Context loads once. Before/after visual.
+    Slide 7: Alternatives — precision (rejected), tiers (complementary), Co-Pilot (chosen).
+    Slide 8: Strategic insight — tiers + Co-Pilot are complementary, not competing. Recommended: Co-Pilot first, then risk tiers.
+    Slide 9: Solution — 4 pillars: unit of work, pre-load, constrain, accelerate.
+    Slide 10: Transformation — 7 before/after rows. 3× output. Queue empty by noon.
+    Slide 11: Demo — live prototype. Show sidebar, merchant cards, evidence pack.
+    Slide 12: MVP — 5 layers by dependency. Grouping first, AI last.
+    Slide 13: Roadmap — 4 phases, signal-gated. Discover → MVP → Deepen → Scale.
+    Slide 14: Why wins — 6 advantages. Volume+time, constraint, workflow, compounds.
+    Slide 15: Metrics — North star, guardrail, growth signal. One each.
+    Slide 16: Close — category shift. Growth capped by market, not capacity.
+
+    KEY MESSAGES TO REINFORCE:
+    - G2RS controls detection. The constraint is investigation capacity.
+    - Unit-of-work mismatch: alerts per merchant, investigations per type.
+    - Co-Pilot groups by type, pre-loads context, constrains the decision.
+    - Risk tiers + Co-Pilot = complementary layers. Systems-level solution. Recommended: Co-Pilot first, then tiers.
+    - North star: alerts per analyst per week. Guardrail: decision time by tier.
+    - Category shift: from capacity-capped to market-capped growth.
+
+    ANTICIPATED Q&A:
+    Q: Why not just hire more analysts? A: Linear scaling, training lag, quality variance. Co-Pilot multiplies existing capacity.
+    Q: What about false negatives from grouping? A: Grouping is display/organization only. Every finding still investigated. No suppression.
+    Q: How does AI summary avoid anchoring bias? A: On-click only. Analyst sees raw data first. Summary is optional acceleration.
+    Q: Why is AI last in MVP? A: Depends on structured cases from grouping. Without grouping, AI has nothing to summarize.
+    Q: How do you measure "we could handle more"? A: Design partner self-report + queue depth before/after. Qualitative gate.
+    Q: What if customers don't increase screening volume? A: Phase 2 learn signal. If flat, investigate. May need pricing/positioning.
+
+    DESIGN TOKENS (for reference):
+    Backgrounds: #ffffff, #f8f7fc, #f5f0ff, #faf9ff
+    Gradients: linear-gradient(135deg, #f5f0ff, #ece6f8)
+    Primary text: #1a1a2e | Secondary: #555 | Tertiary: #888
+    Purple: #7c3aed, #8b5cf6, #a78bfa, #5b3e9e
+    Teal: #00A878, #0d9488
+    Red: #ef4444 | Amber: #f59e0b | Green: #10b981
+    Cards: #fff, border 1px solid #e5e5e5
+    Progress track: rgba(0,0,0,0.06) | Fill: linear-gradient(90deg, #7c3aed, #0d9488)
+    Font: Poppins 300-900 | Title 36px | Body 17px | Label 11px
+
+    NARRATIVE ARC (executive storytelling):
+    Act 1 (Slides 1-5): Problem → Constraint → Root cause → Diagnosis. Establish that G2RS has a scalability ceiling.
+    Act 2 (Slides 6-9): Fix → Alternatives → Complementary insight → Solution. Show the path and why Co-Pilot wins.
+    Act 3 (Slides 10-13): Transformation → Demo → MVP → Roadmap. Prove it works, show how to build it.
+    Act 4 (Slides 14-16): Why wins → Metrics → Closing. Strategic advantage, measurement, memorable close.
+    The arc moves from problem (you have a ceiling) to solution (we break the ceiling) to proof (here's how).
+  -->
+
+  <noscript>
+    <p style="padding: 48px; text-align: center; color: #555;">
+      JavaScript is required for slide navigation. Please enable JavaScript or use a modern browser.
+      Keyboard: Arrow keys, Space, Home, End. Touch: Swipe left/right.
+    </p>
+  </noscript>
+
+  <!--
+    MVP BUILD RATIONALE (detailed):
+    1. Violation-Type Grouping: Without grouping, every other feature delivers partial value. Analyst still opens N cases for N merchants. Context still loads N times. Checklist still repeats N times. Grouping is the structural change that unlocks everything.
+    2. Evidence Pack: Once cases are grouped, we can pre-assemble context for the case (not per merchant). Compass Score, EverC risk graph, merchant history — all in one place. Eliminates 3-tool manual lookup.
+    3. Verification Checklist: With grouped cases and evidence pack, we know the violation type. We can define exactly what to verify for that type. No guessing. Constrains the decision. Reduces investigation time.
+    4. Risk-Tier Routing + Audit: Critical/High surface first. Ensures SLA discipline. Full audit trail for compliance. Enables risk-based monitoring tiers as a second layer.
+    5. AI Case Summary: Depends on structured data from 1-4. Without grouping, AI would summarize 47 separate alerts. With grouping, AI summarizes 3 case types. On-click only to prevent anchoring.
+
+    PHASE GATE RATIONALE:
+    Phase 0 → 1: Partners committed + baselines captured. Need design partners to build with. Need baseline metrics to measure improvement.
+    Phase 1 → 2: Measurable improvement + "we could handle more". Must prove Co-Pilot works before expanding. Qualitative signal from analysts.
+    Phase 2 → 3: Screening requests rising. If customers increase volume, Co-Pilot is unlocking demand. Validates the growth hypothesis.
+    Phase 3: Portfolio expansion across customer base. Full rollout. Co-Pilot priced distinct. Learning loop compounds.
+
+    ALTERNATIVES DEEP DIVE:
+    Better Detection Precision (REJECTED): Even at 100% precision, every true positive requires manual investigation. The bottleneck is not signal quality — it's investigation capacity. Improving precision reduces false positives (good) but does not reduce time per true positive. Does not touch operational scalability. G2RS already has strong detection. This path optimizes the wrong variable.
+    Risk-Based Monitoring Tiers (COMPLEMENTARY): Segment portfolio into dynamic tiers: High (continuous deep monitoring), Medium (monthly, batched weekly), Low (quarterly, significant only). If 60–70% low risk, dramatically reduces volume at source. Pros: directly reduces volume, no workflow change, no adoption friction, respects internal-data constraint, quick deploy. Demand suppression: "Your low-risk portfolio will generate minimal alerts" → customers send more merchants → G2RS unlocks growth. Cons: reduces volume not investigation time per alert; miscategorization risk (missed violations → regulatory exposure); no learning system; no workflow evolution. Strong as Layer 1. Insufficient alone.
+    Merchant Risk Co-Pilot (CHOSEN): Attacks root cause — structural mismatch. Solves: investigation throughput (grouping), workflow inefficiency (checklist), context reconstruction (evidence pack), cognitive switching (one case type at a time). Compounds via feedback loop. Works with risk tiers as Layer 2. Full-system solution.
+
+    METRIC DEFINITIONS (operational):
+    North Star — Alerts investigated per analyst per week: Count of cases where analyst opened case and recorded decision within same week. Excludes cases carried over. Per analyst to control for headcount. Weekly to smooth daily variance. Direct expression of throughput.
+    Guardrail — Case creation to decision time, by tier: Time from case creation (G2RS timestamp) to decision recorded (G2RS timestamp). By tier (Critical/High/Medium) to ensure no tier is neglected. Ensures speed gains don't compromise SLA or quality.
+    Growth Signal — Screening requests per customer per week: Count of screening API calls or equivalent per customer per week. Baseline from Phase 0. Rises if customers previously self-limited and now send full portfolios. Validates demand unlock.
+
+    TRANSFORMATION RATIONALE (Slide 10):
+    Row 1: 47 unstructured → 3 grouped. Grouping by violation type reduces case count. Same findings, different organization.
+    Row 2: Cold open → AI summary in 20s. Evidence pack + optional AI summary. No manual context assembly.
+    Row 3: 3+ tools → evidence pack. Compass, EverC, history in one place. Pre-assembled on case open.
+    Row 4: Guesses → checklist. Violation-type-specific verification. Exactly what to check. No cognitive load.
+    Row 5: 40-60 min → 8-12 min. Target from design partner baselines. Grouping + checklist + evidence pack.
+    Row 6: Blank page → edit pre-draft. Co-Pilot suggests rationale. Analyst edits and approves. Faster, consistent.
+    Row 7: Queue never empties → empty by noon. Throughput increase. Capacity for more. SLA pressure relieved.
+
+    DEMO MOCKUP COMPONENT SPEC (Slide 11):
+    Top bar: Navy #0B1F3A. G2 mark in teal. Title "Merchant Risk Co-Pilot". Establishes product branding.
+    Sidebar: Violation groups with counts. Gambling (2) active/highlighted. Prescription, Counterfeit. Teal highlight for active.
+    Main: "Gambling Violations" header. Merchant cards: domain, score badge (red/orange by threshold), AI Summary button. Checklist items with checkboxes.
+    Right panel: Evidence Pack. Placeholders for risk graph, merchant history, Compass Score. Pre-assembled context.
+    Shadow: 0 8px 40px rgba(124,58,237,0.1) for subtle purple glow. Professional, not flashy.
+
+    WHY THIS WINS (Slide 14 — detailed):
+    1. Solves both volume and time: Risk tiers attack volume. Co-Pilot attacks time per alert. Together = multiplicative.
+    2. Internal-data constraint: Co-Pilot does not require customer to share internal data. Checklist tells analyst what to verify; analyst uses their tools. Respects privacy/compliance.
+    3. Workflow improvement: Co-Pilot improves analyst workflow. Does not shift work to customer (e.g., "you categorize your merchants"). Analyst stays in control.
+    4. Compounds: Feedback loop. More cases → better checklists, better AI. System gets smarter. Value compounds over time.
+    5. UI and API: Co-Pilot can surface in G2RS UI or via API. Serves both integration-heavy and UI-heavy customers.
+    6. Amplified by tiers: Risk tiers as Layer 1 reduce volume. Co-Pilot as Layer 2 maximizes efficiency of remainder. Complementary. Full-stack solution.
+
+    STAKEHOLDER CONSIDERATIONS:
+    Risk analysts: Primary users. Pain: 47 alerts, no structure. Gain: grouped cases, evidence pack, checklist. Adoption: low friction if workflow improves.
+    Risk managers: Care about throughput, SLA, quality. Gain: more cases per analyst, queue empty, audit trail. Adoption: if metrics move.
+    Customers (acquirers): Care about scalability, compliance. Gain: can grow portfolio without proportionally growing team. Adoption: if Co-Pilot proves out.
+    G2RS/EverC: Care about growth, differentiation. Gain: new revenue stream, category shift, competitive moat. Adoption: if ROI clear.
+
+    PRE-PRESENTATION CHECKLIST:
+    [ ] All 16 slides render correctly
+    [ ] Progress bar fills on navigation
+    [ ] Prev/Next buttons work
+    [ ] Keyboard: ArrowRight, Space, ArrowLeft, Home, End
+    [ ] Touch swipe works on mobile
+    [ ] Font loads (Poppins)
+    [ ] Light theme throughout
+    [ ] No white-on-white text
+    [ ] goTo function matches spec exactly
+    [ ] Slide 1: title, subtitle, footer
+    [ ] Slide 2: 6 alert cards, severity colors
+    [ ] Slide 3: flow diagram, 4 boxes, red final box
+    [ ] Slide 4: 3 work rows, FULL RESET badges
+    [ ] Slide 5: 4 diagnosis rows, teal/red icons
+    [ ] Slide 6: before/after panels, GROUP BY TYPE
+    [ ] Slide 7: 3 alt cards, REJECTED/COMPLEMENTARY/CHOSEN
+    [ ] Slide 8: filter + rocket icons, complementary message
+    [ ] Slide 9: 4 solution cards A-D with icons
+    [ ] Slide 10: 7-row comparison table
+    [ ] Slide 11: demo mockup, navy bar, sidebar, evidence pack
+    [ ] Slide 12: 5 MVP items, dotted line
+    [ ] Slide 13: 4 phase cards, arrows
+    [ ] Slide 14: 6 win cards
+    [ ] Slide 15: 3 metric cards with icons
+    [ ] Slide 16: quote, punch, final, footer
+
+    CLOSING VARIATIONS (if time permits):
+    Primary: "Without the Co-Pilot, G2RS growth is capped by analyst capacity. With it, growth is capped by market size. That is a category shift — not a feature improvement."
+    Short: "Capacity-capped today. Market-capped tomorrow. That's the shift."
+    Question: "What would it take for G2RS to 3x its addressable market? The Co-Pilot is that lever."
+
+    SLIDE TIMING (suggested, ~30 min total):
+    Slide 1: 1 min — Hook. "The scalability layer G2RS is missing."
+    Slide 2: 2 min — Paint the picture. 47 alerts. No structure.
+    Slide 3: 2 min — The math. Volume up, capacity fixed.
+    Slide 4: 2 min — Root cause. Unit-of-work mismatch.
+    Slide 5: 2 min — Diagnosis. Detection scales, investigation doesn't.
+    Slide 6: 2 min — The fix. Group by type. Context once.
+    Slide 7: 3 min — Alternatives. Three paths. One recommendation.
+    Slide 8: 2 min — Complementary. Not competing.
+    Slide 9: 3 min — Solution. Four pillars.
+    Slide 10: 2 min — Transformation. 3x output.
+    Slide 11: 2 min — Demo. Live prototype.
+    Slide 12: 2 min — MVP. By dependency.
+    Slide 13: 2 min — Roadmap. Signal-gated.
+    Slide 14: 2 min — Why wins. Six advantages.
+    Slide 15: 2 min — Metrics. North star, guardrail, growth.
+    Slide 16: 1 min — Close. Category shift.
+
+    IMPLEMENTATION RISKS & MITIGATIONS:
+    Risk: Analysts resist workflow change. Mitigation: Design partners from day one. Shadow before build. Co-design checklist.
+    Risk: Grouping introduces errors (e.g., miscategorized). Mitigation: Grouping is display only. Every finding still investigated. No suppression.
+    Risk: AI summary creates anchoring bias. Mitigation: On-click only. Analyst sees raw data first. Summary optional.
+    Risk: Evidence pack incomplete (missing data sources). Mitigation: Phase 0 baseline captures current tool usage. Build to actual workflow.
+    Risk: Design partners don't scale. Mitigation: Phase 1 gate requires measurable improvement. If it works for 2-3, expand.
+    Risk: Customers don't increase screening volume. Mitigation: Phase 2 learn signal. If flat, investigate. May need pricing/positioning.
+    Risk: Co-Pilot cannibalizes core G2RS. Mitigation: Co-Pilot priced distinct. Complements detection. Expands TAM.
+
+    SUCCESS CRITERIA (Phase 1 gate):
+    Quantitative: Alerts per analyst per week increases by 20%+ (design partner baseline). Case creation to decision time by tier within SLA.
+    Qualitative: Design partner says "we could handle more." Analyst feedback: "checklist helps." "Evidence pack saves time."
+    Operational: No increase in appeal rate or quality issues. Audit trail complete.
+
+    MARKET CONTEXT:
+    G2RS (Global Risk Screening) serves acquirers/payment processors. Detects merchant risk (gambling, prescription, counterfeit, etc.). Scales detection. Investigation is manual, customer-side. Co-Pilot addresses the investigation bottleneck. EverC is parent. Compass Score, risk graph are EverC assets. Co-Pilot integrates these into investigation workflow.
+
+    GO-TO-MARKET (post-Phase 3):
+    Target: Existing G2RS customers with high alert volume. Pain is acute. Willing to try.
+    Positioning: "The scalability layer for merchant risk investigations." Not "AI" — workflow redesign.
+    Pricing: Co-Pilot priced distinct. Value-based: throughput increase. Tiered by volume.
+    Channels: G2RS UI, API. Sales: land with detection, expand with Co-Pilot. Support: design partners become references.
+
+    CASE INTERVIEW TIPS:
+    Lead with problem. 47 alerts. Analyst pain. Make it visceral.
+    Root cause before solution. Unit-of-work mismatch. Don't jump to Co-Pilot.
+    Alternatives show rigor. Three paths. Why rejected, why complementary, why chosen.
+    Complementary insight shows systems thinking. Tiers + Co-Pilot. Not either/or.
+    Metrics show discipline. One north star. One guardrail. One growth signal.
+    Close with category shift. Capacity-capped to market-capped. Memorable.
+
+    TECHNICAL DEPENDENCIES (for build):
+    Grouping: G2RS violation type taxonomy. Case model supports multiple merchants per case.
+    Evidence pack: Compass Score API. EverC risk graph API. Merchant history (G2RS or customer). Pre-assembly on case open.
+    Checklist: Violation-type → verification steps mapping. Configurable per type. Stored in G2RS.
+    Routing: Risk tier (Critical/High/Medium) from G2RS. Sort/filter by tier. Audit timestamps.
+    AI summary: LLM API. Input: case context (grouped merchants, evidence). Output: plain-language summary. On-click only.
+
+    DATA FLOW (simplified):
+    1. G2RS generates findings (merchant + violation type). 2. Co-Pilot groups by violation type. 3. Analyst opens case (one type). 4. Evidence pack assembles (Compass, EverC, history). 5. Checklist loads for type. 6. Analyst verifies, decides. 7. Optional: AI summary on click.     8. Decision recorded. Audit trail.
+
+    PHASE 0 — DISCOVER (detailed):
+    Shadow analysts: 2-3 analysts, 2-3 days each. Observe: tool usage, time per case, context switches, pain points.
+    Capture baselines: Alerts per analyst per week. Case creation to decision time. Tool usage (which tools, how often).
+    Design partners: 2-3 customers. Criteria: high alert volume, willing to co-design, representative of target segment.
+    Deliverables: Baseline metrics. Pain point map. Tool usage map. Design partner commitment. Checklist draft (violation type → verification steps).
+
+    DESIGN PARTNER CRITERIA:
+    Volume: 50+ alerts/week (or equivalent). Pain is acute.
+    Willingness: Committed to co-design. Can allocate analyst time. Willing to try new workflow.
+    Representative: Mix of violation types. Mix of tiers. Not edge case.
+    Access: Can shadow analysts. Can measure before/after. Can iterate.
+
+    CHECKLIST EXAMPLE (Gambling violation type):
+    1. Verify merchant category in internal system (MCC, NAICS, or equivalent).
+    2. Confirm no licensed gambling exception (jurisdiction, license check).
+    3. Document decision rationale (approve/decline, evidence cited).
+    Each violation type has its own checklist. Defined in Phase 0 from shadowing. Refined in Phase 1.
+
+    LEARNING LOOP (compounds over time):
+    More cases → more data on verification patterns → better checklists.
+    More cases → more evidence pack usage → better pre-assembly.
+    More cases → more AI summary usage → better summaries (if feedback captured).
+    Co-Pilot gets smarter as it's used. Value compounds. Defensible.
+
+    EDGE CASES:
+    Merchant with multiple violation types: Create separate cases per type. Merchant may appear in multiple cases. No change to grouping logic.
+    Single merchant, single violation: Still grouped. Case has one merchant. Checklist, evidence pack apply. Full value.
+    New violation type: Add to taxonomy. Define checklist. Roll out. Process for expansion.
+
+    ROI FRAMING (for customers):
+    Without Co-Pilot: X alerts/week, Y analysts, Z min/case. Capacity = fixed.
+    With Co-Pilot: Same X alerts. Same Y analysts. Z/3 min/case (target). Capacity = 3X.
+    Option A: Handle 3X volume with same team. Option B: Reduce team, same volume. Option C: Grow portfolio without proportional hiring.
+    Value prop: Throughput multiplier. Pay for outcome (alerts investigated) or capacity (analysts supported).
+
+    NEXT STEPS (post-interview):
+    1. Validate with G2RS product/eng. Feasibility, dependencies.
+    2. Identify 2-3 design partner candidates. Outreach.
+    3. Plan Phase 0: shadow schedule, baseline metrics, checklist draft.
+    4. Align with EverC on Compass, risk graph APIs. Evidence pack integration.
+    5. Define Phase 1 gate criteria. Measurable improvement threshold.
+
+    CREDITS & REFERENCES:
+    Deck: Merchant Risk Co-Pilot. G2RS / EverC. March 2026.
+    Context: Senior PM Case Interview. Ishai Froind + Panel.
+    Design: Light theme, Poppins, purple-teal palette. Self-contained HTML.
+    Navigation: goTo(idx) — exact spec. Keyboard, touch, buttons. Progress bar.
+    Content: 16 slides. Problem → Constraint → Root cause → Diagnosis → Fix → Alternatives → Complementary → Solution → Transformation → Demo → Roadmap → Why wins → Metrics → Closing.
+
+    COMPETITIVE MOAT:
+    Data: More cases → better checklists, better AI. First-mover in investigation workflow. Network effects.
+    Workflow lock-in: Analysts adopt Co-Pilot. Switching cost to manual workflow. Habit.
+    Integration: Compass, EverC risk graph. G2RS-native. Competitors would need to replicate integration.
+    Brand: "The scalability layer." Category definition. Owning the narrative.
+
+    WHY NOT OTHER SOLUTIONS:
+    Outsourcing investigations: Shifts work. Customer loses control. Compliance risk. Co-Pilot keeps work in-house.
+    More automation (auto-approve/decline): Regulatory risk. Analyst judgment required. Co-Pilot assists, doesn't replace.
+    Better UX only: Improves experience. Doesn't change unit of work. Doesn't multiply throughput. Co-Pilot is structural.
+
+    ACCESSIBILITY NOTES:
+    Progress bar: role="progressbar", aria-valuenow/min/max. Updated on navigation.
+    Slide counter: aria-live="polite". Screen readers announce slide changes.
+    Nav buttons: aria-label="Previous slide", "Next slide". Disabled state when at first/last.
+    Slides: aria-label per slide. Appendix with full text for search/screen readers.
+    Focus: nav-btn focus outline. Keyboard navigable. No keyboard traps.
+    Color: Sufficient contrast. Primary text #1a1a2e on light. No white-on-white.
+
+    BROWSER COMPATIBILITY:
+    Chrome, Firefox, Safari, Edge. Modern browsers. requestAnimationFrame, classList, addEventListener.
+    Touch: passive listeners for scroll performance. Swipe threshold 50px.
+    Print: @media print. Slides as pages. Nav hidden. Progress hidden.
+
+    FONT LOADING:
+    Google Fonts: Poppins 300-900. Preconnect for performance.
+    Fallback: sans-serif if Poppins fails. All weights used: 300, 400, 500, 600, 700, 800, 900.
+    Display: swap. Prevents FOIT. Text visible immediately with fallback, then Poppins when loaded.
+
+    VERIFICATION (final pass):
+    All 16 slides present. goTo function exact. Progress bar purple-to-teal. Nav bottom-right.
+    Slide 1: decorative rings. Slide 2: 6 alert cards. Slide 3: 4 flow boxes. Slide 4: FULL RESET.
+    Slide 5: teal check, red X. Slide 6: before/after. Slide 7: 3 alt cards. Slide 8: filter, rocket.
+    Slide 9: A-D with icons. Slide 10: 7 rows. Slide 11: demo mockup. Slide 12: 5 MVP. Slide 13: 4 phases.
+    Slide 14: 6 wins. Slide 15: 3 metrics. Slide 16: quote, punch, final.
+
+    FILE STRUCTURE:
+    Head: meta, title, Google Fonts, style block (~200 lines CSS)
+    Body: progress bar, slide counter, nav buttons, main.deck
+    Deck: 16 section.slide elements. Each with container, label, title, content
+    Script: goTo, renderNav, keyboard, touch, aria update
+    Comments: presentation notes, Q&A, design tokens, narrative arc, MVP rationale, phase gates, alternatives deep dive, metric definitions, transformation rationale, demo spec, why wins, stakeholder, checklist, closing variations, slide timing, implementation risks, success criteria, market context, GTM, case tips, pre-checklist, technical dependencies, data flow, Phase 0, design partner criteria, checklist example, learning loop, edge cases, ROI, next steps, credits, competitive moat, why not, accessibility, browser, font, verification.
+
+    END OF PRESENTATION NOTES.
+    Deck complete. 16 slides. Senior PM Case Interview. Merchant Risk Co-Pilot. G2RS / EverC. March 2026.
+    Open in browser. Use arrow keys or click prev/next. Swipe on touch devices. Print for PDF export.
+
+    SLIDE CONTENT SUMMARY (for quick reference):
+    S1: Merchant Risk Co-Pilot. Scalability layer. S2: 47 alerts. No structure. S3: Volume up, capacity fixed. S4: Unit-of-work mismatch. S5: Detection scales, investigation doesn't. S6: Group by type. S7: Three paths, Co-Pilot chosen. S8: Complementary layers. S9: Four pillars. S10: 3x output. S11: Demo. S12: MVP by dependency. S13: Four phases. S14: Six advantages. S15: North star, guardrail, growth. S16: Category shift.
+
+    VERSION: v5. March 2026. Senior PM Case Interview. Ishai Froind + Panel.
+
+    KEYBOARD SHORTCUTS: ArrowRight or Space = next. ArrowLeft = prev. Home = first. End = last.
+    TOUCH: Swipe left = next. Swipe right = prev. Threshold 50px.
+    PRINT: Cmd/Ctrl+P for PDF. Slides as pages. Nav hidden.
+
+    EXTERNAL DEPENDENCIES: Google Fonts only. Self-contained. No images. No other CDN.
+    BROWSER: Chrome, Firefox, Safari, Edge. Modern. ES6+. requestAnimationFrame, classList.
+    FILE SIZE: ~50KB. Fast load. No external scripts. Inline CSS and JS.
+
+    SLIDE TRANSITIONS: goTo uses exact spec. Old slide: remove active, add prev. New slide: transition none, transform 40px or -40px, opacity 0, add active. requestAnimationFrame x2 to reset transition/transform/opacity. setTimeout 550ms to remove prev from old. current = idx. renderNav().
+
+    COLOR USAGE: Purple (#7c3aed) for primary accent, labels, nav. Teal (#0d9488) for success, chosen, after states. Red (#ef4444) for critical, rejected, before. Amber (#f59e0b) for high, complementary. Green (#10b981) for chosen badge. All on light backgrounds for contrast.
+
+    TYPOGRAPHY: Poppins 300-900. Main title 56px/800. Slide titles 36px/800. Body 17px. Labels 11px/600, letter-spacing 3px. Card text 14-15px. Subtitle 18-20px. Footer 12-13px.
+
+    LAYOUT: Container max-width 1100px. Slide padding 48-60px. Generous whitespace. Cards: 12px radius, 1px border #e5e5e5, subtle shadow. Progress bar 4px height. Nav buttons 48x48px, 12px radius, bottom-right 32px/48px.
+
+    DECORATIVE ELEMENTS: Slide 1 has ::before and ::after pseudo-elements — circular rings rgba(124,58,237,0.06). Slide 16 uses same gradient as Slide 1. Demo mockup has box-shadow 0 8px 40px rgba(124,58,237,0.1).
+
+    ICONS: Inline SVG. Lucide-style stroke-based. Teal check, red X, filter, rocket, layers, box, checklist, brain, speedometer, shield, chart-up. All 24x24 or 28x28 or 36x36 viewBox.
+
+    END OF DOCUMENTATION. Deck ready for presentation.
+    G2RS Merchant Risk Co-Pilot. Senior PM Case Interview. EverC. March 2026.
+    Ishai Froind + Panel. 16 slides. Light theme. Poppins. Purple-teal.
+    — FIN —
+  -->
+
+  <!-- Appendix: Full slide text for search and accessibility (visually hidden) -->
+  <div id="appendix" style="position: absolute; left: -9999px; top: 0; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true">
+    <h2>Slide 1: Merchant Risk Co-Pilot — The scalability layer G2RS is missing.</h2>
+    <h2>Slide 2: 47 alerts. Monday morning. Where do you start? A risk analyst opens their inbox. 47 violations. Different merchant for each one. No structure, no context, no prioritization. Just a list. Every alert opens cold. Full reset. No structure. No context.</h2>
+    <h2>Slide 3: Volume scales. Capacity doesn't. Merchant portfolios up, violation volume up, required investigations up, analyst hours fixed. G2RS controls detection quality. But the binding constraint is investigation capacity. Existing customers breach SLAs. Prospective customers suppress demand.</h2>
+    <h2>Slide 4: Alerts arrive per merchant. Investigations run by violation type. The analyst does the same cognitive work three times because the system delivers three separate alerts instead of one grouped case. Unit-of-work mismatch.</h2>
+    <h2>Slide 5: The system is optimized for detection, not decision-making. Detection scales. Investigation does not. Wrong unit of work. You need fewer investigations per decision, not fewer findings.</h2>
+    <h2>Slide 6: Group by violation type. Context loads once. Before: 6 items by merchant. After: 3 grouped by type.</h2>
+    <h2>Slide 7: Three credible paths. Better precision rejected. Risk tiers complementary. Co-Pilot chosen. Co-Pilot attacks root cause.</h2>
+    <h2>Slide 8: These are not competing solutions. Complementary layers. Risk tiers reduce volume. Co-Pilot maximizes efficiency. Together: fewer alerts times faster investigation equals full-system scalability. Recommended approach: Launch Co-Pilot first to prove efficiency gains and establish baseline metrics; then introduce risk-based monitoring tiers as a second layer to reduce incoming volume and amplify Co-Pilot impact.</h2>
+    <h2>Slide 9: A new operating model. Change unit of work. Pre-load context. Constrain the decision. Accelerate understanding.</h2>
+    <h2>Slide 10: Same alerts. Different system. 3x output. 47 unstructured to 3 grouped. Cold open to AI summary. Manual lookup to evidence pack. Guesses to checklist. 40-60 min to 8-12 min. Blank page to edit. Queue never empties to queue empty by noon.</h2>
+    <h2>Slide 11: Co-Pilot Demo. From alert queue to decision in minutes. Live prototype built during discovery.</h2>
+    <h2>Slide 12: MVP sequenced by dependency. 1 Grouping. 2 Evidence pack. 3 Checklist. 4 Routing. 5 AI summary.</h2>
+    <h2>Slide 13: Four phases. Discover, MVP, Deepen, Scale. Each gated by signal.</h2>
+    <h2>Slide 14: Why Co-Pilot wins. Solves volume and time. Internal-data constraint. Improves workflow. Compounds. UI and API. Amplified by tiers.</h2>
+    <h2>Slide 15: North star: alerts per analyst per week. Guardrail: decision time by tier. Growth: screening requests.</h2>
+    <h2>Slide 16: Without Co-Pilot, growth capped by analyst capacity. With it, growth capped by market size. Category shift.</h2>
+  </div>
+
+  <script>
+    // Slide deck state and navigation
+    const slides = document.querySelectorAll('.slide');
+    const total = slides.length;
+    let current = 0;
+    let touchStartX = 0, touchEndX = 0;
+
+    /**
+     * Navigate to slide by index.
+     * Uses slide transition: old slide fades out, new slide slides in from direction.
+     * @param {number} idx - Zero-based slide index (0 to total-1)
+     */
+    function goTo(idx) {
+      if (idx < 0 || idx >= total || idx === current) return;
+      const oldSlide = slides[current];
+      const newSlide = slides[idx];
+      const forward = idx > current;
+      oldSlide.classList.remove('active');
+      oldSlide.classList.add('prev');
+      newSlide.style.transition = 'none';
+      newSlide.style.transform = forward ? 'translateX(40px)' : 'translateX(-40px)';
+      newSlide.style.opacity = '0';
+      newSlide.classList.add('active');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          newSlide.style.transition = '';
+          newSlide.style.transform = '';
+          newSlide.style.opacity = '';
+        });
+      });
+      setTimeout(() => { oldSlide.classList.remove('prev'); }, 550);
+      current = idx;
+      renderNav();
+    }
+
+    function renderNav() {
+      document.getElementById('progressFill').style.width = ((current + 1) / total * 100) + '%';
+      document.getElementById('slideCounter').textContent = (current + 1) + ' / ' + total;
+      document.getElementById('btnPrev').disabled = current === 0;
+      document.getElementById('btnNext').disabled = current === total - 1;
+    }
+
+    // Keyboard navigation: ArrowRight/Space = next, ArrowLeft = prev, Home/End = first/last
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goTo(current + 1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(current - 1); }
+      else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+      else if (e.key === 'End') { e.preventDefault(); goTo(total - 1); }
+    });
+
+    // Touch swipe: left = next, right = prev
+    document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+    document.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > 50) goTo(diff > 0 ? current + 1 : current - 1);
+    }, { passive: true });
+
+    // Initial render
+    // Update aria-valuenow for progress bar
+    const progressBar = document.querySelector('.progress-bar');
+    function updateAria() {
+      if (progressBar) progressBar.setAttribute('aria-valuenow', current + 1);
+    }
+    const originalRenderNav = renderNav;
+    renderNav = function() {
+      originalRenderNav();
+      updateAria();
+    };
+
+    renderNav();
+  </script>
+</body>
+</html>

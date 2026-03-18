@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Merchant Risk Co-Pilot · G2RS / EverC</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ========== RESET & BASE ========== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f8f7fc;
+      color: #1a1a2e;
+      overflow: hidden;
+      min-height: 100vh;
+    }
+
+    /* ========== DECK & SLIDES ========== */
+    .deck {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 80px 100px 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: #f8f7fc;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                  visibility 0.5s;
+      z-index: 1;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      z-index: 2;
+    }
+
+    .slide.prev {
+      pointer-events: none;
+      transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .slide.prev.prev-forward {
+      transform: translateX(-40px);
+      opacity: 0;
+    }
+
+    .slide.prev.prev-backward {
+      transform: translateX(40px);
+      opacity: 0;
+    }
+
+    .slide .slide-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ========== PROGRESS BAR ========== */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(0,0,0,0.06);
+      z-index: 100;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #7c3aed, #00A878);
+      width: 6.67%;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ========== NAVIGATION ========== */
+    .nav {
+      position: fixed;
+      bottom: 40px;
+      right: 60px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      z-index: 100;
+    }
+
+    .nav-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 2px solid rgba(124, 58, 237, 0.3);
+      background: rgba(255,255,255,0.95);
+      color: #7c3aed;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .nav-btn:hover {
+      background: #7c3aed;
+      color: #fff;
+      border-color: #7c3aed;
+      box-shadow: 0 0 24px rgba(124, 58, 237, 0.5);
+    }
+
+    .nav-btn svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .slide-counter {
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+    }
+
+    /* ========== TYPOGRAPHY ========== */
+    .slide-header {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      color: #8b5cf6;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .slide-subtitle {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 24px;
+    }
+
+    .slide-body {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      color: #333;
+    }
+
+    /* ========== SLIDE 1: TITLE ========== */
+    .slide-1 {
+      background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(124, 58, 237, 0.08) 0%, transparent 60%);
+    }
+
+    .slide-1 .rings {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 600px;
+      pointer-events: none;
+    }
+
+    .slide-1 .ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      animation: ringPulse 4s ease-in-out infinite;
+    }
+
+    .slide-1 .ring:nth-child(1) { width: 200px; height: 200px; animation-delay: 0s; }
+    .slide-1 .ring:nth-child(2) { width: 320px; height: 320px; animation-delay: 0.5s; }
+    .slide-1 .ring:nth-child(3) { width: 440px; height: 440px; animation-delay: 1s; }
+    .slide-1 .ring:nth-child(4) { width: 560px; height: 560px; animation-delay: 1.5s; }
+
+    @keyframes ringPulse {
+      0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.02); }
+    }
+
+    .slide-1 .title-main {
+      font-size: 4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #1a1a2e 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease forwards;
+    }
+
+    .slide-1 .title-sub {
+      font-size: 1.75rem;
+      font-weight: 400;
+      color: #555;
+      margin-bottom: 80px;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease 0.15s forwards;
+    }
+
+    .slide-1 .footer {
+      font-size: 0.85rem;
+      color: #888;
+      letter-spacing: 0.1em;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease 0.3s forwards;
+    }
+
+    /* ========== STAGGER ANIMATIONS ========== */
+    .deck .slide.active:not(.slide-1) .slide-content > * {
+      opacity: 0;
+      animation: fadeInUp 0.5s ease forwards;
+    }
+    .deck .slide.active:not(.slide-1) .slide-content > *:nth-child(1) { animation-delay: 0.06s; }
+    .deck .slide.active:not(.slide-1) .slide-content > *:nth-child(2) { animation-delay: 0.12s; }
+    .deck .slide.active:not(.slide-1) .slide-content > *:nth-child(3) { animation-delay: 0.18s; }
+    .deck .slide.active:not(.slide-1) .slide-content > *:nth-child(4) { animation-delay: 0.24s; }
+    .deck .slide.active:not(.slide-1) .slide-content > *:nth-child(5) { animation-delay: 0.3s; }
+    .deck .slide.active:not(.slide-1) .slide-content > *:nth-child(6) { animation-delay: 0.36s; }
+    .deck .slide.active:not(.slide-1) .slide-content > *:nth-child(7) { animation-delay: 0.42s; }
+    .deck .slide.active:not(.slide-1) .slide-content > *:nth-child(8) { animation-delay: 0.48s; }
+    .deck .slide.active:not(.slide-1) .slide-content > *:nth-child(9) { animation-delay: 0.54s; }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ========== SLIDE 2: ALERT QUEUE ========== */
+    .alert-queue {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    .alert-card {
+      background: #ffffff;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .alert-card:hover {
+      border-color: rgba(124, 58, 237, 0.3);
+      box-shadow: 0 2px 12px rgba(124, 58, 237, 0.08);
+    }
+
+    .alert-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .alert-badge.critical { background: rgba(239, 68, 68, 0.15); color: #dc2626; }
+    .alert-badge.high { background: rgba(245, 158, 11, 0.2); color: #d97706; }
+    .alert-badge.medium { background: rgba(59, 130, 246, 0.2); color: #2563eb; }
+
+    .alert-domain { font-weight: 600; color: #1a1a2e; }
+    .alert-type { font-size: 0.85rem; color: #666; }
+    .alert-context { font-size: 0.75rem; color: #888; font-style: italic; }
+
+    /* ========== SLIDE 3: TWO COLUMNS ========== */
+    .two-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin: 24px 0;
+    }
+
+    .col-card {
+      padding: 28px;
+      border-radius: 12px;
+      border: 1px solid;
+    }
+
+    .col-card.delivers {
+      background: rgba(0, 168, 120, 0.06);
+      border-color: rgba(0, 168, 120, 0.3);
+    }
+
+    .col-card.needs {
+      background: rgba(245, 158, 11, 0.06);
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .col-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .col-card.delivers h3 { color: #5eead4; }
+    .col-card.needs h3 { color: #fbbf24; }
+
+    .col-card ul {
+      list-style: none;
+    }
+
+    .col-card li {
+      padding: 8px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.95rem;
+      color: #333;
+    }
+
+    .col-card .icon { flex-shrink: 0; }
+
+    /* ========== SLIDE 4: WORKFLOW ========== */
+    .workflow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 32px 0;
+      gap: 8px;
+    }
+
+    .workflow-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .workflow-num {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c3aed, #5b21b6);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+
+    .workflow-label {
+      font-size: 0.75rem;
+      text-align: center;
+      color: #555;
+      line-height: 1.3;
+    }
+
+    .workflow-connector {
+      flex: 0 0 20px;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(124, 58, 237, 0.5), rgba(124, 58, 237, 0.2));
+    }
+
+    /* ========== SLIDE 5: ROOT CAUSE ========== */
+    .merchant-rows {
+      margin: 28px 0;
+    }
+
+    .merchant-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      background: #ffffff;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(124, 58, 237, 0.15);
+    }
+
+    .merchant-label {
+      font-weight: 700;
+      color: #8b5cf6;
+      min-width: 100px;
+    }
+
+    .merchant-flow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .merchant-flow span {
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    .reset-label {
+      text-align: center;
+      padding: 8px 0;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #dc2626;
+      letter-spacing: 0.1em;
+    }
+
+    /* ========== SLIDE 6: DIAGNOSIS ========== */
+    .slide-6 .diagnosis-text {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+    }
+
+    .slide-6 .diagnosis-emphasis {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #7c3aed, #00A878);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 32px;
+    }
+
+    .slide-6 .diagnosis-body {
+      font-size: 1.2rem;
+      line-height: 1.7;
+      color: #444;
+      margin-bottom: 24px;
+    }
+
+    .slide-6 .diagnosis-conclusion {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #0d9488;
+    }
+
+    /* ========== SLIDE 7: ALTERNATIVES ========== */
+    .alt-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin: 28px 0;
+    }
+
+    .alt-card {
+      padding: 24px;
+      background: #ffffff;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .alt-card:hover {
+      border-color: rgba(124, 58, 237, 0.3);
+      box-shadow: 0 2px 12px rgba(124, 58, 237, 0.08);
+    }
+
+    .alt-card.chosen {
+      border-color: rgba(0, 168, 120, 0.4);
+      box-shadow: 0 2px 16px rgba(0, 168, 120, 0.12);
+    }
+
+    .alt-card h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .alt-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .alt-badge.rejected { background: rgba(239, 68, 68, 0.15); color: #dc2626; }
+    .alt-badge.complementary { background: rgba(245, 158, 11, 0.2); color: #d97706; }
+    .alt-badge.chosen { background: rgba(0, 168, 120, 0.2); color: #0d9488; }
+
+    .alt-card p {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: #444;
+    }
+
+    /* ========== SLIDE 8: BEFORE/AFTER ========== */
+    .before-after {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      margin: 28px 0;
+    }
+
+    .ba-group {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ba-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #888;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .ba-before .ba-items {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ba-before .ba-item {
+      padding: 10px 14px;
+      background: #ffffff;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      color: #444;
+      border: 1px solid #e5e5e5;
+    }
+
+    .ba-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ba-arrow span {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #8b5cf6;
+    }
+
+    .ba-after .ba-categories {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ba-category {
+      padding: 14px 18px;
+      background: rgba(0, 168, 120, 0.08);
+      border: 1px solid rgba(0, 168, 120, 0.3);
+      border-radius: 8px;
+    }
+
+    .ba-category-title {
+      font-weight: 700;
+      color: #0d9488;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+
+    .ba-category-merchants {
+      font-size: 0.85rem;
+      color: #444;
+      padding-left: 12px;
+    }
+
+    /* ========== SLIDE 9: SOLUTION LAYERS ========== */
+    .solution-layers {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin: 28px 0;
+    }
+
+    .solution-card {
+      padding: 24px;
+      background: #ffffff;
+      border: 1px solid rgba(124, 58, 237, 0.15);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .solution-card:nth-child(1) { border-color: rgba(0, 168, 120, 0.3); }
+    .solution-card:hover {
+      box-shadow: 0 2px 12px rgba(124, 58, 237, 0.1);
+    }
+
+    .solution-card .num {
+      font-size: 2rem;
+      font-weight: 800;
+      color: rgba(124, 58, 237, 0.5);
+      margin-bottom: 8px;
+    }
+
+    .solution-card .title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #8b5cf6;
+      margin-bottom: 6px;
+    }
+
+    .solution-card .subtitle {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    .solution-card .desc {
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #444;
+    }
+
+    .solution-card .icon-wrap {
+      margin-bottom: 12px;
+    }
+
+    /* ========== SLIDE 10: TRANSFORMATION TABLE ========== */
+    .transform-table {
+      margin: 24px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(124, 58, 237, 0.15);
+      background: #ffffff;
+    }
+
+    .transform-table thead th {
+      padding: 16px 24px;
+      text-align: left;
+      font-size: 0.9rem;
+      font-weight: 700;
+      background: #f5f0ff;
+      color: #666;
+    }
+
+    .transform-table thead th:last-child {
+      color: #0d9488;
+    }
+
+    .transform-table th:nth-child(2),
+    .transform-table td:nth-child(2) {
+      width: 48px;
+      text-align: center;
+      color: rgba(124, 58, 237, 0.8);
+      font-size: 1.2rem;
+    }
+
+    .transform-table tbody tr {
+      border-top: 1px solid #eee;
+    }
+
+    .transform-table tbody tr:nth-child(even) {
+      background: #faf9fc;
+    }
+
+    .transform-table tbody td {
+      padding: 14px 24px;
+      font-size: 0.95rem;
+      color: #333;
+    }
+
+    .transform-table tbody td:first-child {
+      color: #666;
+    }
+
+    .transform-table tbody td:last-child {
+      color: #0d9488;
+    }
+
+    /* ========== SLIDE 11: MVP ========== */
+    .mvp-foundation {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #8b5cf6;
+      letter-spacing: 0.15em;
+      margin-bottom: 20px;
+    }
+
+    .mvp-cards {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .mvp-card {
+      padding: 20px;
+      background: #ffffff;
+      border: 1px solid rgba(124, 58, 237, 0.15);
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .mvp-card:hover {
+      border-color: rgba(124, 58, 237, 0.3);
+    }
+
+    .mvp-card .num {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #7c3aed;
+      margin-bottom: 8px;
+    }
+
+    .mvp-card .title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+    }
+
+    .mvp-card .desc {
+      font-size: 0.8rem;
+      line-height: 1.4;
+      color: #555;
+    }
+
+    /* ========== SLIDE 12: DEMO MOCKUP ========== */
+    .demo-mockup {
+      margin: 24px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(124, 58, 237, 0.2);
+      box-shadow: 0 4px 24px rgba(124, 58, 237, 0.12);
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .demo-topbar {
+      background: #12122a;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+    }
+
+    .demo-logo {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #8b5cf6;
+    }
+
+    .demo-title {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .demo-body {
+      display: flex;
+      min-height: 320px;
+    }
+
+    .demo-sidebar {
+      width: 200px;
+      background: #0a0a1a;
+      padding: 16px;
+      border-right: 1px solid rgba(124, 58, 237, 0.2);
+    }
+
+    .demo-sidebar-item {
+      padding: 10px 14px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .demo-sidebar-item.active {
+      background: rgba(0, 168, 120, 0.2);
+      color: #5eead4;
+      border: 1px solid rgba(0, 168, 120, 0.4);
+    }
+
+    .demo-main {
+      flex: 1;
+      padding: 20px;
+      background: rgba(10, 10, 26, 0.5);
+    }
+
+    .demo-main-header {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .demo-merchant-card {
+      background: rgba(18, 18, 42, 0.8);
+      border: 1px solid rgba(124, 58, 237, 0.25);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .demo-merchant-name {
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .demo-merchant-meta {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 10px;
+      font-size: 0.8rem;
+    }
+
+    .demo-compass {
+      color: #f87171;
+      font-weight: 700;
+    }
+
+    .demo-ai-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      background: rgba(124, 58, 237, 0.3);
+      border-radius: 6px;
+      font-size: 0.75rem;
+      color: #a78bfa;
+      margin-bottom: 10px;
+    }
+
+    .demo-checklist {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .demo-right {
+      width: 220px;
+      background: #12122a;
+      padding: 16px;
+      border-left: 1px solid rgba(124, 58, 237, 0.2);
+    }
+
+    .demo-right-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #5eead4;
+      margin-bottom: 12px;
+    }
+
+    .demo-graph-placeholder {
+      height: 80px;
+      background: rgba(0, 168, 120, 0.1);
+      border-radius: 6px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.4);
+    }
+
+    .demo-timeline {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .demo-label {
+      text-align: center;
+      font-size: 0.75rem;
+      color: rgba(124, 58, 237, 0.8);
+      margin-top: 12px;
+    }
+
+    /* ========== SLIDE 13: ROADMAP ========== */
+    .roadmap {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin: 28px 0;
+      overflow-x: auto;
+      padding-bottom: 16px;
+    }
+
+    .roadmap-phase {
+      flex: 0 0 220px;
+      padding: 20px;
+      background: #ffffff;
+      border: 1px solid rgba(124, 58, 237, 0.15);
+      border-radius: 10px;
+    }
+
+    .roadmap-phase h4 {
+      font-size: 0.9rem;
+      color: #8b5cf6;
+      margin-bottom: 6px;
+    }
+
+    .roadmap-phase .duration {
+      font-size: 0.75rem;
+      color: #888;
+      margin-bottom: 12px;
+    }
+
+    .roadmap-phase p {
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #444;
+      margin-bottom: 8px;
+    }
+
+    .roadmap-phase .gate {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #0d9488;
+      margin-top: 12px;
+    }
+
+    .roadmap-arrow {
+      flex-shrink: 0;
+      padding-top: 40px;
+      color: rgba(124, 58, 237, 0.6);
+    }
+
+    /* ========== SLIDE 14: METRICS ========== */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin: 28px 0;
+    }
+
+    .metric-card {
+      padding: 24px;
+      background: #ffffff;
+      border: 1px solid rgba(124, 58, 237, 0.15);
+      border-radius: 12px;
+    }
+
+    .metric-card:nth-child(1),
+    .metric-card:nth-child(3) {
+      border-color: rgba(0, 168, 120, 0.3);
+    }
+
+    .metric-card .label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #0d9488;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .metric-card .label.purple { color: #a78bfa; }
+
+    .metric-card .title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 10px;
+    }
+
+    .metric-card .desc {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #444;
+      margin-bottom: 10px;
+    }
+
+    .metric-card .how {
+      font-size: 0.8rem;
+      color: #666;
+    }
+
+    /* ========== SLIDE 15: CLOSING ========== */
+    .slide-15 {
+      background: linear-gradient(180deg, #f8f7fc 0%, #f5f0ff 50%, #ece6f8 100%);
+    }
+
+    .slide-15 .closing-quote {
+      font-size: 2rem;
+      font-weight: 500;
+      line-height: 1.6;
+      color: #1a1a2e;
+      margin-bottom: 32px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .slide-15 .closing-sub {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #0d9488;
+      margin-bottom: 16px;
+    }
+
+    .slide-15 .closing-bold {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #1a1a2e;
+      margin-bottom: 60px;
+    }
+
+    .slide-15 .footer {
+      font-size: 0.9rem;
+      color: #888;
+    }
+
+    /* ========== BOTTOM NOTE STYLING ========== */
+    .bottom-note {
+      margin-top: 24px;
+      font-size: 0.9rem;
+      color: #666;
+      font-style: italic;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 1200px) {
+      .slide { padding: 60px 60px 100px; }
+      .solution-layers { grid-template-columns: repeat(2, 1fr); }
+      .mvp-cards { grid-template-columns: repeat(2, 1fr); }
+      .metrics-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .slide { padding: 50px 30px 100px; }
+      .slide-1 .title-main { font-size: 2.5rem; }
+      .two-cols { grid-template-columns: 1fr; }
+      .workflow { flex-wrap: wrap; }
+      .workflow-connector { display: none; }
+      .alt-cards { grid-template-columns: 1fr; }
+      .before-after { flex-direction: column; }
+      .demo-body { flex-direction: column; }
+      .demo-sidebar { width: 100%; }
+      .demo-right { width: 100%; }
+      .roadmap { flex-direction: column; }
+      .roadmap-phase { flex: 1 1 auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <div class="deck">
+    <!-- Slide 1: Title -->
+    <section class="slide slide-1 active" data-slide="1">
+      <div class="rings">
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+      </div>
+      <div class="slide-content">
+        <h1 class="title-main">Merchant Risk Co-Pilot</h1>
+        <p class="title-sub">The scalability layer G2RS is missing.</p>
+        <p class="footer">SENIOR PM CASE INTERVIEW · G2RS / EVERC | March 2026 · Ishai Froind + Panel</p>
+      </div>
+    </section>
+
+    <!-- Slide 2: The Problem -->
+    <section class="slide" data-slide="2">
+      <div class="slide-content">
+        <div class="slide-header">THE PROBLEM</div>
+        <h2 class="slide-subtitle">47 alerts. Monday morning. Where do you start?</h2>
+        <p class="slide-body">A risk analyst opens their inbox. 47 violations. Different merchant for each one. No structure, no context. Just a list.</p>
+        <div class="alert-queue">
+          <div class="alert-card">
+            <span class="alert-badge critical">CRITICAL</span>
+            <div>
+              <span class="alert-domain">betwin365.com</span>
+              <div class="alert-type">Gambling</div>
+              <div class="alert-context">No context loaded</div>
+            </div>
+          </div>
+          <div class="alert-card">
+            <span class="alert-badge critical">CRITICAL</span>
+            <div>
+              <span class="alert-domain">pharmadir.com</span>
+              <div class="alert-type">Prescription</div>
+              <div class="alert-context">No context loaded</div>
+            </div>
+          </div>
+          <div class="alert-card">
+            <span class="alert-badge high">HIGH</span>
+            <div>
+              <span class="alert-domain">luxreplica.co</span>
+              <div class="alert-type">Counterfeit</div>
+              <div class="alert-context">No context loaded</div>
+            </div>
+          </div>
+          <div class="alert-card">
+            <span class="alert-badge high">HIGH</span>
+            <div>
+              <span class="alert-domain">jackpotstore.io</span>
+              <div class="alert-type">Gambling</div>
+              <div class="alert-context">No context loaded</div>
+            </div>
+          </div>
+          <div class="alert-card">
+            <span class="alert-badge medium">MEDIUM</span>
+            <div>
+              <span class="alert-domain">cleanmeds.co</span>
+              <div class="alert-type">Prescription</div>
+              <div class="alert-context">No context loaded</div>
+            </div>
+          </div>
+          <div class="alert-card">
+            <span class="alert-badge high">HIGH</span>
+            <div>
+              <span class="alert-domain">sportzgear.com</span>
+              <div class="alert-type">Counterfeit</div>
+              <div class="alert-context">No context loaded</div>
+            </div>
+          </div>
+        </div>
+        <p class="bottom-note">Every alert opens cold. No structure. No context.</p>
+      </div>
+    </section>
+
+    <!-- Slide 3: The Gap -->
+    <section class="slide" data-slide="3">
+      <div class="slide-content">
+        <div class="slide-header">THE GAP</div>
+        <h2 class="slide-subtitle">G2RS gives detection. Not scalability.</h2>
+        <div class="two-cols">
+          <div class="col-card delivers">
+            <h3>
+              <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00A878" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+              What G2RS delivers
+            </h3>
+            <ul>
+              <li><span class="icon">✓</span> Merchant scanning & detection</li>
+              <li><span class="icon">✓</span> Compass Score + risk graph</li>
+              <li><span class="icon">✓</span> Behavioral signals via EverC</li>
+              <li><span class="icon">✓</span> High-precision violation findings</li>
+            </ul>
+          </div>
+          <div class="col-card needs">
+            <h3>
+              <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              What customers need
+            </h3>
+            <ul>
+              <li><span class="icon">✕</span> Workflow to act on findings</li>
+              <li><span class="icon">✕</span> Context pre-loaded per case</li>
+              <li><span class="icon">✕</span> Structured investigation guide</li>
+              <li><span class="icon">✕</span> Scalability as portfolio grows</li>
+            </ul>
+          </div>
+        </div>
+        <p class="bottom-note">As portfolios grow → violation queue grows → analyst team can't keep up → customers self-limit or switch G2RS off.</p>
+      </div>
+    </section>
+
+    <!-- Slide 4: Investigation Workflow -->
+    <section class="slide" data-slide="4">
+      <div class="slide-content">
+        <div class="slide-header">THE INVESTIGATION WORKFLOW</div>
+        <h2 class="slide-subtitle">One alert. Seven steps. 40–60 minutes.</h2>
+        <div class="workflow">
+          <div class="workflow-step">
+            <div class="workflow-num">1</div>
+            <span class="workflow-label">Open Alert<br>No context pre-loaded</span>
+          </div>
+          <div class="workflow-connector"></div>
+          <div class="workflow-step">
+            <div class="workflow-num">2</div>
+            <span class="workflow-label">Lookup Merchant<br>Manual, 3+ internal tools</span>
+          </div>
+          <div class="workflow-connector"></div>
+          <div class="workflow-step">
+            <div class="workflow-num">3</div>
+            <span class="workflow-label">Identify Violation<br>Read & interpret manually</span>
+          </div>
+          <div class="workflow-connector"></div>
+          <div class="workflow-step">
+            <div class="workflow-num">4</div>
+            <span class="workflow-label">Recall Policy<br>Open AUP, search clause</span>
+          </div>
+          <div class="workflow-connector"></div>
+          <div class="workflow-step">
+            <div class="workflow-num">5</div>
+            <span class="workflow-label">Build Checklist<br>No guidance — analyst guesses</span>
+          </div>
+          <div class="workflow-connector"></div>
+          <div class="workflow-step">
+            <div class="workflow-num">6</div>
+            <span class="workflow-label">Run Investigation<br>Txn logs, chargebacks, invoices</span>
+          </div>
+          <div class="workflow-connector"></div>
+          <div class="workflow-step">
+            <div class="workflow-num">7</div>
+            <span class="workflow-label">Write Rationale<br>Blank page, every time</span>
+          </div>
+        </div>
+        <p class="bottom-note">40–60 MINUTES GONE · Then full reset — same 7 steps repeat for the next case.</p>
+      </div>
+    </section>
+
+    <!-- Slide 5: Root Cause -->
+    <section class="slide" data-slide="5">
+      <div class="slide-content">
+        <div class="slide-header">THE ROOT CAUSE</div>
+        <h2 class="slide-subtitle">Same process. Different merchant. Full reset.</h2>
+        <div class="merchant-rows">
+          <div class="merchant-row">
+            <span class="merchant-label">Merchant A</span>
+            <span class="merchant-flow">Open → Lookup → Policy → Checklist → Write</span>
+            <span style="color: #888;">Gambling violation</span>
+          </div>
+          <div class="reset-label">FULL RESET</div>
+          <div class="merchant-row">
+            <span class="merchant-label">Merchant B</span>
+            <span class="merchant-flow">Open → Lookup → Policy → Checklist → Write</span>
+            <span style="color: #888;">Gambling violation</span>
+          </div>
+          <div class="reset-label">FULL RESET</div>
+          <div class="merchant-row">
+            <span class="merchant-label">Merchant C</span>
+            <span class="merchant-flow">Open → Lookup → Policy → Checklist → Write</span>
+            <span style="color: #888;">Gambling violation</span>
+          </div>
+        </div>
+        <p class="bottom-note">"Alerts arrive by merchant. Investigation logic lives by violation type. That mismatch is the bottleneck."</p>
+      </div>
+    </section>
+
+    <!-- Slide 6: The Diagnosis -->
+    <section class="slide slide-6" data-slide="6">
+      <div class="slide-content" style="text-align: center;">
+        <div class="slide-header">THE DIAGNOSIS</div>
+        <p class="diagnosis-text">This is not a volume problem.</p>
+        <p class="diagnosis-emphasis">It is a structure problem.</p>
+        <p class="diagnosis-body">G2RS gives customers detection. It doesn't give them a way to act on it at scale.</p>
+        <p class="diagnosis-conclusion">Fix the structure → solve the scale.</p>
+      </div>
+    </section>
+
+    <!-- Slide 7: Alternatives -->
+    <section class="slide" data-slide="7">
+      <div class="slide-content">
+        <div class="slide-header">ALTERNATIVES CONSIDERED</div>
+        <h2 class="slide-subtitle">Three directions. One chosen.</h2>
+        <div class="alt-cards">
+          <div class="alt-card">
+            <h3><span class="alt-badge rejected">Rejected</span> A: Better Detection Precision</h3>
+            <p>Even 100% precision still generates alerts. Every true positive still needs investigation. Doesn't touch investigation time.</p>
+          </div>
+          <div class="alt-card">
+            <h3><span class="alt-badge complementary">Complementary</span> B: Risk-Based Monitoring Tiers</h3>
+            <p>Segment the portfolio into dynamic risk tiers instead of monitoring all merchants equally:</p>
+            <ul style="font-size:0.85rem;line-height:1.6;color:#444;margin:8px 0 12px;padding-left:18px;">
+              <li><strong>High risk</strong> → continuous deep monitoring, all violations surfaced</li>
+              <li><strong>Medium risk</strong> → monthly monitoring, violations batched weekly</li>
+              <li><strong>Low risk</strong> → quarterly monitoring, only significant violations surfaced</li>
+            </ul>
+            <p>If 60–70% of merchants are genuinely low risk, this dramatically reduces violation volume at the source.</p>
+            <p><strong>Why strong:</strong> Directly reduces alert volume at the source. No workflow or behavior change required. No adoption friction. Fully respects the internal data constraint. Can be deployed quickly. <strong>Demand suppression:</strong> A customer afraid to send 50,000 merchants hears: "Your low-risk portfolio will generate minimal alerts." → They send more merchants → G2RS unlocks growth.</p>
+            <p><strong>Where it falls short:</strong> (1) Reduces volume — but not investigation time. Each surfaced violation still requires the same manual investigation. (2) Miscategorization risk: incorrect tiering = missed violations for months → regulatory exposure. (3) No learning system; tiering is largely static. (4) Does not evolve the workflow — API and UI customers experience no change in investigation process.</p>
+          </div>
+          <div class="alt-card chosen">
+            <h3><span class="alt-badge chosen">Chosen ✓</span> C: Merchant Risk Co-Pilot</h3>
+            <p>Attacks the root cause: structural mismatch between how alerts arrive and how investigations run. Scales as software.</p>
+          </div>
+        </div>
+        <div style="margin-top:24px;padding:20px 24px;background:rgba(124,58,237,0.06);border-radius:12px;border-left:4px solid #8b5cf6;max-width:100%;border:1px solid rgba(124,58,237,0.15)">
+          <p style="font-size:0.9rem;line-height:1.7;color:#444;margin-bottom:8px"><strong>Tradeoff:</strong> Risk-based tiers: ✓ Solve volume elegantly, ✓ Fast low-risk adoption — ✗ Leave investigation time unchanged, ✗ Introduce tiering risk, ✗ Do not compound in value. Co-Pilot: ✓ Solves both volume and investigation time, ✓ Improves workflow fundamentally, ✓ Builds a learning system — ✗ Requires behavioral change.</p>
+          <p style="font-size:0.9rem;line-height:1.7;color:#444;margin-bottom:8px"><strong>Strategic insight:</strong> These are complementary layers — Risk-based tiers reduce incoming volume; Co-Pilot maximizes efficiency of remaining investigations. Together: fewer alerts × faster investigation = full-system scalability.</p>
+          <p style="font-size:0.9rem;line-height:1.7;color:#444"><strong>Recommended approach:</strong> (1) Launch Co-Pilot first → prove investigation efficiency gains → establish baseline metrics. (2) Introduce risk-based monitoring tiers as a second layer → reduce incoming volume → amplify Co-Pilot impact.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 8: The Fix -->
+    <section class="slide" data-slide="8">
+      <div class="slide-content">
+        <div class="slide-header">THE FIX</div>
+        <h2 class="slide-subtitle">Group by violation type. Context loads once.</h2>
+        <div class="before-after">
+          <div class="ba-group ba-before">
+            <div class="ba-label">BEFORE</div>
+            <div class="ba-items">
+              <div class="ba-item">betwin365.com · Gambling</div>
+              <div class="ba-item">pharmadir.com · Prescription</div>
+              <div class="ba-item">luxreplica.co · Counterfeit</div>
+              <div class="ba-item">jackpotstore.io · Gambling</div>
+              <div class="ba-item">cleanmeds.co · Prescription</div>
+              <div class="ba-item">sportzgear.com · Counterfeit</div>
+            </div>
+          </div>
+          <div class="ba-arrow">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <span>GROUP BY TYPE</span>
+          </div>
+          <div class="ba-group ba-after">
+            <div class="ba-label">AFTER</div>
+            <div class="ba-categories">
+              <div class="ba-category">
+                <div class="ba-category-title">Gambling (2)</div>
+                <div class="ba-category-merchants">• betwin365.com • jackpotstore.io</div>
+              </div>
+              <div class="ba-category">
+                <div class="ba-category-title">Prescription (2)</div>
+                <div class="ba-category-merchants">• pharmadir.com • cleanmeds.co</div>
+              </div>
+              <div class="ba-category">
+                <div class="ba-category-title">Counterfeit (2)</div>
+                <div class="ba-category-merchants">• luxreplica.co • sportzgear.com</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 9: The Solution -->
+    <section class="slide" data-slide="9">
+      <div class="slide-content">
+        <div class="slide-header">THE SOLUTION</div>
+        <h2 class="slide-subtitle">Merchant Risk Co-Pilot — Four layers.</h2>
+        <div class="solution-layers">
+          <div class="solution-card">
+            <div class="num">1</div>
+            <div class="title">FOUNDATION</div>
+            <div class="subtitle">Violation-Type Grouping</div>
+            <div class="icon-wrap">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00A878" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+              </svg>
+            </div>
+            <p class="desc">Eliminates context switching. Analyst stays in same mental model across entire batch.</p>
+          </div>
+          <div class="solution-card">
+            <div class="num">2</div>
+            <div class="title">Violation-Type Checklist</div>
+            <div class="icon-wrap">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2">
+                <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+              </svg>
+            </div>
+            <p class="desc">Pre-defined list of exactly what internal data to verify. No guessing, just execute.</p>
+          </div>
+          <div class="solution-card">
+            <div class="num">3</div>
+            <div class="title">Evidence Pack</div>
+            <div class="icon-wrap">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2">
+                <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                <path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/>
+              </svg>
+            </div>
+            <p class="desc">Compass Score, EverC risk graph, merchant history — auto-assembled on case open.</p>
+          </div>
+          <div class="solution-card">
+            <div class="num">4</div>
+            <div class="title">AI Case Summary</div>
+            <div class="icon-wrap">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2">
+                <path d="M12 2a10 10 0 1010 10A10 10 0 0012 2z"/>
+                <path d="M12 6v6l4 2"/>
+              </svg>
+            </div>
+            <p class="desc">Plain-language context loaded on demand. On-click only — prevents anchoring bias.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 10: Transformation -->
+    <section class="slide" data-slide="10">
+      <div class="slide-content">
+        <div class="slide-header">THE TRANSFORMATION</div>
+        <h2 class="slide-subtitle">Same analyst. 47 alerts. Completely different day.</h2>
+        <div class="transform-table-wrap">
+          <table class="transform-table">
+            <thead>
+              <tr>
+                <th>WITHOUT CO-PILOT</th>
+                <th>→</th>
+                <th>WITH CO-PILOT</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>47 unstructured alerts, random order</td>
+                <td>→</td>
+                <td>3 grouped batches by violation type</td>
+              </tr>
+              <tr>
+                <td>Opens cold — no context</td>
+                <td>→</td>
+                <td>AI summary loads in 20 seconds</td>
+              </tr>
+              <tr>
+                <td>Pull history from 3+ tools manually</td>
+                <td>→</td>
+                <td>Evidence pack pre-assembled</td>
+              </tr>
+              <tr>
+                <td>Figure out what to check — guesses</td>
+                <td>→</td>
+                <td>Checklist: exactly 3 things to verify</td>
+              </tr>
+              <tr>
+                <td>40–60 minutes per case</td>
+                <td>→</td>
+                <td>8–12 minutes per case</td>
+              </tr>
+              <tr>
+                <td>Write rationale from blank page</td>
+                <td>→</td>
+                <td>Edit pre-drafted rationale and approve</td>
+              </tr>
+              <tr>
+                <td>Queue never empties — SLA pressure</td>
+                <td>→</td>
+                <td>Queue empty by noon — capacity for more</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 11: MVP -->
+    <section class="slide" data-slide="11">
+      <div class="slide-content">
+        <div class="slide-header">MVP</div>
+        <h2 class="slide-subtitle">Five features. Everything needed. Nothing else.</h2>
+        <div class="mvp-foundation">THE FOUNDATION</div>
+        <div class="mvp-cards">
+          <div class="mvp-card">
+            <div class="num">1</div>
+            <div class="title">Violation-Type Grouping</div>
+            <p class="desc">Without this, nothing else delivers full value.</p>
+          </div>
+          <div class="mvp-card">
+            <div class="num">2</div>
+            <div class="title">Violation-Type Checklist</div>
+            <p class="desc">Eliminates biggest cognitive load — what to verify.</p>
+          </div>
+          <div class="mvp-card">
+            <div class="num">3</div>
+            <div class="title">Evidence Pack</div>
+            <p class="desc">Compass Score, EverC graph, history — auto on open.</p>
+          </div>
+          <div class="mvp-card">
+            <div class="num">4</div>
+            <div class="title">AI Case Summary</div>
+            <p class="desc">Cold-start time drops from minutes to seconds.</p>
+          </div>
+          <div class="mvp-card">
+            <div class="num">5</div>
+            <div class="title">Risk-Tier Routing + Audit</div>
+            <p class="desc">Critical/High surface first. Full audit trail.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 12: Demo -->
+    <section class="slide" data-slide="12">
+      <div class="slide-content">
+        <div class="slide-header">CO-PILOT DEMO</div>
+        <h2 class="slide-subtitle">From alert queue to decision in minutes.</h2>
+        <div class="demo-mockup">
+          <div class="demo-topbar">
+            <span class="demo-logo">G2RS</span>
+            <span class="demo-title">Merchant Risk Co-Pilot</span>
+          </div>
+          <div class="demo-body">
+            <div class="demo-sidebar">
+              <div class="demo-sidebar-item active">Gambling (2)</div>
+              <div class="demo-sidebar-item">Prescription (2)</div>
+              <div class="demo-sidebar-item">Counterfeit (2)</div>
+            </div>
+            <div class="demo-main">
+              <div class="demo-main-header">Gambling Violations</div>
+              <div class="demo-merchant-card">
+                <div class="demo-merchant-name">betwin365.com</div>
+                <div class="demo-merchant-meta">
+                  <span class="demo-compass">Compass Score 87</span>
+                </div>
+                <div class="demo-ai-btn">▶ AI Summary</div>
+                <div class="demo-checklist">☐ Verify domain ownership · ☐ Check transaction patterns · ☐ Confirm AUP clause 4.2</div>
+              </div>
+              <div class="demo-merchant-card">
+                <div class="demo-merchant-name">jackpotstore.io</div>
+                <div class="demo-merchant-meta">
+                  <span class="demo-compass">Compass Score 72</span>
+                </div>
+                <div class="demo-ai-btn">▶ AI Summary</div>
+                <div class="demo-checklist">☐ Verify domain ownership · ☐ Check transaction patterns · ☐ Confirm AUP clause 4.2</div>
+              </div>
+            </div>
+            <div class="demo-right">
+              <div class="demo-right-title">Evidence Pack</div>
+              <div class="demo-graph-placeholder">EverC Risk Graph</div>
+              <div class="demo-timeline">Merchant history timeline</div>
+            </div>
+          </div>
+        </div>
+        <p class="demo-label">Live prototype — built during discovery</p>
+      </div>
+    </section>
+
+    <!-- Slide 13: Roadmap -->
+    <section class="slide" data-slide="13">
+      <div class="slide-content">
+        <div class="slide-header">ROADMAP</div>
+        <h2 class="slide-subtitle">Four phases. Each gated by a real signal — not a date.</h2>
+        <div class="roadmap">
+          <div class="roadmap-phase">
+            <h4>Phase 0: Discover</h4>
+            <div class="duration">4–6 wks</div>
+            <p>Shadow analysts live, Capture baselines, 2–3 design partners.</p>
+            <div class="gate">Gate → Partners agreed</div>
+          </div>
+          <div class="roadmap-arrow">→</div>
+          <div class="roadmap-phase">
+            <h4>Phase 1: MVP</h4>
+            <div class="duration">3–4 mo</div>
+            <p>5 MVP features, Design partners only, Weekly feedback loop.</p>
+            <div class="gate">Gate → 'We could handle more'</div>
+          </div>
+          <div class="roadmap-arrow">→</div>
+          <div class="roadmap-phase">
+            <h4>Phase 2: Deepen</h4>
+            <div class="duration">4–6 mo</div>
+            <p>AI Insights layer, Remediation workflow, Broader rollout.</p>
+            <div class="gate">Gate → Requests increasing</div>
+          </div>
+          <div class="roadmap-arrow">→</div>
+          <div class="roadmap-phase">
+            <h4>Phase 3: Scale</h4>
+            <div class="duration">Ongoing</div>
+            <p>Full market rollout, Co-Pilot priced distinct, Feedback loop compounds.</p>
+            <div class="gate">Gate → Portfolio expanding</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 14: Success Metrics -->
+    <section class="slide" data-slide="14">
+      <div class="slide-content">
+        <div class="slide-header">SUCCESS METRICS</div>
+        <h2 class="slide-subtitle">One north star. One guardrail. One growth signal.</h2>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="label">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00A878" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              NORTH STAR
+            </div>
+            <div class="title">Alerts investigated per analyst per week</div>
+            <p class="desc">Direct expression of the scalability problem. If this moves — the Co-Pilot is working.</p>
+            <p class="how">HOW: Case open → decision timestamp, per analyst. Entirely within Co-Pilot.</p>
+          </div>
+          <div class="metric-card">
+            <div class="label purple">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              GUARDRAIL
+            </div>
+            <div class="title">Case creation to decision time, by tier</div>
+            <p class="desc">Speed gains must not come at the cost of SLA discipline or decision quality.</p>
+            <p class="how">HOW: Both timestamps owned by G2RS. Per tier. No customer data sharing.</p>
+          </div>
+          <div class="metric-card">
+            <div class="label">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00A878" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+              GROWTH SIGNAL
+            </div>
+            <div class="title">Screening requests per customer per week</div>
+            <p class="desc">If customers self-limited before, this rises as Co-Pilot gives them confidence to grow.</p>
+            <p class="how">HOW: Measured directly in G2RS API. Baseline captured in Phase 0.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 15: Closing -->
+    <section class="slide slide-15" data-slide="15">
+      <div class="slide-content" style="text-align: center;">
+        <div class="slide-header">CLOSING</div>
+        <p class="closing-quote">"A customer with 100,000 merchants can monitor all of them — and tell G2RS to send more."</p>
+        <p class="closing-sub">That's what scalability means.</p>
+        <p class="closing-bold">That's what the Co-Pilot delivers.</p>
+        <p class="footer">Merchant Risk Co-Pilot · G2RS / EverC · March 2026</p>
+      </div>
+    </section>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-btn" id="prevBtn" aria-label="Previous slide">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </button>
+    <span class="slide-counter" id="slideCounter">1 / 15</span>
+    <button class="nav-btn" id="nextBtn" aria-label="Next slide">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </nav>
+
+  <script>
+    const deck = document.querySelector('.deck');
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const total = slides.length;
+    let current = 0;
+    const progressFill = document.getElementById('progressFill');
+    const slideCounter = document.getElementById('slideCounter');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function renderNav() {
+      progressFill.style.width = ((current + 1) / total * 100) + '%';
+      slideCounter.textContent = (current + 1) + ' / ' + total;
+    }
+
+    function goTo(idx) {
+      if (idx < 0 || idx >= total || idx === current) return;
+      const oldSlide = slides[current];
+      const newSlide = slides[idx];
+      const forward = idx > current;
+      oldSlide.classList.remove('active');
+      oldSlide.classList.add('prev', forward ? 'prev-forward' : 'prev-backward');
+      newSlide.style.transition = 'none';
+      newSlide.style.transform = forward ? 'translateX(40px)' : 'translateX(-40px)';
+      newSlide.style.opacity = '0';
+      newSlide.classList.add('active');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          newSlide.style.transition = '';
+          newSlide.style.transform = '';
+          newSlide.style.opacity = '';
+        });
+      });
+      setTimeout(() => { oldSlide.classList.remove('prev', 'prev-forward', 'prev-backward'); }, 550);
+      current = idx;
+      renderNav();
+    }
+
+    function next() { goTo(current + 1); }
+    function prev() { goTo(current - 1); }
+
+    prevBtn.addEventListener('click', prev);
+    nextBtn.addEventListener('click', next);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        next();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prev();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        goTo(0);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        goTo(total - 1);
+      }
+    });
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+    deck.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+    deck.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) next();
+        else prev();
+      }
+    }, { passive: true });
+
+    renderNav();
+  </script>
+</body>
+</html>

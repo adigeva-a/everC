@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Merchant Risk Co-Pilot · G2RS / EverC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{overflow:hidden;height:100%;-webkit-font-smoothing:antialiased}
+    body{font-family:'Poppins',sans-serif;background:#f3f1f6;color:#1a1a2e}
+
+    .deck{position:relative;width:100vw;height:100vh;overflow:hidden}
+    .slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .45s ease,transform .45s ease;background:#f3f1f6}
+    .slide.active{opacity:1;pointer-events:auto;z-index:2}
+    .slide.prev{z-index:1}
+    .si{width:100%;height:100%;max-width:1200px;padding:40px 80px 56px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+
+    .progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:200;background:#e5e2ed}
+    .progress-fill{height:100%;background:linear-gradient(90deg,#7c3aed,#0d9488);transition:width .3s}
+
+    /* NAV */
+    .nav{position:fixed;bottom:0;left:0;right:0;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 80px;z-index:200;background:rgba(243,241,246,.92);backdrop-filter:blur(12px);border-top:1px solid #e5e2ed}
+    .counter{font-size:13px;font-weight:600;color:#9a94a8}
+    .nav-btns{display:flex;gap:8px}
+    .nb{width:40px;height:40px;border-radius:10px;border:1px solid rgba(124,58,237,.25);background:#fff;color:#7c3aed;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s}
+    .nb:hover:not(:disabled){background:#7c3aed;color:#fff;border-color:#7c3aed}
+    .nb:disabled{opacity:.3;cursor:not-allowed}
+
+    /* TYPOGRAPHY */
+    .label{font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#7c3aed;margin-bottom:12px}
+    .t1{font-size:48px;font-weight:800;line-height:1.1;color:#1a1a2e;margin-bottom:18px}
+    .t2{font-size:36px;font-weight:700;line-height:1.15;color:#1a1a2e;margin-bottom:16px}
+    .body{font-size:17px;line-height:1.65;color:#555}
+    .body-sm{font-size:14px;line-height:1.55;color:#666}
+    .dim{color:#999}
+    .purple{color:#7c3aed}
+    .teal{color:#0d9488}
+    .red{color:#dc2626}
+    .amber{color:#d97706}
+    .bold{font-weight:700}
+
+    /* GIANT NUMBER */
+    .giant{font-weight:900;font-size:120px;line-height:1;letter-spacing:-4px;background:linear-gradient(135deg,#7c3aed,#4f46e5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+    /* CARDS */
+    .card{background:#fff;border-radius:14px;padding:22px 26px;box-shadow:0 2px 12px rgba(0,0,0,.05);border:1px solid #eae7f0;transition:transform .2s,box-shadow .2s}
+    .card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,58,237,.08)}
+    .card-purple{background:rgba(124,58,237,.05);border:1px solid rgba(124,58,237,.15);border-radius:14px;padding:22px 26px}
+    .card-red{background:rgba(239,68,68,.04);border:1px solid rgba(239,68,68,.15);border-radius:14px;padding:22px 26px}
+    .card-amber{background:rgba(245,158,11,.04);border:1px solid rgba(245,158,11,.15);border-radius:14px;padding:22px 26px}
+    .card-teal{background:rgba(13,148,136,.04);border:1px solid rgba(13,148,136,.15);border-radius:14px;padding:22px 26px}
+    .icon-box{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .ib-purple{background:rgba(124,58,237,.1)}
+    .ib-teal{background:rgba(13,148,136,.1)}
+    .ib-red{background:rgba(239,68,68,.08)}
+    .ib-amber{background:rgba(245,158,11,.08)}
+
+    /* LAYOUTS */
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+    .split-wide{display:grid;grid-template-columns:1.3fr .7fr;gap:32px;align-items:center}
+    .tri{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+    .quad{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px}
+
+    /* BADGE */
+    .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:.5px}
+    .badge-red{background:rgba(239,68,68,.1);color:#dc2626}
+    .badge-amber{background:rgba(245,158,11,.1);color:#d97706}
+    .badge-green{background:rgba(13,148,136,.1);color:#0d9488}
+    .badge-purple{background:rgba(124,58,237,.1);color:#7c3aed}
+
+    /* FLOW */
+    .flow{display:flex;align-items:center;gap:0;margin:20px 0}
+    .flow-box{padding:14px 20px;background:#fff;border:1px solid #eae7f0;font-size:15px;font-weight:500;display:flex;align-items:center;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+    .flow-box:first-child{border-radius:12px 0 0 12px}
+    .flow-box:last-child{border-radius:0 12px 12px 0}
+    .flow-box.danger{background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.2);color:#dc2626}
+    .flow-arr{padding:0 4px;color:#c4b5fd;font-size:20px;font-weight:700}
+
+    /* ALERT CARDS */
+    .alert-strip{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+    .alert-chip{padding:16px 22px;border-radius:12px;font-size:16px;font-weight:500;background:#fff;border:1px solid #eae7f0;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px rgba(0,0,0,.06);transition:transform .2s,box-shadow .2s}
+    .alert-chip:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.08)}
+    .alert-chip.crit{border-left:4px solid #dc2626;background:rgba(220,38,38,.03)}
+    .alert-chip.high{border-left:4px solid #d97706;background:rgba(217,119,6,.03)}
+    .alert-chip.med{border-left:4px solid #f59e0b;background:rgba(245,158,11,.03)}
+    .alert-chip .sev{font-size:12px;font-weight:800;letter-spacing:.8px;padding:4px 10px;border-radius:6px}
+    .alert-chip.crit .sev{color:#dc2626;background:rgba(220,38,38,.1)}
+    .alert-chip.high .sev{color:#d97706;background:rgba(217,119,6,.1)}
+    .alert-chip.med .sev{color:#b45309;background:rgba(245,158,11,.1)}
+    .alert-chip .dom{color:#1a1a2e;font-weight:700;font-size:16px}.alert-chip .typ{color:#888;font-size:14px;font-weight:500}
+
+    /* TRACK STEPS */
+    .track{display:flex;gap:0;margin:20px 0}
+    .track-step{flex:1;padding:16px 12px;text-align:center;background:#fff;border:1px solid #eae7f0;border-right:0;position:relative}
+    .track-step:first-child{border-radius:12px 0 0 12px}
+    .track-step:last-child{border-radius:0 12px 12px 0;border-right:1px solid #eae7f0}
+    .track-step .sn{font-size:22px;font-weight:800;color:#7c3aed}
+    .track-step .st{font-size:13px;font-weight:600;color:#1a1a2e;margin-top:3px}
+    .track-step .sp{font-size:11px;color:#999;margin-top:3px;font-style:italic}
+    .track-step .si-ico{margin-bottom:6px}
+
+    /* LANE VISUAL */
+    .lane-v{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #eae7f0}
+    .lane-v:last-child{border-bottom:0}
+    .lane-tag{font-size:14px;font-weight:600;color:#555;min-width:180px}
+    .lane-dots{display:flex;gap:8px;flex:1}
+    .lane-dot{width:12px;height:12px;border-radius:50%;background:rgba(124,58,237,.2);border:2px solid #7c3aed}
+    .lane-reset{font-size:11px;font-weight:800;color:#dc2626;letter-spacing:1.5px;display:flex;align-items:center;gap:4px}
+
+    /* VS COMPARISON */
+    .vs{display:grid;grid-template-columns:1fr 44px 1fr;gap:0;margin:18px 0}
+    .vs-col{display:flex;flex-direction:column;gap:5px}
+    .vs-head{padding:10px 16px;font-size:12px;font-weight:700;letter-spacing:1.5px;text-align:center;border-radius:12px 12px 0 0}
+    .vs-head.bad{background:rgba(239,68,68,.08);color:#dc2626}
+    .vs-head.good{background:rgba(13,148,136,.08);color:#0d9488}
+    .vs-row{padding:9px 16px;font-size:14px;color:#555;display:flex;align-items:center;gap:8px;background:#fff;border-bottom:1px solid #f3f1f6}
+    .vs-mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding-top:44px}
+    .vs-mid span{color:#c4b5fd;font-size:16px;font-weight:700}
+
+    /* MVP STACK */
+    .mvp-stack{display:flex;flex-direction:column;gap:12px;margin:16px 0}
+    .mvp-bar{display:flex;align-items:center;gap:16px;padding:16px 22px;border-radius:12px;background:#fff;border:1px solid #eae7f0;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+    .mvp-bar.primary{border-color:rgba(124,58,237,.25);background:rgba(124,58,237,.04)}
+    .mvp-n{font-size:22px;font-weight:800;color:#7c3aed;min-width:30px}
+    .mvp-t{font-size:16px;font-weight:600;color:#1a1a2e}
+    .mvp-d{font-size:13px;color:#888;margin-top:2px}
+
+    /* LAYER BARS */
+    .layer-bar{display:flex;align-items:center;gap:16px;padding:18px 24px;border-radius:14px;margin-bottom:10px;background:#fff;border:1px solid #eae7f0;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+    .layer-bar .lbl{font-size:17px;font-weight:600;color:#1a1a2e}
+    .layer-bar .sub{font-size:14px;color:#888;margin-top:2px}
+
+    /* SEGMENT CARDS */
+    .seg-card{padding:20px 22px;border-radius:14px;background:#fff;border:1px solid #eae7f0;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+    .seg-card h4{font-size:16px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+    .seg-card p{font-size:13px;color:#666;line-height:1.5;margin-bottom:4px}
+    .seg-card .phase-tag{font-size:11px;font-weight:800;letter-spacing:1px;color:#7c3aed;margin-top:8px}
+
+    /* PHASE TIMELINE */
+    .ph-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0;margin:18px 0;border:1px solid #eae7f0;border-radius:14px;overflow:hidden;background:#fff}
+    .ph-cell{padding:18px 20px;border-right:1px solid #eae7f0;position:relative}
+    .ph-cell:last-child{border-right:0}
+    .ph-cell::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+    .ph-cell:nth-child(1)::before{background:#7c3aed}
+    .ph-cell:nth-child(2)::before{background:#4f46e5}
+    .ph-cell:nth-child(3)::before{background:#0d9488}
+    .ph-cell:nth-child(4)::before{background:#10b981}
+    .ph-name{font-size:11px;font-weight:800;letter-spacing:1.5px;color:#7c3aed;margin-bottom:6px}
+    .ph-cell:nth-child(2) .ph-name{color:#4f46e5}
+    .ph-cell:nth-child(3) .ph-name{color:#0d9488}
+    .ph-cell:nth-child(4) .ph-name{color:#10b981}
+    .ph-dur{font-size:12px;color:#999;margin-bottom:10px}
+    .ph-line{font-size:13px;color:#666;margin-bottom:5px;line-height:1.45;display:flex;align-items:flex-start;gap:6px}
+    .ph-gate{font-size:12px;font-weight:700;color:#7c3aed;margin-top:10px;padding-top:8px;border-top:1px solid #eae7f0;display:flex;align-items:center;gap:6px}
+
+    /* METRIC CARDS */
+    .met-card{padding:24px;border-radius:14px;background:#fff;border:1px solid #eae7f0;box-shadow:0 2px 12px rgba(0,0,0,.04);position:relative;overflow:hidden}
+    .met-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+    .met-card.mc::before{background:#7c3aed}
+    .met-card.mp::before{background:#4f46e5}
+    .met-card.mg::before{background:#0d9488}
+    .met-label{font-size:10px;font-weight:800;letter-spacing:2px;margin-bottom:10px}
+    .met-card.mc .met-label{color:#7c3aed}.met-card.mp .met-label{color:#4f46e5}.met-card.mg .met-label{color:#0d9488}
+    .met-name{font-size:17px;font-weight:700;color:#1a1a2e;margin-bottom:6px}
+    .met-body{font-size:14px;color:#666;line-height:1.5;margin-bottom:8px}
+    .met-how{font-size:12px;color:#999}
+    .met-gauge{height:5px;border-radius:3px;background:#eae7f0;margin-top:12px;overflow:hidden}
+    .met-gauge-fill{height:100%;border-radius:3px}
+    .slide.active .met-gauge-fill{animation:bar-grow 1.2s ease both .5s}
+
+    /* ANIMATIONS */
+    @keyframes fu{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fl{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}
+    @keyframes fr{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+    @keyframes fi{from{opacity:0}to{opacity:1}}
+    @keyframes pop{0%{opacity:0;transform:scale(.8)}70%{transform:scale(1.03)}100%{opacity:1;transform:scale(1)}}
+    @keyframes bar-grow{from{width:0}to{width:var(--w)}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.06);opacity:.85}}
+
+    .an{opacity:0}.slide.active .an{animation-fill-mode:both}
+    .slide.active .au{animation:fu .55s ease both}
+    .slide.active .al{animation:fl .5s ease both}
+    .slide.active .ar{animation:fr .5s ease both}
+    .slide.active .af{animation:fi .5s ease both}
+    .slide.active .ap{animation:pop .5s ease both}
+    .d0{animation-delay:0s!important}.d1{animation-delay:.08s!important}.d2{animation-delay:.16s!important}.d3{animation-delay:.24s!important}.d4{animation-delay:.32s!important}.d5{animation-delay:.4s!important}.d6{animation-delay:.48s!important}.d7{animation-delay:.56s!important}.d8{animation-delay:.64s!important}.d9{animation-delay:.72s!important}.d10{animation-delay:.8s!important}
+
+    /* INLINE ICON helper */
+    .ic{display:inline-flex;vertical-align:middle;margin-right:6px}
+
+    @media(max-width:900px){
+      .si{padding:28px 24px 56px}
+      .t1{font-size:32px}.t2{font-size:26px}
+      .split,.split-wide,.tri{grid-template-columns:1fr}
+      .quad{grid-template-columns:1fr 1fr}
+      .flow,.track{flex-wrap:wrap}
+      .giant{font-size:70px}
+      .ph-row{grid-template-columns:1fr 1fr}
+      .nav{padding:0 24px}
+    }
+    @media print{.progress,.nav{display:none!important}.slide{position:relative;opacity:1!important;pointer-events:auto!important;page-break-after:always}.an{opacity:1!important}}
+  </style>
+</head>
+<body>
+<div class="deck">
+  <div class="progress"><div class="progress-fill" id="pf"></div></div>
+  <main>
+
+    <!-- 1: TITLE -->
+    <section class="slide active" data-s="0" style="background:linear-gradient(135deg,#f3f1f6 0%,#ede8f5 50%,#f3f1f6 100%)">
+      <div class="si" style="align-items:center;text-align:center">
+        <div class="an ap d0" style="margin-bottom:20px">
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="30" stroke="#7c3aed" stroke-width="2" fill="rgba(124,58,237,.06)"/><circle cx="32" cy="32" r="18" stroke="#c4b5fd" stroke-width="1.5" stroke-dasharray="4 4"/><circle cx="32" cy="32" r="8" fill="#7c3aed"/><path d="M32 2v10M32 52v10M2 32h10M52 32h10" stroke="#7c3aed" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <p class="label an au d1" style="margin-bottom:16px">SENIOR PM CASE INTERVIEW · G2RS / EVERC · MARCH 2026</p>
+        <h1 class="t1 an au d2" style="font-size:56px">Merchant Risk<br><span class="purple">Co-Pilot</span></h1>
+        <p class="body an au d3" style="font-size:20px;max-width:600px;margin-top:4px">G2RS detects violations. This is about giving customers the scalability to act on all of them.</p>
+      </div>
+    </section>
+
+    <!-- 2: 47 ALERTS -->
+    <section class="slide" data-s="1">
+      <div class="si">
+        <p class="label an au d0"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r=".5"/></svg></span>THE PROBLEM</p>
+        <h2 class="t2 an au d1"><span class="purple">47 alerts.</span> Monday morning.</h2>
+        <p class="body an au d2" style="max-width:700px">A risk analyst opens their queue. 47 violations across different merchants. No grouping. No order. Just a list.</p>
+        <div class="alert-strip an af d4">
+          <div class="alert-chip crit"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span class="sev">CRITICAL</span><span class="dom">betwin365.com</span><span class="typ">Gambling</span></div>
+          <div class="alert-chip crit"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span class="sev">CRITICAL</span><span class="dom">pharmadir.com</span><span class="typ">Prescription</span></div>
+          <div class="alert-chip high"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg><span class="sev">HIGH</span><span class="dom">luxreplica.co</span><span class="typ">Counterfeit</span></div>
+          <div class="alert-chip high"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg><span class="sev">HIGH</span><span class="dom">jackpotstore.io</span><span class="typ">Gambling</span></div>
+          <div class="alert-chip med"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" opacity=".7"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span class="sev">MEDIUM</span><span class="dom">cleanmeds.co</span><span class="typ">Prescription</span></div>
+          <div class="alert-chip high"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg><span class="sev">HIGH</span><span class="dom">sportzgear.com</span><span class="typ">Counterfeit</span></div>
+        </div>
+        <div class="card-red an au d5" style="text-align:center;margin-top:6px"><p style="font-size:16px;margin:0"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span><strong class="red">No grouping. No context. Every alert opens cold.</strong></p></div>
+      </div>
+    </section>
+
+    <!-- 3: SCALABILITY GAP -->
+    <section class="slide" data-s="2">
+      <div class="si">
+        <p class="label an au d0"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>THE SCALABILITY GAP</p>
+        <h2 class="t2 an au d1">G2RS gives customers detection.<br>It doesn't give them <span class="purple">scalability</span>.</h2>
+        <div class="flow an af d2">
+          <div class="flow-box"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Portfolio ↑</div><span class="flow-arr">→</span>
+          <div class="flow-box"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>Violations ↑</div><span class="flow-arr">→</span>
+          <div class="flow-box"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Investigation × volume</div><span class="flow-arr">→</span>
+          <div class="flow-box danger"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Capacity = FIXED</div>
+        </div>
+        <div class="card-purple an au d3" style="margin:14px 0"><p class="body" style="font-size:16px;color:#555;margin:0"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span>G2RS has no scalability layer for what happens after detection. Every true positive becomes a unit of work the customer cannot absorb at scale.</p></div>
+        <div class="an au d4" style="max-width:600px">
+          <div class="card" style="display:flex;align-items:center;gap:18px"><div class="icon-box ib-red"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><p style="font-size:17px;margin:0"><strong class="red">Customers</strong> <span class="dim">cap portfolio at analyst capacity</span></p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4: ALTERNATIVES -->
+    <section class="slide" data-s="3">
+      <div class="si">
+        <p class="label an au d0"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>ALTERNATIVES CONSIDERED</p>
+        <h2 class="t2 an au d1" style="font-size:32px">Three paths. Here's how I evaluated them.</h2>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px">
+          <div class="card-red an al d2" style="display:flex;align-items:flex-start;gap:14px">
+            <div class="icon-box ib-red" style="margin-top:2px"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+            <div><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span class="badge badge-red">REJECTED</span><span style="font-size:16px;font-weight:700">Automate the investigation</span></div><p class="body-sm" style="margin:0">Security boundary. Banks won't allow third-party access to internal data. Customer is legally liable.</p></div>
+          </div>
+          <div class="card-amber an al d3" style="display:flex;align-items:flex-start;gap:14px">
+            <div class="icon-box ib-amber" style="margin-top:2px"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></div>
+            <div><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span class="badge badge-amber">COMPLEMENTARY</span><span style="font-size:16px;font-weight:700">Risk-Based Monitoring Tiers</span></div><p class="body-sm" style="margin:0 0 8px">High → continuous, Medium → monthly, Low → quarterly. Reduces volume at source.</p>
+              <div class="split" style="gap:16px"><div><p style="font-size:12px;font-weight:700;color:#0d9488;margin-bottom:3px">✓ STRENGTHS</p><p style="font-size:13px;color:#888;margin:0">Reduces volume · No behavior change · Deploys quickly</p></div><div><p style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:3px">✗ GAPS</p><p style="font-size:13px;color:#888;margin:0">Doesn't reduce per-case effort · Miscategorization risk</p></div></div>
+            </div>
+          </div>
+          <div class="card-teal an al d4" style="display:flex;align-items:flex-start;gap:14px">
+            <div class="icon-box ib-teal" style="margin-top:2px"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span class="badge badge-green">CHOSEN ✓</span><span style="font-size:16px;font-weight:700">Merchant Risk Co-Pilot</span></div><p class="body-sm" style="margin:0">Attacks root cause — structural mismatch. Scales as software. Respects data boundary.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5: ANALYST'S JOURNEY -->
+    <section class="slide" data-s="4">
+      <div class="si">
+        <p class="label an au d0"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>THE ANALYST'S DAY</p>
+        <h2 class="t2 an au d1">One alert. <strong class="purple">8 steps. 40–60 min.</strong></h2>
+        <div class="track an af d2">
+          <div class="track-step"><div class="si-ico"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M13.8 12H3"/></svg></div><div class="sn">1</div><div class="st">Open</div><div class="sp">No context</div></div>
+          <div class="track-step"><div class="si-ico"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div class="sn">2</div><div class="st">Lookup</div><div class="sp">3+ tools</div></div>
+          <div class="track-step"><div class="si-ico"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="sn">3</div><div class="st">ID type</div><div class="sp">Read finding</div></div>
+          <div class="track-step"><div class="si-ico"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></div><div class="sn">4</div><div class="st">Policy</div><div class="sp">Open AUP</div></div>
+          <div class="track-step"><div class="si-ico"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div class="sn">5</div><div class="st">What to check</div><div class="sp">Guessing</div></div>
+          <div class="track-step"><div class="si-ico"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div class="sn">6</div><div class="st">Investigate</div><div class="sp">Logs</div></div>
+          <div class="track-step"><div class="si-ico"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><div class="sn">7</div><div class="st">Write</div><div class="sp">Blank page</div></div>
+          <div class="track-step"><div class="si-ico"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div><div class="sn">8</div><div class="st">Close</div><div class="sp">Done</div></div>
+        </div>
+        <div class="card-red an ap d3" style="text-align:center;margin-top:12px"><p style="font-size:18px;font-weight:700;color:#dc2626;margin:0"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>40–60 minutes gone. For one alert. 46 more waiting.</p></div>
+      </div>
+    </section>
+
+    <!-- 6: REPETITION -->
+    <section class="slide" data-s="5">
+      <div class="si">
+        <p class="label an au d0"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></span>THE REAL PAIN</p>
+        <h2 class="t2 an au d1">Same violation type. Different merchant.<br><span class="red">Full reset.</span></h2>
+        <div class="card an af d2" style="margin:18px 0;padding:20px 28px">
+          <div class="lane-v"><span class="lane-tag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" style="vertical-align:middle;margin-right:6px"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Merchant A · Gambling</span><span class="lane-dots"><span class="lane-dot"></span><span class="lane-dot"></span><span class="lane-dot"></span><span class="lane-dot"></span><span class="lane-dot"></span></span><span class="lane-reset"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg> FULL RESET</span></div>
+          <div class="lane-v" style="opacity:.6"><span class="lane-tag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" style="vertical-align:middle;margin-right:6px"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Merchant B · Gambling</span><span class="lane-dots"><span class="lane-dot"></span><span class="lane-dot"></span><span class="lane-dot"></span><span class="lane-dot"></span><span class="lane-dot"></span></span><span class="lane-reset"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg> FULL RESET</span></div>
+          <div class="lane-v" style="opacity:.3"><span class="lane-tag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" style="vertical-align:middle;margin-right:6px"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Merchant C · Gambling</span><span class="lane-dots"><span class="lane-dot"></span><span class="lane-dot"></span><span class="lane-dot"></span><span class="lane-dot"></span><span class="lane-dot"></span></span><span class="lane-reset"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg> FULL RESET</span></div>
+        </div>
+        <div class="card-purple an au d3"><p class="body" style="font-size:16px;color:#555;margin:0"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>Same violation type, same investigation logic — but the analyst starts from <strong class="purple">zero</strong> every single time.</p></div>
+      </div>
+    </section>
+
+    <!-- 7: DIAGNOSIS -->
+    <section class="slide" data-s="6" style="background:linear-gradient(180deg,#ede8f5 0%,#f3f1f6 100%)">
+      <div class="si" style="align-items:center;text-align:center">
+        <div class="an ap d0" style="margin-bottom:16px"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+        <h2 class="t2 an au d1" style="max-width:750px">Alerts arrive <span class="purple">ungrouped</span>.<br>Investigation is <span class="purple">violation-type-specific</span>.</h2>
+        <p class="body an au d2" style="font-size:20px;margin-bottom:24px">That mismatch is the bottleneck.</p>
+        <div style="display:flex;flex-direction:column;gap:12px;max-width:680px;width:100%">
+          <div class="card an al d3" style="display:flex;align-items:center;gap:14px"><div class="icon-box ib-purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div><p style="font-size:15px;margin:0"><strong>No grouping by type</strong> — context switching after every case</p></div>
+          <div class="card an al d4" style="display:flex;align-items:center;gap:14px"><div class="icon-box ib-purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><p style="font-size:15px;margin:0"><strong>No checklist</strong> — analyst rebuilds guidance from scratch</p></div>
+          <div class="card an al d5" style="display:flex;align-items:center;gap:14px"><div class="icon-box ib-purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div><p style="font-size:15px;margin:0"><strong>No pre-loaded context</strong> — merchant story rebuilt manually</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8: THE FIX -->
+    <section class="slide" data-s="7">
+      <div class="si">
+        <p class="label an au d0"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>THE FIX</p>
+        <h2 class="t2 an au d1">Group by type. Load context once.<br><span class="teal">Work the batch.</span></h2>
+        <div class="split an af d2" style="margin:18px 0;gap:20px">
+          <div class="card-red"><p style="font-size:12px;font-weight:700;letter-spacing:1.5px;color:#dc2626;margin-bottom:10px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" style="vertical-align:middle;margin-right:4px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>BEFORE</p><p style="font-size:15px;color:#666">betwin365, pharmadir, luxreplica, jackpotstore, cleanmeds, sportzgear — <span class="dim">random list, no structure</span></p></div>
+          <div class="card-teal"><p style="font-size:12px;font-weight:700;letter-spacing:1.5px;color:#0d9488;margin-bottom:10px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.5" style="vertical-align:middle;margin-right:4px"><polyline points="20 6 9 17 4 12"/></svg>AFTER</p>
+            <div style="margin-bottom:8px"><span class="badge badge-purple" style="margin-right:6px">Gambling (2)</span><span class="dim" style="font-size:14px">betwin365, jackpotstore</span></div>
+            <div style="margin-bottom:8px"><span class="badge badge-amber" style="margin-right:6px">Prescription (2)</span><span class="dim" style="font-size:14px">pharmadir, cleanmeds</span></div>
+            <div><span class="badge badge-red" style="margin-right:6px">Counterfeit (2)</span><span class="dim" style="font-size:14px">luxreplica, sportzgear</span></div>
+          </div>
+        </div>
+        <div class="card-teal an au d3"><p class="body" style="font-size:16px;color:#555;margin:0"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M12 2a10 10 0 110 20 10 10 0 010-20z"/><path d="M12 6v6l4 2"/></svg></span><strong class="teal">The analyst becomes a violation-type expert</strong> for the batch — instead of starting cold on every alert.</p></div>
+      </div>
+    </section>
+
+    <!-- 9: FOUR LAYERS -->
+    <section class="slide" data-s="8">
+      <div class="si">
+        <p class="label an au d0"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span>THE FULL SOLUTION</p>
+        <h2 class="t2 an au d1">Grouping solves switching. These solve the rest.</h2>
+        <div style="margin:16px 0;display:flex;flex-direction:column;gap:12px">
+          <div class="layer-bar an al d2" style="border-left:4px solid #7c3aed"><div class="icon-box ib-purple"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div><div><div class="lbl">Violation-type grouping</div><div class="sub">Eliminates context switching</div></div><span class="badge badge-green" style="margin-left:auto">CO-PILOT CORE</span></div>
+          <div class="layer-bar an al d3" style="border-left:4px solid #4f46e5"><div class="icon-box" style="background:rgba(79,70,229,.1)"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><div><div class="lbl">Targeted verification checklist</div><div class="sub">Exactly what to verify internally for this type</div></div></div>
+          <div class="layer-bar an al d4" style="border-left:4px solid #0d9488"><div class="icon-box ib-teal"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><div><div class="lbl">Evidence pack</div><div class="sub">Merchant history, Compass Score, EverC signals — pre-assembled</div></div></div>
+          <div class="layer-bar an al d5" style="border-left:4px solid #d97706"><div class="icon-box ib-amber"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M12 2a10 10 0 110 20 10 10 0 010-20z"/><path d="M12 6v6l4 2"/></svg></div><div><div class="lbl">AI case summary</div><div class="sub">Plain language: who is this merchant, what's the pattern</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10: CO-PILOT INTRO -->
+    <section class="slide" data-s="9">
+      <div class="si">
+        <p class="label an au d0"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>THE SOLUTION</p>
+        <h2 class="t2 an au d1">The scalability layer G2RS is <span class="purple">missing</span>.</h2>
+        <p class="body an au d2" style="margin-bottom:22px">Not a new detection product. The layer between detection and decision.</p>
+        <div class="flow an af d3" style="margin-bottom:20px">
+          <div class="flow-box"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Detected</div><span class="flow-arr">→</span>
+          <div class="flow-box"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Grouped</div><span class="flow-arr">→</span>
+          <div class="flow-box"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8"/></svg>Evidence</div><span class="flow-arr">→</span>
+          <div class="flow-box"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Verifies</div><span class="flow-arr">→</span>
+          <div class="flow-box"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Decision</div>
+        </div>
+        <div class="card-purple an au d4"><p style="font-size:16px;color:#555;margin:0"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>G2RS cannot access customer data. The Co-Pilot tells analysts <strong class="purple">exactly what to verify</strong> internally.</p></div>
+        <div class="split an au d5" style="gap:16px;margin-top:14px">
+          <div class="card-teal" style="padding:14px 18px"><p style="font-size:12px;font-weight:700;color:#0d9488;margin-bottom:4px">WHAT CHANGES</p><p style="font-size:14px;color:#666;margin:0">Structured investigation · Pre-loaded context · Type-specific checklist</p></div>
+          <div class="card" style="padding:14px 18px"><p style="font-size:12px;font-weight:700;color:#999;margin-bottom:4px">WHAT STAYS</p><p style="font-size:14px;color:#666;margin:0">Analyst decides · Internal data stays internal · Customer liable</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11: TRANSFORMATION -->
+    <section class="slide" data-s="10">
+      <div class="si">
+        <p class="label an au d0"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>THE TRANSFORMATION</p>
+        <h2 class="t2 an au d1">Same analyst. Same Monday.<br><span class="teal">Different outcome.</span></h2>
+        <div class="vs an af d2">
+          <div class="vs-col">
+            <div class="vs-head bad">WITHOUT CO-PILOT</div>
+            <div class="vs-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>47 unstructured alerts</div>
+            <div class="vs-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Opens cold — no context</div>
+            <div class="vs-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Figures out what to check</div>
+            <div class="vs-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>40–60 min per case</div>
+            <div class="vs-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>History from 3+ tools</div>
+            <div class="vs-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Queue never empties</div>
+          </div>
+          <div class="vs-mid"><span>→</span><span>→</span><span>→</span><span>→</span><span>→</span><span>→</span></div>
+          <div class="vs-col">
+            <div class="vs-head good">WITH CO-PILOT</div>
+            <div class="vs-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>3 batches by type</div>
+            <div class="vs-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Evidence pre-assembled</div>
+            <div class="vs-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Checklist: 3 things to verify</div>
+            <div class="vs-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>8–12 min per case</div>
+            <div class="vs-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>AI summary in 20 sec</div>
+            <div class="vs-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Queue empty by noon</div>
+          </div>
+        </div>
+        <p class="an ap d3" style="text-align:center;font-size:20px;font-weight:700;color:#0d9488;margin-top:10px">Same alerts. Different system. 3× output.</p>
+      </div>
+    </section>
+
+    <!-- 12: MVP -->
+    <section class="slide" data-s="11">
+      <div class="si">
+        <p class="label an au d0"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>MVP</p>
+        <h2 class="t2 an au d1">Five features. Sequenced by <span class="purple">dependency</span>.</h2>
+        <p class="body an au d2">Each layer enables the next.</p>
+        <div class="mvp-stack">
+          <div class="mvp-bar primary an al d3"><div class="icon-box ib-purple"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div><span class="mvp-n">1</span><div><div class="mvp-t">Violation-Type Grouping <span class="badge badge-green" style="margin-left:8px;vertical-align:middle">FOUNDATION</span></div><div class="mvp-d">Without this, nothing else delivers full value.</div></div></div>
+          <div class="mvp-bar an al d4"><div class="icon-box ib-teal"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div><span class="mvp-n">2</span><div><div class="mvp-t">Evidence Pack</div><div class="mvp-d">Pre-loads context. Eliminates 3-tool manual lookup.</div></div></div>
+          <div class="mvp-bar an al d5"><div class="icon-box ib-amber"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M12 2a10 10 0 110 20 10 10 0 010-20z"/><path d="M12 6v6l4 2"/></svg></div><span class="mvp-n">3</span><div><div class="mvp-t">AI Case Summary</div><div class="mvp-d">Plain language: who is this merchant, what's the pattern.</div></div></div>
+          <div class="mvp-bar an al d6"><div class="icon-box" style="background:rgba(79,70,229,.1)"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><span class="mvp-n">4</span><div><div class="mvp-t">Verification Checklist</div><div class="mvp-d">What internal data to check for this violation type.</div></div></div>
+          <div class="mvp-bar an al d7"><div class="icon-box ib-red"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><span class="mvp-n">5</span><div><div class="mvp-t">Risk-Tier Routing + Decision</div><div class="mvp-d">Critical/High first. SLA timer. Audit trail.</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 13: ROADMAP -->
+    <section class="slide" data-s="12">
+      <div class="si">
+        <p class="label an au d0"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>ROADMAP</p>
+        <h2 class="t2 an au d1">What we build after workflow is <span class="purple">proven</span>.</h2>
+        <div class="tri an af d2" style="margin:16px 0">
+          <div class="card" style="display:flex;align-items:flex-start;gap:14px"><div class="icon-box ib-purple"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M12 2a10 10 0 110 20 10 10 0 010-20z"/><path d="M12 6v6l4 2"/></svg></div><div><p style="font-size:16px;font-weight:700;margin-bottom:6px">AI Insights</p><p class="body-sm" style="margin:0">Outcome prediction, recommended action, pre-drafted rationale</p></div></div>
+          <div class="card" style="display:flex;align-items:flex-start;gap:14px"><div class="icon-box ib-teal"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div><div><p style="font-size:16px;font-weight:700;margin-bottom:6px">Remediation</p><p class="body-sm" style="margin:0">Outreach templates, deadline timer, instant re-scan</p></div></div>
+          <div class="card" style="display:flex;align-items:flex-start;gap:14px"><div class="icon-box ib-amber"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></div><div><p style="font-size:16px;font-weight:700;margin-bottom:6px">Feedback Loop</p><p class="body-sm" style="margin:0">Outcome capture → tier calibration + AI improvement</p></div></div>
+        </div>
+        <div class="card-teal an au d3"><p class="body-sm" style="margin:0"><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></span><strong class="teal">Complementary:</strong> Risk-based tiers reduce volume entering the Co-Pilot. Co-Pilot first → prove efficiency → then introduce tiers.</p></div>
+      </div>
+    </section>
+
+    <!-- 14: SEGMENTS -->
+    <section class="slide" data-s="13">
+      <div class="si">
+        <p class="label an au d0"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></span>CUSTOMER SEGMENTS</p>
+        <h2 class="t2 an au d1">Same platform. Different <span class="purple">lever</span> per segment.</h2>
+        <div class="quad an af d2" style="margin-top:16px">
+          <div class="seg-card"><h4><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg><span class="purple">Growing PayFac</span></h4><p><strong>Pain:</strong> Alert volume overwhelming team.</p><p><strong>Lever:</strong> Violation-type grouping.</p><p class="phase-tag">MVP</p></div>
+          <div class="seg-card"><h4><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span style="color:#4f46e5">Established Acquirer</span></h4><p><strong>Pain:</strong> SLA breach risk on Critical cases.</p><p><strong>Lever:</strong> Evidence pack + SLA timer.</p><p class="phase-tag">MVP</p></div>
+          <div class="seg-card"><h4><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span class="amber">Risk-Averse Prospect</span></h4><p><strong>Pain:</strong> Fear of adoption — "too many alerts."</p><p><strong>Lever:</strong> Structured workflow.</p><p class="phase-tag">PHASE 2</p></div>
+          <div class="seg-card"><h4><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg><span class="teal">Marketplace</span></h4><p><strong>Pain:</strong> Millions of sellers.</p><p><strong>Lever:</strong> Full automation + Smart Scan.</p><p class="phase-tag">PHASE 3</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 15: EXECUTION -->
+    <section class="slide" data-s="14">
+      <div class="si">
+        <p class="label an au d0"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>EXECUTION</p>
+        <h2 class="t2 an au d1">Four phases. Gated by <span class="purple">signal</span> — not date.</h2>
+        <div class="ph-row an af d2">
+          <div class="ph-cell"><div class="ph-name">PHASE 0 · DISCOVER</div><div class="ph-dur">4–6 weeks</div><div class="ph-line"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Shadow analysts, baselines</div><div class="ph-line"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>2–3 design partners</div><div class="ph-gate"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Gate → Partners committed</div></div>
+          <div class="ph-cell"><div class="ph-name">PHASE 1 · MVP</div><div class="ph-dur">3–4 months</div><div class="ph-line"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>5 features, partners only</div><div class="ph-line"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/></svg>Does grouping work?</div><div class="ph-gate"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Gate → Measurable improvement</div></div>
+          <div class="ph-cell"><div class="ph-name">PHASE 2 · DEEPEN</div><div class="ph-dur">4–6 months</div><div class="ph-line"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M12 2a10 10 0 110 20 10 10 0 010-20z"/><path d="M12 6v6l4 2"/></svg>AI insights, remediation</div><div class="ph-line"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>Volume increasing?</div><div class="ph-gate"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Gate → Screening requests rising</div></div>
+          <div class="ph-cell"><div class="ph-name">PHASE 3 · SCALE</div><div class="ph-dur">Ongoing</div><div class="ph-line"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>Full rollout, pricing</div><div class="ph-line"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>System compounds?</div><div class="ph-gate"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Gate → Portfolio expansion</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 16: METRICS -->
+    <section class="slide" data-s="15">
+      <div class="si">
+        <p class="label an au d0"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></span>METRICS</p>
+        <h2 class="t2 an au d1">One north star. One guardrail. One <span class="purple">growth signal</span>.</h2>
+        <div class="tri an af d2" style="margin-top:16px">
+          <div class="met mc">
+            <div style="margin-bottom:10px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div class="met-label">NORTH STAR</div>
+            <div class="met-name">Alerts per analyst per week</div>
+            <div class="met-body">Direct expression of "more with less." If this moves, Co-Pilot works.</div>
+            <div class="met-how">Case open → decision timestamp</div>
+            <div class="met-gauge"><div class="met-fill" style="--w:85%;background:linear-gradient(90deg,#7c3aed,#4f46e5)"></div></div>
+          </div>
+          <div class="met mp">
+            <div style="margin-bottom:10px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div class="met-label">GUARDRAIL</div>
+            <div class="met-name">Case creation → decision time</div>
+            <div class="met-body">Speed must not compromise SLA discipline.</div>
+            <div class="met-how">Both timestamps per tier</div>
+            <div class="met-gauge"><div class="met-fill" style="--w:60%;background:linear-gradient(90deg,#4f46e5,#7c3aed)"></div></div>
+          </div>
+          <div class="met mg">
+            <div style="margin-bottom:10px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+            <div class="met-label">GROWTH SIGNAL</div>
+            <div class="met-name">Screening requests per customer</div>
+            <div class="met-body">Self-limited before → rising = confidence grows.</div>
+            <div class="met-how">G2RS API, baseline from Phase 0</div>
+            <div class="met-gauge"><div class="met-fill" style="--w:40%;background:linear-gradient(90deg,#0d9488,#10b981)"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 17: CLOSING -->
+    <section class="slide" data-s="16" style="background:linear-gradient(135deg,#1a1a2e,#2d1b69)">
+      <div class="si" style="align-items:center;text-align:center;position:relative;z-index:1">
+        <div class="an ap d0" style="margin-bottom:20px"><svg width="56" height="56" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="30" stroke="rgba(255,255,255,.15)" stroke-width="1.5"/><circle cx="32" cy="32" r="18" stroke="rgba(255,255,255,.1)" stroke-width="1" stroke-dasharray="4 4"/><circle cx="32" cy="32" r="8" fill="#7c3aed"/></svg></div>
+        <p class="an au d1" style="font-size:24px;font-weight:600;color:rgba(255,255,255,.65);max-width:680px;line-height:1.45;margin-bottom:20px">Without the Co-Pilot, G2RS growth is capped by its customers' analyst capacity.</p>
+        <p class="an au d3" style="font-size:24px;font-weight:700;color:#c4b5fd;max-width:680px;line-height:1.4;margin-bottom:16px">With it, a customer with 100,000 merchants can monitor all of them — and tell G2RS to send more.</p>
+        <p class="an au d5" style="font-size:22px;font-weight:800;color:#fff;margin-bottom:32px">That's what scalability means.</p>
+        <p class="an af d7" style="font-size:12px;letter-spacing:2px;color:rgba(255,255,255,.3)">MERCHANT RISK CO-PILOT · G2RS / EVERC · MARCH 2026</p>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="nav">
+    <span class="counter" id="ctr">01 / 17</span>
+    <div class="nav-btns">
+      <button class="nb" id="pb" disabled>←</button>
+      <button class="nb" id="xb">→</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const S=document.querySelectorAll('.slide'),T=S.length;let C=0;
+  const pf=document.getElementById('pf'),ctr=document.getElementById('ctr'),pb=document.getElementById('pb'),xb=document.getElementById('xb');
+  function go(i){if(i<0||i>=T||i===C)return;const o=S[C],n=S[i],fw=i>C;o.classList.remove('active');o.classList.add('prev');n.style.transition='none';n.style.transform=fw?'translateX(30px)':'translateX(-30px)';n.style.opacity='0';n.classList.add('active');requestAnimationFrame(()=>{requestAnimationFrame(()=>{n.style.transition='';n.style.transform='';n.style.opacity=''})});setTimeout(()=>o.classList.remove('prev'),500);C=i;rn()}
+  function rn(){ctr.textContent=String(C+1).padStart(2,'0')+' / '+String(T).padStart(2,'0');pf.style.width=((C+1)/T*100)+'%';pb.disabled=C===0;xb.disabled=C===T-1}
+  pb.addEventListener('click',()=>go(C-1));xb.addEventListener('click',()=>go(C+1));
+  document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(Math.min(C+1,T-1))}else if(e.key==='ArrowLeft'){e.preventDefault();go(Math.max(C-1,0))}else if(e.key==='Home'){e.preventDefault();go(0)}else if(e.key==='End'){e.preventDefault();go(T-1)}});
+  let tx=0;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].clientX;if(Math.abs(d)>50)d>0?go(Math.min(C+1,T-1)):go(Math.max(C-1,0))},{passive:true});
+  rn();
+</script>
+</body>
+</html>

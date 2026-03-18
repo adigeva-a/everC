@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Merchant Risk Co-Pilot · G2RS / EverC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f8fafc; color: #111827;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .deck { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+
+    .slide {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      padding-bottom: 48px;
+      display: flex; flex-direction: column;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    .slide.active { opacity: 1; pointer-events: auto; }
+
+    .progress-bar { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: #e5e7eb; z-index: 100; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #4f46e5, #0d9488); transition: width 0.4s ease; }
+
+    .slide-inner {
+      flex: 1; max-width: 1260px; margin: 0 auto;
+      padding: 40px 80px; width: 100%;
+      overflow: hidden;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+
+    /* ====== ANIMATIONS ====== */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes fadeLeft {
+      from { opacity: 0; transform: translateX(-30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeRight {
+      from { opacity: 0; transform: translateX(30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.5); }
+      70% { transform: scale(1.05); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes drawLine {
+      from { stroke-dashoffset: 200; }
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.08); opacity: 0.85; }
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes growWidth {
+      from { width: 0%; }
+      to { width: var(--target-width, 100%); }
+    }
+
+    .anim { opacity: 0; }
+    .slide.active .anim { animation-fill-mode: both; }
+    .slide.active .a-up { animation: fadeUp 0.55s ease both; }
+    .slide.active .a-fade { animation: fadeIn 0.5s ease both; }
+    .slide.active .a-left { animation: fadeLeft 0.5s ease both; }
+    .slide.active .a-right { animation: fadeRight 0.5s ease both; }
+    .slide.active .a-scale { animation: scaleIn 0.45s ease both; }
+    .slide.active .a-pop { animation: popIn 0.5s ease both; }
+    .slide.active .a-down { animation: slideDown 0.5s ease both; }
+
+    .d0 { animation-delay: 0s !important; }
+    .d1 { animation-delay: 0.08s !important; }
+    .d2 { animation-delay: 0.16s !important; }
+    .d3 { animation-delay: 0.24s !important; }
+    .d4 { animation-delay: 0.32s !important; }
+    .d5 { animation-delay: 0.4s !important; }
+    .d6 { animation-delay: 0.48s !important; }
+    .d7 { animation-delay: 0.56s !important; }
+    .d8 { animation-delay: 0.64s !important; }
+    .d9 { animation-delay: 0.72s !important; }
+    .d10 { animation-delay: 0.8s !important; }
+
+    /* ====== TYPOGRAPHY ====== */
+    .label {
+      font-size: 13px; font-weight: 600; letter-spacing: 2.5px;
+      text-transform: uppercase; color: #4f46e5; margin-bottom: 10px;
+    }
+    .slide-title {
+      font-size: 40px; font-weight: 700; color: #111827;
+      line-height: 1.15; margin: 0 0 16px 0;
+    }
+    .slide-subtitle {
+      font-size: 22px; font-weight: 400; color: #6b7280;
+      line-height: 1.45; margin: 0 0 20px 0;
+    }
+    .body-text { font-size: 18px; color: #4b5563; line-height: 1.55; margin: 0 0 16px 0; }
+
+    /* ====== CARDS ====== */
+    .card {
+      background: #fff; border-radius: 12px; border: 1px solid #e5e7eb;
+      padding: 18px 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .card-accent-indigo { border-left: 4px solid #4f46e5; }
+    .card-accent-teal { border-left: 4px solid #0d9488; }
+    .card-accent-red { border-left: 4px solid #ef4444; }
+    .card-accent-amber { border-left: 4px solid #f59e0b; }
+    .card-accent-purple { border-left: 4px solid #7c3aed; }
+    .card-top-accent-red { border-top: 4px solid #ef4444; }
+    .card-top-accent-amber { border-top: 4px solid #f59e0b; }
+    .card-top-accent-teal { border-top: 4px solid #0d9488; }
+    .card-top-accent-indigo { border-top: 4px solid #4f46e5; }
+
+    /* ====== ILLUSTRATION CONTAINERS ====== */
+    .illust {
+      display: flex; align-items: center; justify-content: center;
+      margin: 14px 0;
+    }
+    .illust svg { display: block; }
+
+    .slide.active .illust .draw-path {
+      stroke-dasharray: 200;
+      stroke-dashoffset: 200;
+      animation: drawLine 1.2s ease forwards;
+    }
+    .slide.active .illust .float-el {
+      animation: float 3s ease-in-out infinite;
+    }
+    .slide.active .illust .pulse-el {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* ====== NAV ====== */
+    .nav-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 48px;
+      background: #fff; border-top: 1px solid #e5e7eb;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 64px; z-index: 100;
+    }
+    .slide-counter { font-size: 14px; color: #9ca3af; }
+    .nav-buttons { display: flex; gap: 10px; }
+    .nav-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1px solid rgba(79,70,229,0.3); background: #fff;
+      color: #4f46e5; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover:not(:disabled) { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+    .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* ====== HELPERS ====== */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .flex-center { display: flex; align-items: center; justify-content: center; }
+    .gap-sm { gap: 14px; }
+    .gap-md { gap: 20px; }
+    .mt-sm { margin-top: 12px; }
+    .mt-md { margin-top: 18px; }
+    .mb-sm { margin-bottom: 12px; }
+    .text-center { text-align: center; }
+    .text-sm { font-size: 15px; }
+    .text-xs { font-size: 13px; }
+    .text-bold { font-weight: 600; }
+    .c-indigo { color: #4f46e5; }
+    .c-teal { color: #0d9488; }
+    .c-red { color: #b91c1c; }
+    .c-amber { color: #b45309; }
+    .c-gray { color: #6b7280; }
+
+    /* ====== SLIDE 1 — HERO ====== */
+    .hero-title { font-size: 50px; font-weight: 800; color: #111827; line-height: 1.1; margin: 0 0 14px 0; }
+    .hero-sub { font-size: 26px; font-weight: 400; color: #6b7280; margin: 0 0 32px 0; line-height: 1.4; }
+    .hero-badge {
+      display: inline-block; padding: 8px 20px; border-radius: 24px;
+      background: rgba(79,70,229,0.08); color: #4f46e5;
+      font-size: 13px; font-weight: 600; letter-spacing: 1.5px;
+    }
+
+    /* ====== SLIDE 2 — ALERT CHAOS ====== */
+    .alert-mini {
+      padding: 10px 16px; border-radius: 10px; border: 1px solid #e5e7eb;
+      border-left: 4px solid; font-size: 14px; background: #fff;
+    }
+    .alert-mini.crit { border-left-color: #ef4444; }
+    .alert-mini.high { border-left-color: #f59e0b; }
+    .alert-mini.med { border-left-color: #eab308; }
+
+    /* ====== SLIDE 3 — FLOW ====== */
+    .flow-chain {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; flex-wrap: wrap;
+    }
+    .flow-node {
+      padding: 12px 20px; border-radius: 10px; font-size: 15px; font-weight: 500;
+      background: #fff; border: 1px solid #e5e7eb;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .flow-node.danger { background: rgba(239,68,68,0.06); border-color: #fca5a5; color: #b91c1c; }
+    .flow-arrow { color: #c4b5fd; font-size: 22px; font-weight: 700; }
+
+    /* ====== SLIDE 5 — WORK PILLS ====== */
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 16px; border-radius: 20px; font-size: 14px; font-weight: 500;
+    }
+    .pill-indigo { background: rgba(79,70,229,0.1); color: #4f46e5; }
+    .pill-red { background: rgba(239,68,68,0.1); color: #b91c1c; }
+    .pill-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+
+    /* ====== SLIDE 6 — DIAGNOSIS ====== */
+    .diag-row {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 10px; font-size: 16px;
+    }
+    .diag-icon {
+      width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .diag-icon.ok { background: rgba(13,148,136,0.12); }
+    .diag-icon.fail { background: rgba(239,68,68,0.12); }
+
+    /* ====== SLIDE 7 — ALTERNATIVES ====== */
+    .alt-card {
+      background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; padding: 16px 18px;
+    }
+    .alt-badge {
+      display: inline-block; padding: 4px 12px; border-radius: 6px;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 8px;
+    }
+    .alt-badge.rejected { background: rgba(239,68,68,0.12); color: #b91c1c; }
+    .alt-badge.complementary { background: rgba(245,158,11,0.12); color: #b45309; }
+    .alt-badge.chosen { background: rgba(16,185,129,0.12); color: #047857; }
+    .tiers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+    .tier-list { margin: 0; padding: 0; list-style: none; }
+    .tier-list li {
+      display: flex; align-items: flex-start; gap: 6px;
+      font-size: 14px; color: #4b5563; margin-bottom: 5px; line-height: 1.4;
+    }
+    .tier-list li svg { flex-shrink: 0; margin-top: 2px; }
+
+    /* ====== SLIDE 8 — INSIGHT ====== */
+    .combo-visual {
+      display: flex; align-items: center; justify-content: center; gap: 28px;
+      margin: 16px 0;
+    }
+    .combo-box {
+      flex: 0 0 auto; width: 220px; padding: 20px; border-radius: 14px;
+      text-align: center; font-size: 15px;
+    }
+    .combo-box.indigo { background: rgba(79,70,229,0.06); border: 1px solid rgba(79,70,229,0.2); }
+    .combo-box.teal { background: rgba(13,148,136,0.06); border: 1px solid rgba(13,148,136,0.2); }
+    .combo-plus { font-size: 34px; font-weight: 800; color: #c4b5fd; }
+    .combo-eq { font-size: 34px; font-weight: 800; color: #0d9488; }
+    .combo-result {
+      padding: 16px 28px; border-radius: 14px;
+      background: linear-gradient(135deg, #4f46e5, #0d9488); color: #fff;
+      font-weight: 600; font-size: 16px; text-align: center;
+    }
+
+    /* ====== SLIDE 9 — SOLUTION ====== */
+    .sol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .sol-card {
+      background: #fff; border-radius: 12px; border: 1px solid #e5e7eb;
+      padding: 18px; display: flex; gap: 16px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .sol-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(79,70,229,0.1); }
+    .sol-icon {
+      width: 50px; height: 50px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sol-icon.a { background: rgba(79,70,229,0.08); }
+    .sol-icon.b { background: rgba(13,148,136,0.08); }
+    .sol-icon.c { background: rgba(124,58,237,0.08); }
+    .sol-icon.d { background: rgba(245,158,11,0.08); }
+    .sol-body .title { font-size: 16px; font-weight: 600; color: #111827; margin: 0 0 5px 0; }
+    .sol-body .desc { font-size: 14px; color: #6b7280; line-height: 1.45; margin: 0; }
+
+    /* ====== SLIDE 10 — BEFORE/AFTER ====== */
+    .ba-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; margin: 16px 0; }
+    .ba-col { display: flex; flex-direction: column; gap: 8px; }
+    .ba-header {
+      padding: 10px 18px; border-radius: 10px 10px 0 0; font-size: 14px;
+      font-weight: 700; letter-spacing: 1.5px; text-align: center;
+    }
+    .ba-header.before { background: rgba(239,68,68,0.08); color: #b91c1c; }
+    .ba-header.after { background: rgba(13,148,136,0.08); color: #047857; }
+    .ba-item {
+      padding: 8px 16px; font-size: 15px; color: #4b5563;
+      border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; gap: 8px;
+    }
+    .ba-arrows {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px; padding: 0 14px; padding-top: 30px;
+    }
+    .ba-arrow-icon { color: #c4b5fd; font-size: 20px; }
+
+    /* ====== SLIDE 11 — MVP ====== */
+    .mvp-timeline { position: relative; padding-left: 34px; margin: 12px 0; }
+    .mvp-timeline::before {
+      content: ''; position: absolute; left: 16px; top: 4px; bottom: 4px;
+      width: 3px; background: linear-gradient(to bottom, #4f46e5, #0d9488);
+    }
+    .mvp-item {
+      position: relative; margin-bottom: 14px; display: flex; align-items: flex-start; gap: 16px;
+    }
+    .mvp-dot {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #4f46e5; color: #fff; font-size: 14px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; position: relative; z-index: 1;
+    }
+    .mvp-item:last-child .mvp-dot { background: #0d9488; }
+    .mvp-text .title { font-size: 16px; font-weight: 600; color: #111827; }
+    .mvp-text .desc { font-size: 14px; color: #6b7280; }
+
+    /* ====== SLIDE 12 — ROADMAP ====== */
+    .road-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 14px 0; }
+    .road-card {
+      background: #fff; border-radius: 12px; border: 1px solid #e5e7eb;
+      padding: 16px; position: relative; overflow: hidden;
+    }
+    .road-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, #4f46e5, #0d9488);
+    }
+    .road-name { font-weight: 700; color: #4f46e5; font-size: 14px; margin-bottom: 4px; }
+    .road-dur { font-size: 13px; color: #9ca3af; margin-bottom: 8px; }
+    .road-line { font-size: 13px; color: #4b5563; margin-bottom: 5px; line-height: 1.4; }
+    .road-gate { font-size: 13px; color: #0d9488; font-weight: 600; margin-top: 6px; }
+
+    /* ====== SLIDE 13 — WINS ====== */
+    .win-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .win-card {
+      background: #fff; border-radius: 12px; border: 1px solid #e5e7eb;
+      padding: 20px; text-align: center; font-size: 15px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .win-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(79,70,229,0.1); }
+    .win-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+    }
+    .win-icon.teal { background: rgba(13,148,136,0.1); }
+    .win-icon.indigo { background: rgba(79,70,229,0.1); }
+
+    /* ====== SLIDE 14 — METRICS ====== */
+    .met-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .met-card {
+      background: #fff; border-radius: 12px; border: 1px solid #e5e7eb;
+      padding: 20px; position: relative; overflow: hidden;
+    }
+    .met-tag {
+      font-size: 12px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8px;
+    }
+    .met-name { font-size: 17px; font-weight: 600; color: #111827; margin-bottom: 6px; }
+    .met-body { font-size: 14px; color: #6b7280; line-height: 1.45; margin-bottom: 8px; }
+    .met-how { font-size: 13px; color: #9ca3af; }
+    .met-bar {
+      height: 5px; border-radius: 3px; margin-top: 10px; overflow: hidden;
+      background: #f3f4f6;
+    }
+    .met-bar-fill { height: 100%; border-radius: 2px; }
+    .slide.active .met-bar-fill { animation: growWidth 1.2s ease both; animation-delay: 0.6s; }
+
+    /* ====== SLIDE 15 — CLOSING ====== */
+    .close-quote { font-size: 28px; font-weight: 600; color: #4b5563; margin: 0 0 18px 0; line-height: 1.35; }
+    .close-punch { font-size: 26px; font-weight: 700; color: #4f46e5; margin: 0 0 18px 0; }
+    .close-final { font-size: 20px; font-weight: 800; color: #111827; margin: 0 0 28px 0; }
+    .close-meta { font-size: 15px; color: #9ca3af; }
+    .gradient-line {
+      width: 100px; height: 5px; border-radius: 3px;
+      background: linear-gradient(90deg, #4f46e5, #0d9488);
+      margin-bottom: 22px;
+    }
+
+    @media (max-width: 900px) {
+      .slide-inner { padding: 24px 24px; }
+      .slide-title { font-size: 28px; }
+      .two-col, .sol-grid, .tiers-grid, .ba-grid { grid-template-columns: 1fr; }
+      .three-col, .road-grid, .win-grid, .met-grid { grid-template-columns: 1fr; }
+      .flow-chain { flex-direction: column; }
+      .combo-visual { flex-direction: column; }
+      .nav-bar { padding: 0 20px; }
+    }
+
+    @media print {
+      .progress-bar, .nav-bar { display: none !important; }
+      .slide { position: relative; opacity: 1 !important; pointer-events: auto !important; page-break-after: always; }
+      .anim { opacity: 1 !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:6.67%"></div></div>
+
+    <main>
+      <!-- SLIDE 1: TITLE -->
+      <section class="slide active" data-slide="1">
+        <div class="slide-inner" style="background: linear-gradient(180deg, rgba(79,70,229,0.03) 0%, #fff 100%);">
+          <div class="illust anim a-scale d0" style="margin-bottom: 24px;">
+            <svg width="100" height="100" viewBox="0 0 80 80" fill="none">
+              <circle cx="40" cy="40" r="36" stroke="#e5e7eb" stroke-width="2" fill="rgba(79,70,229,0.03)"/>
+              <circle cx="40" cy="40" r="24" stroke="#c4b5fd" stroke-width="1.5" stroke-dasharray="4 4" class="pulse-el"/>
+              <circle cx="40" cy="40" r="12" fill="#4f46e5" class="pulse-el" style="animation-delay:0.5s"/>
+              <path d="M40 4 L40 16" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" class="draw-path"/>
+              <path d="M40 64 L40 76" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" class="draw-path"/>
+              <path d="M4 40 L16 40" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" class="draw-path"/>
+              <path d="M64 40 L76 40" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" class="draw-path"/>
+            </svg>
+          </div>
+          <h1 class="hero-title anim a-up d1">G2RS detects violations at scale.</h1>
+          <p class="hero-sub anim a-up d2">But every alert still requires manual investigation.</p>
+          <div class="anim a-up d3">
+            <span class="hero-badge">SENIOR PM CASE INTERVIEW · G2RS / EVERC · MARCH 2026</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2: ALERT CHAOS -->
+      <section class="slide" data-slide="2">
+        <div class="slide-inner">
+          <p class="label anim a-up d0">THE PROBLEM</p>
+          <h2 class="slide-title anim a-up d1">47 alerts. Monday morning. Where do you start?</h2>
+          <p class="body-text anim a-fade d2">A risk analyst opens their queue. 47 violations across different merchants. No structure, no context, no prioritization.</p>
+          <div class="three-col" style="margin: 16px 0;">
+            <div class="alert-mini crit anim a-pop d3"><strong>CRITICAL</strong> · betwin365.com · <span class="c-gray">Gambling</span><div class="text-xs c-gray" style="margin-top:3px; font-style:italic;">No context loaded</div></div>
+            <div class="alert-mini crit anim a-pop d4"><strong>CRITICAL</strong> · pharmadir.com · <span class="c-gray">Prescription</span><div class="text-xs c-gray" style="margin-top:3px; font-style:italic;">No context loaded</div></div>
+            <div class="alert-mini high anim a-pop d5"><strong>HIGH</strong> · luxreplica.co · <span class="c-gray">Counterfeit</span><div class="text-xs c-gray" style="margin-top:3px; font-style:italic;">No context loaded</div></div>
+            <div class="alert-mini high anim a-pop d6"><strong>HIGH</strong> · jackpotstore.io · <span class="c-gray">Gambling</span><div class="text-xs c-gray" style="margin-top:3px; font-style:italic;">No context loaded</div></div>
+            <div class="alert-mini med anim a-pop d7"><strong>MEDIUM</strong> · cleanmeds.co · <span class="c-gray">Prescription</span><div class="text-xs c-gray" style="margin-top:3px; font-style:italic;">No context loaded</div></div>
+            <div class="alert-mini high anim a-pop d8"><strong>HIGH</strong> · sportzgear.com · <span class="c-gray">Counterfeit</span><div class="text-xs c-gray" style="margin-top:3px; font-style:italic;">No context loaded</div></div>
+          </div>
+          <div class="card card-accent-red anim a-up d9" style="font-size:16px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="vertical-align:middle; margin-right:8px;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            <strong>Every alert opens cold. Full reset. No structure. No context.</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: CONSTRAINT -->
+      <section class="slide" data-slide="3">
+        <div class="slide-inner">
+          <p class="label anim a-up d0">THE CONSTRAINT</p>
+          <h2 class="slide-title anim a-up d1">Volume scales. Capacity doesn't.</h2>
+          <div class="flow-chain" style="margin: 20px 0;">
+            <div class="flow-node anim a-left d2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+              Merchant portfolios ↑
+            </div>
+            <span class="flow-arrow anim a-fade d3">→</span>
+            <div class="flow-node anim a-left d3">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Violation volume ↑
+            </div>
+            <span class="flow-arrow anim a-fade d4">→</span>
+            <div class="flow-node anim a-left d4">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Investigations ↑
+            </div>
+            <span class="flow-arrow anim a-fade d5">→</span>
+            <div class="flow-node danger anim a-scale d5">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Analyst hours = FIXED
+            </div>
+          </div>
+          <div class="illust anim a-scale d6" style="margin: 16px 0;">
+            <svg width="420" height="68" viewBox="0 0 420 68" fill="none">
+              <rect x="0" y="22" width="420" height="24" rx="12" fill="#f3f4f6"/>
+              <rect x="0" y="22" width="340" height="24" rx="12" fill="url(#barGrad)" class="draw-path" style="stroke-dasharray:400;stroke-dashoffset:400;"/>
+              <line x1="260" y1="8" x2="260" y2="58" stroke="#ef4444" stroke-width="2" stroke-dasharray="4 3"/>
+              <text x="260" y="6" font-size="11" fill="#b91c1c" text-anchor="middle" font-weight="600">CAPACITY LIMIT</text>
+              <text x="340" y="62" font-size="11" fill="#4f46e5" text-anchor="middle" font-weight="600">VOLUME</text>
+              <defs><linearGradient id="barGrad" x1="0" y1="0" x2="320" y2="0"><stop offset="0%" stop-color="#4f46e5"/><stop offset="100%" stop-color="#ef4444"/></linearGradient></defs>
+            </svg>
+          </div>
+          <div class="two-col anim a-up d7">
+            <div class="card card-accent-red" style="font-size:15px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="vertical-align:middle; margin-right:6px;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              Existing customers breach SLAs as queues overflow
+            </div>
+            <div class="card card-accent-amber" style="font-size:15px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" style="vertical-align:middle; margin-right:6px;"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+              Prospective customers suppress demand — refusing full portfolios
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 4: BUSINESS IMPACT -->
+      <section class="slide" data-slide="4">
+        <div class="slide-inner">
+          <p class="label anim a-up d0">BUSINESS IMPACT</p>
+          <h2 class="slide-title anim a-up d1">A growth engine with a ceiling.</h2>
+          <div class="two-col" style="margin: 18px 0;">
+            <div class="card card-accent-red anim a-left d2">
+              <div class="flex-center" style="justify-content: flex-start; gap: 14px; margin-bottom: 10px;">
+                <div style="width:52px;height:52px;border-radius:14px;background:rgba(239,68,68,0.08);display:flex;align-items:center;justify-content:center;">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <div>
+                  <div style="font-size:32px;font-weight:800;color:#b91c1c;">40–60 min</div>
+                  <div class="text-xs text-bold c-gray">PER INVESTIGATION</div>
+                </div>
+              </div>
+              <p style="font-size:15px;color:#4b5563;margin:0;">Every alert requires full manual investigation with no pre-loaded context</p>
+            </div>
+            <div class="card card-accent-amber anim a-right d2">
+              <div class="flex-center" style="justify-content: flex-start; gap: 14px; margin-bottom: 10px;">
+                <div style="width:52px;height:52px;border-radius:14px;background:rgba(245,158,11,0.08);display:flex;align-items:center;justify-content:center;">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div>
+                  <div style="font-size:24px;font-weight:800;color:#b45309;">Demand suppression</div>
+                  <div class="text-xs text-bold c-gray">GROWTH BLOCKER</div>
+                </div>
+              </div>
+              <p style="font-size:15px;color:#4b5563;margin:0;">Customers limit portfolio size because they can't investigate the resulting alerts</p>
+            </div>
+          </div>
+          <div class="card card-accent-teal text-center anim a-up d4" style="font-size:16px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" style="vertical-align:middle; margin-right:8px;"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+            This is not a detection problem. This is a <strong>structural workflow problem</strong> that limits G2RS's addressable market.
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 5: ROOT CAUSE -->
+      <section class="slide" data-slide="5">
+        <div class="slide-inner">
+          <p class="label anim a-up d0">ROOT CAUSE</p>
+          <h2 class="slide-title anim a-up d1">Alerts arrive per merchant. Investigations run by violation type.</h2>
+          <div style="margin: 16px 0;">
+            <div class="pill-row anim a-left d2">
+              <span class="pill pill-indigo">Merchant A · Gambling</span>
+              <span class="pill pill-indigo">Open</span><span class="pill pill-indigo">Lookup</span><span class="pill pill-indigo">Policy</span><span class="pill pill-indigo">Checklist</span><span class="pill pill-indigo">Write</span>
+            </div>
+            <div class="pill-row anim a-scale d3" style="justify-content:center;">
+              <span class="pill pill-red">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+                FULL RESET
+              </span>
+            </div>
+            <div class="pill-row anim a-left d4">
+              <span class="pill pill-indigo">Merchant B · Gambling</span>
+              <span class="pill pill-indigo">Open</span><span class="pill pill-indigo">Lookup</span><span class="pill pill-indigo">Policy</span><span class="pill pill-indigo">Checklist</span><span class="pill pill-indigo">Write</span>
+            </div>
+            <div class="pill-row anim a-scale d5" style="justify-content:center;">
+              <span class="pill pill-red">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+                FULL RESET
+              </span>
+            </div>
+            <div class="pill-row anim a-left d6">
+              <span class="pill pill-indigo">Merchant C · Gambling</span>
+              <span class="pill pill-indigo">Open</span><span class="pill pill-indigo">Lookup</span><span class="pill pill-indigo">Policy</span><span class="pill pill-indigo">Checklist</span><span class="pill pill-indigo">Write</span>
+            </div>
+          </div>
+          <div class="card card-accent-purple anim a-up d7" style="font-size:16px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" style="vertical-align:middle; margin-right:8px;"><path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Same violation type, same investigation logic — but the system delivers three separate alerts. <strong>Unit-of-work mismatch.</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 6: DIAGNOSIS -->
+      <section class="slide" data-slide="6">
+        <div class="slide-inner">
+          <p class="label anim a-up d0">DIAGNOSIS</p>
+          <h2 class="slide-title anim a-up d1">Optimized for detection, not decision-making.</h2>
+          <div style="margin: 16px 0;">
+            <div class="diag-row anim a-left d2">
+              <div class="diag-icon ok"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <span>Detection scales — G2RS processes millions of merchants</span>
+            </div>
+            <div class="diag-row anim a-left d3">
+              <div class="diag-icon fail"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+              <span>Investigation does not — every finding requires manual analyst work</span>
+            </div>
+            <div class="diag-row anim a-left d4">
+              <div class="diag-icon fail"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+              <span>Wrong unit of work — raw findings, not structured cases</span>
+            </div>
+            <div class="diag-row anim a-left d5">
+              <div class="diag-icon fail"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+              <span>G2RS gives findings, not a scalable workflow for acting on them</span>
+            </div>
+          </div>
+          <div class="illust anim a-scale d6">
+            <svg width="400" height="72" viewBox="0 0 400 72" fill="none">
+              <rect x="10" y="16" width="160" height="40" rx="10" fill="rgba(13,148,136,0.1)" stroke="#0d9488" stroke-width="1.5"/>
+              <text x="90" y="40" text-anchor="middle" font-size="14" font-weight="600" fill="#0d9488">Detection ✓</text>
+              <path d="M185 36 L215 36" stroke="#c4b5fd" stroke-width="2" stroke-dasharray="4 3"/>
+              <rect x="230" y="16" width="160" height="40" rx="10" fill="rgba(239,68,68,0.06)" stroke="#fca5a5" stroke-width="1.5" stroke-dasharray="5 3"/>
+              <text x="310" y="40" text-anchor="middle" font-size="14" font-weight="600" fill="#b91c1c">Investigation ✗</text>
+            </svg>
+          </div>
+          <div class="card card-accent-teal anim a-up d7" style="font-size:17px;">
+            <strong>You do not need fewer findings. You need fewer investigations per decision.</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 7: ALTERNATIVES -->
+      <section class="slide" data-slide="7">
+        <div class="slide-inner">
+          <p class="label anim a-up d0">ALTERNATIVES ANALYSIS</p>
+          <h2 class="slide-title anim a-up d1">Three credible paths. One recommendation.</h2>
+          <div class="three-col" style="margin: 14px 0;">
+            <div class="alt-card card-top-accent-red anim a-pop d2">
+              <span class="alt-badge rejected">REJECTED</span>
+              <h3 style="font-size:16px; margin:0 0 6px 0;">Better Detection Precision</h3>
+              <p style="margin:0;color:#6b7280;font-size:14px;">Even 100% precision still generates alerts requiring manual investigation.</p>
+            </div>
+            <div class="alt-card card-top-accent-amber anim a-pop d3">
+              <span class="alt-badge complementary">COMPLEMENTARY</span>
+              <h3 style="font-size:16px; margin:0 0 6px 0;">Risk-Based Monitoring Tiers</h3>
+              <p style="margin:0;color:#6b7280;font-size:14px;">High → continuous, Medium → monthly, Low → quarterly. Reduces volume at source.</p>
+            </div>
+            <div class="alt-card card-top-accent-teal anim a-pop d4">
+              <span class="alt-badge chosen">CHOSEN ✓</span>
+              <h3 style="font-size:16px; margin:0 0 6px 0;">Merchant Risk Co-Pilot</h3>
+              <p style="margin:0;color:#6b7280;font-size:14px;">Attacks root cause: structural mismatch. Solves throughput and cognitive switching.</p>
+            </div>
+          </div>
+          <p class="text-xs text-bold c-gray anim a-fade d5" style="margin: 10px 0 6px;">Risk-Based Tiers — Honest Analysis</p>
+          <div class="tiers-grid anim a-up d5">
+            <div class="card" style="padding:14px 16px;">
+              <p style="font-size:14px;font-weight:600;color:#047857;margin:0 0 6px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.5" style="vertical-align:middle;margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Why It's Strong
+              </p>
+              <ul class="tier-list">
+                <li><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Reduces alert volume at the source</li>
+                <li><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>No workflow change required</li>
+                <li><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Zero adoption friction</li>
+                <li><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Respects internal data constraint</li>
+              </ul>
+            </div>
+            <div class="card" style="padding:14px 16px;">
+              <p style="font-size:14px;font-weight:600;color:#b91c1c;margin:0 0 6px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2.5" style="vertical-align:middle;margin-right:4px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Where It Falls Short
+              </p>
+              <ul class="tier-list">
+                <li><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Reduces count, not per-case effort</li>
+                <li><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Miscategorization → regulatory risk</li>
+                <li><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Static tiering, no learning loop</li>
+                <li><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>No workflow evolution for analysts</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 8: STRATEGIC INSIGHT -->
+      <section class="slide" data-slide="8">
+        <div class="slide-inner">
+          <p class="label anim a-up d0">STRATEGIC INSIGHT</p>
+          <h2 class="slide-title anim a-up d1">These are not competing solutions.</h2>
+          <p class="slide-subtitle anim a-fade d2 text-center" style="font-size:20px; margin-bottom:14px;">They are complementary layers in the same system.</p>
+          <div class="combo-visual">
+            <div class="combo-box indigo anim a-left d3">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" style="margin:0 auto 6px;display:block;"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+              <strong>Risk-based tiers</strong><br><span class="text-xs c-gray">Reduce incoming volume</span>
+            </div>
+            <span class="combo-plus anim a-scale d4">+</span>
+            <div class="combo-box teal anim a-right d5">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" style="margin:0 auto 6px;display:block;"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              <strong>Co-Pilot</strong><br><span class="text-xs c-gray">Maximize investigation efficiency</span>
+            </div>
+            <span class="combo-eq anim a-scale d6">=</span>
+            <div class="combo-result anim a-scale d7">Full-system<br>scalability</div>
+          </div>
+          <div class="card anim a-up d8" style="font-size:16px; margin-top:14px;">
+            <strong>Recommended Approach:</strong>
+            <span class="c-indigo">①</span> Launch Co-Pilot → prove efficiency →
+            <span class="c-teal">②</span> Introduce tiers → reduce volume → amplify impact
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 9: SOLUTION -->
+      <section class="slide" data-slide="9">
+        <div class="slide-inner">
+          <p class="label anim a-up d0">THE SOLUTION</p>
+          <h2 class="slide-title anim a-up d1">A new operating model for investigations.</h2>
+          <p class="slide-subtitle anim a-fade d2">Not a feature list. A workflow redesign.</p>
+          <div class="sol-grid" style="margin: 14px 0;">
+            <div class="sol-card anim a-left d3">
+              <div class="sol-icon a">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+              </div>
+              <div class="sol-body">
+                <div class="title">Change the unit of work</div>
+                <div class="desc">Raw alerts → structured cases grouped by violation type. One investigation logic across multiple merchants.</div>
+              </div>
+            </div>
+            <div class="sol-card anim a-right d3">
+              <div class="sol-icon b">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+              </div>
+              <div class="sol-body">
+                <div class="title">Pre-load context</div>
+                <div class="desc">Evidence pack auto-assembled: Compass Score, EverC risk graph, merchant history.</div>
+              </div>
+            </div>
+            <div class="sol-card anim a-left d5">
+              <div class="sol-icon c">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+              </div>
+              <div class="sol-body">
+                <div class="title">Constrain the decision</div>
+                <div class="desc">Targeted verification checklist: exactly what internal data to verify for this violation type.</div>
+              </div>
+            </div>
+            <div class="sol-card anim a-right d5">
+              <div class="sol-icon d">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 2a10 10 0 110 20 10 10 0 010-20z"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+              <div class="sol-body">
+                <div class="title">Accelerate understanding</div>
+                <div class="desc">AI case summary on demand. Plain-language context in 20 seconds. Click only — prevents bias.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 10: BEFORE/AFTER -->
+      <section class="slide" data-slide="10">
+        <div class="slide-inner">
+          <p class="label anim a-up d0">THE TRANSFORMATION</p>
+          <h2 class="slide-title anim a-up d1">Same alerts. Different system. 3× output.</h2>
+          <div class="ba-grid" style="margin: 18px 0;">
+            <div class="ba-col">
+              <div class="ba-header before anim a-left d2">WITHOUT CO-PILOT</div>
+              <div class="ba-item anim a-left d3"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> 47 unstructured alerts, random</div>
+              <div class="ba-item anim a-left d4"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Opens cold — no context</div>
+              <div class="ba-item anim a-left d5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Pull history from 3+ tools</div>
+              <div class="ba-item anim a-left d6"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Figure out what to check</div>
+              <div class="ba-item anim a-left d7"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> 40–60 min per case</div>
+              <div class="ba-item anim a-left d8"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Queue never empties</div>
+            </div>
+            <div class="ba-arrows">
+              <span class="ba-arrow-icon anim a-scale d3">→</span>
+              <span class="ba-arrow-icon anim a-scale d4">→</span>
+              <span class="ba-arrow-icon anim a-scale d5">→</span>
+              <span class="ba-arrow-icon anim a-scale d6">→</span>
+              <span class="ba-arrow-icon anim a-scale d7">→</span>
+              <span class="ba-arrow-icon anim a-scale d8">→</span>
+            </div>
+            <div class="ba-col">
+              <div class="ba-header after anim a-right d2">WITH CO-PILOT</div>
+              <div class="ba-item anim a-right d3"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 3 grouped batches by type</div>
+              <div class="ba-item anim a-right d4"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> AI summary in 20 seconds</div>
+              <div class="ba-item anim a-right d5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Evidence pack pre-assembled</div>
+              <div class="ba-item anim a-right d6"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Checklist: 3 things to verify</div>
+              <div class="ba-item anim a-right d7"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 8–12 min per case</div>
+              <div class="ba-item anim a-right d8"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Queue empty by noon</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 11: MVP -->
+      <section class="slide" data-slide="11">
+        <div class="slide-inner">
+          <p class="label anim a-up d0">MVP</p>
+          <h2 class="slide-title anim a-up d1">Sequenced by dependency, not priority.</h2>
+          <p class="slide-subtitle anim a-fade d2">Each layer enables the next.</p>
+          <div class="mvp-timeline">
+            <div class="mvp-item anim a-left d3">
+              <div class="mvp-dot">1</div>
+              <div class="mvp-text"><div class="title">Violation-Type Grouping</div><div class="desc">Foundation. Without this, nothing else delivers full value.</div></div>
+            </div>
+            <div class="mvp-item anim a-left d4">
+              <div class="mvp-dot">2</div>
+              <div class="mvp-text"><div class="title">Evidence Pack</div><div class="desc">Pre-loads context. Eliminates 3-tool manual lookup.</div></div>
+            </div>
+            <div class="mvp-item anim a-left d5">
+              <div class="mvp-dot">3</div>
+              <div class="mvp-text"><div class="title">Verification Checklist</div><div class="desc">Constrains the decision. Tells analyst exactly what to check.</div></div>
+            </div>
+            <div class="mvp-item anim a-left d6">
+              <div class="mvp-dot">4</div>
+              <div class="mvp-text"><div class="title">Risk-Tier Routing + Audit</div><div class="desc">Critical/High surface first. Full audit trail for compliance.</div></div>
+            </div>
+            <div class="mvp-item anim a-left d7">
+              <div class="mvp-dot">5</div>
+              <div class="mvp-text"><div class="title">AI Case Summary</div><div class="desc">Last because it depends on structured data from layers 1–4.</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 12: ROADMAP -->
+      <section class="slide" data-slide="12">
+        <div class="slide-inner">
+          <p class="label anim a-up d0">ROADMAP</p>
+          <h2 class="slide-title anim a-up d1">Four phases. Each gated by a signal — not a date.</h2>
+          <div class="road-grid">
+            <div class="road-card anim a-up d2">
+              <div class="road-name">Phase 0 — Discover</div>
+              <div class="road-dur">4–6 weeks</div>
+              <div class="road-line"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" style="vertical-align:middle;margin-right:3px;"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>Shadow analysts, capture baselines</div>
+              <div class="road-line"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" style="vertical-align:middle;margin-right:3px;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>How analysts actually work</div>
+              <div class="road-gate">Gate → Partners committed</div>
+            </div>
+            <div class="road-card anim a-up d4">
+              <div class="road-name">Phase 1 — MVP</div>
+              <div class="road-dur">3–4 months</div>
+              <div class="road-line"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" style="vertical-align:middle;margin-right:3px;"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>5 MVP features, partners only</div>
+              <div class="road-line"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" style="vertical-align:middle;margin-right:3px;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Does grouping reduce switches?</div>
+              <div class="road-gate">Gate → Measurable improvement</div>
+            </div>
+            <div class="road-card anim a-up d6">
+              <div class="road-name">Phase 2 — Deepen</div>
+              <div class="road-dur">4–6 months</div>
+              <div class="road-line"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" style="vertical-align:middle;margin-right:3px;"><path d="M12 2a10 10 0 110 20 10 10 0 010-20z"/><path d="M12 6v6l4 2"/></svg>AI insights, remediation, rollout</div>
+              <div class="road-line"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" style="vertical-align:middle;margin-right:3px;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Do customers increase volume?</div>
+              <div class="road-gate">Gate → Screening requests rising</div>
+            </div>
+            <div class="road-card anim a-up d8">
+              <div class="road-name">Phase 3 — Scale</div>
+              <div class="road-dur">Ongoing</div>
+              <div class="road-line"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" style="vertical-align:middle;margin-right:3px;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>Full rollout, priced distinct</div>
+              <div class="road-line"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" style="vertical-align:middle;margin-right:3px;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Does the system compound?</div>
+              <div class="road-gate">Gate → Portfolio expansion</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 13: WHY IT WINS -->
+      <section class="slide" data-slide="13">
+        <div class="slide-inner">
+          <p class="label anim a-up d0">STRATEGIC ADVANTAGE</p>
+          <h2 class="slide-title anim a-up d1">Why the Co-Pilot wins.</h2>
+          <div class="win-grid" style="margin: 16px 0;">
+            <div class="win-card anim a-pop d2">
+              <div class="win-icon teal"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+              Solves both volume and investigation time
+            </div>
+            <div class="win-card anim a-pop d3">
+              <div class="win-icon indigo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+              Works within the internal-data constraint
+            </div>
+            <div class="win-card anim a-pop d4">
+              <div class="win-icon indigo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1.08-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
+              Improves workflow — doesn't shift work
+            </div>
+            <div class="win-card anim a-pop d5">
+              <div class="win-icon teal"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></div>
+              Compounds in value via feedback loop
+            </div>
+            <div class="win-card anim a-pop d6">
+              <div class="win-icon indigo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+              Supports both UI and API customers
+            </div>
+            <div class="win-card anim a-pop d7">
+              <div class="win-icon teal"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+              Amplified by risk-based tiers as second layer
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 14: METRICS -->
+      <section class="slide" data-slide="14">
+        <div class="slide-inner">
+          <p class="label anim a-up d0">METRICS</p>
+          <h2 class="slide-title anim a-up d1">One north star. One guardrail. One growth signal.</h2>
+          <div class="met-grid" style="margin: 18px 0;">
+            <div class="met-card card-top-accent-teal anim a-up d2">
+              <div class="met-tag c-teal">NORTH STAR</div>
+              <div class="met-name">Alerts investigated per analyst per week</div>
+              <div class="met-body">Direct expression of the scalability problem. If this moves, the Co-Pilot is working.</div>
+              <div class="met-how">Case open → decision timestamp, per analyst</div>
+              <div class="met-bar"><div class="met-bar-fill" style="--target-width:85%; background: linear-gradient(90deg, #0d9488, #4f46e5);"></div></div>
+            </div>
+            <div class="met-card card-top-accent-indigo anim a-up d4">
+              <div class="met-tag c-indigo">GUARDRAIL</div>
+              <div class="met-name">Case creation to decision time</div>
+              <div class="met-body">Speed gains must not come at the cost of SLA discipline or decision quality.</div>
+              <div class="met-how">Both timestamps owned by G2RS, per tier</div>
+              <div class="met-bar"><div class="met-bar-fill" style="--target-width:60%; background: linear-gradient(90deg, #4f46e5, #7c3aed);"></div></div>
+            </div>
+            <div class="met-card card-top-accent-teal anim a-up d6">
+              <div class="met-tag c-teal">GROWTH SIGNAL</div>
+              <div class="met-name">Screening requests per customer per week</div>
+              <div class="met-body">If customers self-limited before, this rises as Co-Pilot gives them confidence.</div>
+              <div class="met-how">Measured directly in G2RS API. Baseline from Phase 0</div>
+              <div class="met-bar"><div class="met-bar-fill" style="--target-width:40%; background: linear-gradient(90deg, #0d9488, #10b981);"></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 15: CLOSING -->
+      <section class="slide" data-slide="15">
+        <div class="slide-inner" style="background: linear-gradient(180deg, rgba(79,70,229,0.03) 0%, #fff 100%);">
+          <div class="gradient-line anim a-scale d0"></div>
+          <p class="close-quote anim a-up d1">"Without the Co-Pilot, G2RS growth is capped by analyst capacity."</p>
+          <p class="close-punch anim a-up d3">With it, growth is capped by market size.</p>
+          <p class="close-final anim a-up d5">That is a category shift — not a feature improvement.</p>
+          <div class="illust anim a-scale d7" style="margin-top: 20px;">
+            <svg width="280" height="56" viewBox="0 0 280 56" fill="none">
+              <rect x="0" y="24" width="110" height="10" rx="5" fill="#ef444433"/>
+              <text x="55" y="18" text-anchor="middle" font-size="12" fill="#b91c1c" font-weight="600">CAPACITY-CAPPED</text>
+              <path d="M120 29 L155 29" stroke="#c4b5fd" stroke-width="2" marker-end="url(#arrowEnd)"/>
+              <rect x="170" y="24" width="110" height="10" rx="5" fill="url(#closeGrad)"/>
+              <text x="225" y="18" text-anchor="middle" font-size="12" fill="#047857" font-weight="600">MARKET-CAPPED</text>
+              <defs>
+                <linearGradient id="closeGrad" x1="120" y1="0" x2="200" y2="0"><stop offset="0%" stop-color="#4f46e5"/><stop offset="100%" stop-color="#0d9488"/></linearGradient>
+                <marker id="arrowEnd" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#c4b5fd"/></marker>
+              </defs>
+            </svg>
+          </div>
+          <p class="close-meta anim a-fade d8" style="margin-top: 16px;">Merchant Risk Co-Pilot · G2RS / EverC · March 2026</p>
+        </div>
+      </section>
+    </main>
+
+    <div class="nav-bar">
+      <span class="slide-counter" id="slideCounter">1 / 15</span>
+      <div class="nav-buttons">
+        <button class="nav-btn" id="prevBtn" disabled>←</button>
+        <button class="nav-btn" id="nextBtn">→</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const total = slides.length;
+    let current = 0;
+    const progressFill = document.getElementById('progressFill');
+    const slideCounter = document.getElementById('slideCounter');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function goTo(idx) {
+      if (idx < 0 || idx >= total || idx === current) return;
+      slides[current].classList.remove('active');
+      slides[idx].classList.add('active');
+      current = idx;
+      renderNav();
+    }
+
+    function renderNav() {
+      progressFill.style.width = ((current + 1) / total * 100) + '%';
+      slideCounter.textContent = (current + 1) + ' / ' + total;
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === total - 1;
+    }
+
+    prevBtn.addEventListener('click', () => goTo(current - 1));
+    nextBtn.addEventListener('click', () => goTo(current + 1));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') { e.preventDefault(); goTo(Math.min(current + 1, total - 1)); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goTo(Math.max(current - 1, 0)); }
+      else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+      else if (e.key === 'End') { e.preventDefault(); goTo(total - 1); }
+    });
+
+    let tx = 0;
+    document.addEventListener('touchstart', e => { tx = e.changedTouches[0].screenX; }, { passive: true });
+    document.addEventListener('touchend', e => {
+      const d = tx - e.changedTouches[0].screenX;
+      if (Math.abs(d) > 50) { d > 0 ? goTo(Math.min(current + 1, total - 1)) : goTo(Math.max(current - 1, 0)); }
+    }, { passive: true });
+
+    renderNav();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>G2RS Risk Co-Pilot</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0B1F3A;
+    --navy-light: #152d52;
+    --teal: #00A878;
+    --teal-dark: #008a62;
+    --teal-light: #e6f7f3;
+    --white: #ffffff;
+    --gray-50: #F8FAFC;
+    --gray-100: #F1F5F9;
+    --gray-200: #E2E8F0;
+    --gray-300: #CBD5E1;
+    --gray-400: #94A3B8;
+    --gray-500: #64748B;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1E293B;
+    --text: #1A2B3C;
+    --critical: #DC2626;
+    --critical-bg: #FEF2F2;
+    --critical-border: #FECACA;
+    --high: #EA580C;
+    --high-bg: #FFF7ED;
+    --high-border: #FED7AA;
+    --medium: #D97706;
+    --medium-bg: #FFFBEB;
+    --medium-border: #FDE68A;
+    --low: #16A34A;
+    --low-bg: #F0FDF4;
+    --low-border: #BBF7D0;
+    --info: #2563EB;
+    --info-bg: #EFF6FF;
+    --info-border: #BFDBFE;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+    --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+    --radius: 8px;
+    --radius-sm: 6px;
+    --radius-lg: 12px;
+  }
+
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--gray-50);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* API Key Modal */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(11,31,58,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.hidden { display: none; }
+
+  .modal {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    width: 480px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  }
+
+  .modal-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .modal-logo-mark {
+    width: 36px; height: 36px;
+    background: var(--navy);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: -0.5px;
+  }
+
+  .modal-logo-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  .modal h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+
+  .modal p {
+    color: var(--gray-500);
+    font-size: 13px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .modal-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    margin-bottom: 16px;
+  }
+  .modal-input:focus { border-color: var(--teal); }
+  .modal-input::placeholder { color: var(--gray-400); }
+
+  .modal-btn {
+    width: 100%;
+    padding: 11px;
+    background: var(--navy);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .modal-btn:hover { background: var(--navy-light); }
+
+  /* MAIN LAYOUT */
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* TOP NAV */
+  .topnav {
+    background: var(--navy);
+    height: 52px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 16px;
+    flex-shrink: 0;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.08);
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -0.3px;
+  }
+
+  .nav-logo-mark {
+    width: 28px; height: 28px;
+    background: var(--teal);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.5px;
+  }
+
+  .nav-badge {
+    margin-left: 4px;
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.6);
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .nav-spacer { flex: 1; }
+
+  .nav-stats {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .nav-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255,255,255,0.6);
+    font-size: 12px;
+  }
+
+  .nav-stat-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+
+  .nav-stat-dot.critical { background: var(--critical); }
+  .nav-stat-dot.high { background: var(--high); }
+  .nav-stat-dot.medium { background: var(--medium); }
+
+  .nav-url-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: var(--radius-sm);
+    padding: 4px 4px 4px 12px;
+  }
+
+  .nav-url-input input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    width: 220px;
+  }
+  .nav-url-input input::placeholder { color: rgba(255,255,255,0.35); }
+
+  .nav-analyze-btn {
+    background: var(--teal);
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .nav-analyze-btn:hover { background: var(--teal-dark); }
+
+  /* MAIN CONTENT AREA */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* LEFT SIDEBAR */
+  .sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background: white;
+    border-right: 1px solid var(--gray-200);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidebar-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .sidebar-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+
+  .sidebar-count {
+    font-size: 11px;
+    color: var(--gray-400);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .sidebar-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+  }
+  .sidebar-body::-webkit-scrollbar { width: 4px; }
+  .sidebar-body::-webkit-scrollbar-track { background: transparent; }
+  .sidebar-body::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 2px; }
+
+  /* Violation groups */
+  .vgroup {
+    margin-bottom: 4px;
+  }
+
+  .vgroup-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    user-select: none;
+    background: var(--gray-50);
+    margin-bottom: 2px;
+    border: 1px solid var(--gray-200);
+  }
+
+  .vgroup-header:hover { background: var(--gray-100); }
+
+  .vgroup-icon { font-size: 13px; }
+
+  .vgroup-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    flex: 1;
+  }
+
+  .vgroup-meta {
+    font-size: 10px;
+    color: var(--gray-400);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .vgroup-chevron {
+    font-size: 10px;
+    color: var(--gray-400);
+    transition: transform 0.15s;
+  }
+  .vgroup.collapsed .vgroup-chevron { transform: rotate(-90deg); }
+  .vgroup.collapsed .vgroup-alerts { display: none; }
+
+  /* Alert cards */
+  .alert-card {
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--gray-200);
+    margin-bottom: 4px;
+    cursor: pointer;
+    transition: all 0.12s;
+    background: white;
+    position: relative;
+  }
+
+  .alert-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 4px 0 0 4px;
+    opacity: 0;
+    transition: opacity 0.12s;
+  }
+
+  .alert-card:hover { border-color: var(--gray-300); background: var(--gray-50); }
+
+  .alert-card.selected {
+    border-color: var(--teal);
+    background: var(--teal-light);
+  }
+  .alert-card.selected::before { opacity: 1; background: var(--teal); }
+
+  .alert-card.critical-card::before { background: var(--critical); }
+  .alert-card.critical-card.selected { border-color: var(--critical); background: var(--critical-bg); }
+
+  .alert-row1 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .alert-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .sev-badge {
+    font-size: 9px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .sev-critical { background: var(--critical-bg); color: var(--critical); border: 1px solid var(--critical-border); }
+  .sev-high { background: var(--high-bg); color: var(--high); border: 1px solid var(--high-border); }
+  .sev-medium { background: var(--medium-bg); color: var(--medium); border: 1px solid var(--medium-border); }
+  .sev-low { background: var(--low-bg); color: var(--low); border: 1px solid var(--low-border); }
+
+  .alert-meta {
+    font-size: 11px;
+    color: var(--gray-500);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .alert-pattern {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .pattern-escalating { color: var(--high); }
+  .pattern-recurring { color: var(--critical); }
+  .pattern-first { color: var(--gray-400); }
+  .pattern-new { color: var(--critical); }
+
+  /* RIGHT PANEL */
+  .right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--gray-50);
+  }
+
+  /* Empty state */
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: var(--gray-400);
+    padding: 40px;
+  }
+
+  .empty-icon {
+    width: 56px; height: 56px;
+    border: 2px dashed var(--gray-200);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+
+  .empty-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--gray-500);
+  }
+
+  .empty-sub {
+    font-size: 13px;
+    color: var(--gray-400);
+    text-align: center;
+    max-width: 280px;
+    line-height: 1.6;
+  }
+
+  /* Case view */
+  .case-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* Case header */
+  .case-header {
+    background: white;
+    border-bottom: 1px solid var(--gray-200);
+    padding: 16px 24px;
+    flex-shrink: 0;
+  }
+
+  .case-header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .case-merchant-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--navy);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 4px;
+  }
+
+  .case-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .case-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--gray-500);
+  }
+
+  .case-meta-label { color: var(--gray-400); }
+
+  .pattern-banner {
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .pattern-banner.escalating {
+    background: var(--high-bg);
+    border: 1px solid var(--high-border);
+    color: var(--high);
+  }
+
+  .pattern-banner.recurring {
+    background: var(--critical-bg);
+    border: 1px solid var(--critical-border);
+    color: var(--critical);
+  }
+
+  .pattern-banner.first {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    color: var(--gray-500);
+  }
+
+  .pattern-banner.new-merchant {
+    background: var(--critical-bg);
+    border: 1px solid var(--critical-border);
+    color: var(--critical);
+  }
+
+  /* Decision buttons in header */
+  .decision-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.12s;
+    border: 1.5px solid transparent;
+  }
+
+  .btn-terminate {
+    background: var(--critical-bg);
+    border-color: var(--critical-border);
+    color: var(--critical);
+  }
+  .btn-terminate:hover { background: #fee2e2; }
+
+  .btn-engage {
+    background: var(--high-bg);
+    border-color: var(--high-border);
+    color: var(--high);
+  }
+  .btn-engage:hover { background: #fed7aa; }
+
+  .btn-accept {
+    background: var(--low-bg);
+    border-color: var(--low-border);
+    color: var(--low);
+  }
+  .btn-accept:hover { background: #dcfce7; }
+
+  .btn-primary {
+    background: var(--navy);
+    color: white;
+    border-color: var(--navy);
+  }
+  .btn-primary:hover { background: var(--navy-light); }
+
+  /* Case body — two columns */
+  .case-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    gap: 0;
+  }
+
+  /* LEFT COLUMN — merchant intel + history */
+  .col-left {
+    width: 340px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--gray-200);
+    overflow-y: auto;
+    padding: 16px;
+    background: white;
+  }
+  .col-left::-webkit-scrollbar { width: 4px; }
+  .col-left::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 2px; }
+
+  /* RIGHT COLUMN — tabs for investigation */
+  .col-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--gray-50);
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--gray-200);
+    background: white;
+    padding: 0 16px;
+    flex-shrink: 0;
+  }
+
+  .tab {
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-500);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.12s;
+    white-space: nowrap;
+  }
+
+  .tab:hover { color: var(--navy); }
+
+  .tab.active {
+    color: var(--navy);
+    border-bottom-color: var(--teal);
+  }
+
+  .tab-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+  }
+  .tab-content::-webkit-scrollbar { width: 4px; }
+  .tab-content::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 2px; }
+
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  /* Cards */
+  .card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .card-title {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--gray-400);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card-title.teal { color: var(--teal-dark); }
+  .card-title.navy { color: var(--navy); }
+
+  /* AI Summary streaming */
+  .ai-summary-text {
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.7;
+    min-height: 40px;
+  }
+
+  .streaming-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 14px;
+    background: var(--teal);
+    animation: blink 0.8s infinite;
+    vertical-align: text-bottom;
+    margin-left: 1px;
+  }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+  /* EverC signals */
+  .signal-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--gray-100);
+    font-size: 12px;
+  }
+  .signal-row:last-child { border-bottom: none; }
+  .signal-label { color: var(--gray-500); }
+  .signal-value { font-weight: 500; color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; }
+  .signal-value.warning { color: var(--high); }
+  .signal-value.ok { color: var(--low); }
+
+  /* Timeline */
+  .timeline {
+    position: relative;
+    padding-left: 20px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px; top: 6px; bottom: 6px;
+    width: 1px;
+    background: var(--gray-200);
+  }
+
+  .tl-item {
+    position: relative;
+    margin-bottom: 14px;
+    animation: fadeSlide 0.3s ease both;
+  }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateX(-4px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .tl-dot {
+    position: absolute;
+    left: -17px;
+    top: 4px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 0 1px var(--gray-200);
+  }
+
+  .tl-dot.clean { background: var(--low); box-shadow: 0 0 0 1px var(--low-border); }
+  .tl-dot.violation { background: var(--critical); box-shadow: 0 0 0 1px var(--critical-border); }
+  .tl-dot.warning { background: var(--medium); box-shadow: 0 0 0 1px var(--medium-border); }
+  .tl-dot.current { background: var(--info); box-shadow: 0 0 0 3px var(--info-bg); }
+
+  .tl-date {
+    font-size: 10px;
+    color: var(--gray-400);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 2px;
+  }
+
+  .tl-event {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .tl-detail {
+    font-size: 11px;
+    color: var(--gray-500);
+    margin-top: 2px;
+  }
+
+  .tl-current-badge {
+    display: inline-block;
+    background: var(--info);
+    color: white;
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+    margin-left: 6px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  /* Checklist */
+  .checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--gray-200);
+    margin-bottom: 8px;
+    background: var(--gray-50);
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+
+  .checklist-item:hover { border-color: var(--teal); background: var(--teal-light); }
+  .checklist-item.checked { border-color: var(--low-border); background: var(--low-bg); }
+
+  .check-box {
+    width: 16px; height: 16px;
+    border: 1.5px solid var(--gray-300);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.12s;
+  }
+
+  .checklist-item.checked .check-box {
+    background: var(--low);
+    border-color: var(--low);
+    color: white;
+    font-size: 10px;
+  }
+
+  .check-text {
+    font-size: 12px;
+    color: var(--gray-700);
+    line-height: 1.5;
+  }
+
+  .check-why {
+    font-size: 11px;
+    color: var(--gray-400);
+    margin-top: 2px;
+  }
+
+  /* AI Insights */
+  .ai-insights-btn {
+    width: 100%;
+    padding: 10px 16px;
+    background: var(--info-bg);
+    border: 1.5px solid var(--info-border);
+    border-radius: var(--radius-sm);
+    color: var(--info);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.12s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .ai-insights-btn:hover { background: #dbeafe; }
+
+  .insights-panel {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .insights-panel.visible { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .outcome-bars {
+    margin-bottom: 4px;
+  }
+
+  .outcome-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .outcome-bar-label {
+    font-size: 12px;
+    color: var(--gray-600);
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  .outcome-bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--gray-100);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .outcome-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.8s ease;
+  }
+
+  .fill-terminate { background: var(--critical); }
+  .fill-engage { background: var(--medium); }
+  .fill-accept { background: var(--low); }
+
+  .outcome-pct {
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    width: 32px;
+    text-align: right;
+    color: var(--gray-600);
+  }
+
+  .recommendation-box {
+    background: var(--navy);
+    color: white;
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-top: 12px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .rec-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 6px;
+  }
+
+  .rec-text { color: rgba(255,255,255,0.9); }
+
+  /* Rationale */
+  .rationale-text {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .rationale-text:focus { border-color: var(--teal); }
+
+  .approve-btn {
+    width: 100%;
+    padding: 11px;
+    background: var(--teal);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-top: 12px;
+  }
+  .approve-btn:hover { background: var(--teal-dark); }
+
+  /* Policy reference */
+  .policy-box {
+    border-left: 3px solid var(--navy);
+    padding: 10px 14px;
+    background: var(--gray-50);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 12px;
+    color: var(--gray-700);
+    line-height: 1.6;
+  }
+
+  .policy-ref {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--navy);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  /* Loading state */
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 16px;
+    color: var(--gray-400);
+    padding: 40px;
+  }
+
+  .loading-spinner {
+    width: 32px; height: 32px;
+    border: 2px solid var(--gray-200);
+    border-top-color: var(--teal);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .loading-step {
+    font-size: 12px;
+    color: var(--gray-400);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .loading-step.visible { opacity: 1; color: var(--gray-600); }
+  .loading-step.done { opacity: 0.4; }
+
+  /* Compass score pill */
+  .compass-score {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+  }
+  .compass-score.low-risk { background: var(--low-bg); color: var(--low); border: 1px solid var(--low-border); }
+  .compass-score.med-risk { background: var(--medium-bg); color: var(--medium); border: 1px solid var(--medium-border); }
+  .compass-score.high-risk { background: var(--high-bg); color: var(--high); border: 1px solid var(--high-border); }
+  .compass-score.crit-risk { background: var(--critical-bg); color: var(--critical); border: 1px solid var(--critical-border); }
+
+  /* Powered by label */
+  .powered-by {
+    font-size: 10px;
+    color: var(--gray-300);
+    text-align: center;
+    padding: 8px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .teal-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--teal);
+    border-radius: 50%;
+    animation: pulse-dot 2s infinite;
+    vertical-align: middle;
+    margin-right: 4px;
+  }
+  @keyframes pulse-dot {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Template label */
+  .template-label {
+    font-size: 10px;
+    background: var(--teal-light);
+    color: var(--teal-dark);
+    border: 1px solid rgba(0,168,120,0.2);
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<!-- API Key Modal -->
+<div class="modal-overlay" id="apiModal">
+  <div class="modal">
+    <div class="modal-logo">
+      <div class="modal-logo-mark">G2</div>
+      <div class="modal-logo-text">Risk Co-Pilot</div>
+    </div>
+    <h2>Launch the demo</h2>
+    <p>Enter your Anthropic API key for live AI analysis, or run in demo mode with pre-loaded responses.</p>
+    <input type="password" class="modal-input" id="apiKeyInput" placeholder="sk-ant-api03-... (optional)" />
+    <button class="modal-btn" onclick="startDemo()" style="margin-bottom:10px">Launch with Live AI →</button>
+    <button class="modal-btn" onclick="startDemoMode()" style="background:var(--gray-100); color:var(--gray-700); border:1.5px solid var(--gray-200);">Launch in Demo Mode (no API key)</button>
+    <p style="margin-top:12px; font-size:11px; color:var(--gray-400); text-align:center">API key from console.anthropic.com · Stored in memory only</p>
+  </div>
+</div>
+
+<!-- Main App -->
+<div class="app" id="mainApp" style="display:none">
+
+  <!-- Top Nav -->
+  <nav class="topnav">
+    <div class="nav-logo">
+      <div class="nav-logo-mark">G2</div>
+      Risk Co-Pilot
+      <span class="nav-badge">BETA</span>
+    </div>
+    <div class="nav-stats">
+      <div class="nav-stat">
+        <div class="nav-stat-dot critical"></div>
+        2 Critical
+      </div>
+      <div class="nav-stat">
+        <div class="nav-stat-dot high"></div>
+        1 High
+      </div>
+      <div class="nav-stat">
+        <div class="nav-stat-dot medium"></div>
+        2 Medium
+      </div>
+    </div>
+    <div class="nav-spacer"></div>
+    <div class="nav-url-input">
+      <input type="text" id="urlInput" placeholder="Analyze any merchant URL..." />
+      <button class="nav-analyze-btn" onclick="analyzeURL()">Analyze →</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main">
+
+    <!-- Left Sidebar — Violation Queue -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-title">Violation Queue</span>
+        <span class="sidebar-count">5 alerts · grouped</span>
+      </div>
+      <div class="sidebar-body" id="sidebarBody">
+        <!-- Groups injected by JS -->
+      </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="right-panel" id="rightPanel">
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-title">No case selected</div>
+        <div class="empty-sub">Select a violation alert from the queue to open the merchant investigation view, or analyze any URL using the bar above.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let apiKey = '';
+  let demoMode = false;
+
+  const demoSummaries = {
+    betwin365: "Merchant betwin365.com was onboarded as a sports equipment retailer but has been detected serving gambling content for the third consecutive month, with violations now prominently displayed on the front page. The escalating pattern — from sidebar placement to front-page exposure across three monitoring cycles — strongly suggests deliberate policy evasion rather than an inadvertent error. Given the prior warning acknowledgment and continued recurrence, this merchant appears to be intentionally maintaining a dual-use site.",
+    jackpotstore: "Merchant jackpotstore.io declared itself as an online retail store but a gambling content flag has appeared for the first time this cycle, with a moderate confidence score of 0.81. The content appears in a sidebar rather than a product listing, suggesting this may be an advertising injection or third-party widget rather than an active gambling operation. Given the merchant's six-month clean history and ambiguous placement, outreach to clarify the content source is the appropriate first response.",
+    pharmadir: "Merchant pharmadir.com was originally flagged for prescription drug content eight months ago, formally warned, confirmed remediation, and cleared — but has now returned to the same violation with higher volume across multiple product pages. This recurring pattern following documented acknowledgment is a strong indicator of bad-faith compliance: the merchant removed content under pressure and reinstated it once monitoring pressure appeared to ease. The return at higher volume makes this significantly more serious than the original detection.",
+    cleanmeds: "Merchant cleanmeds.co has maintained a clean compliance record across 14 consecutive monthly scans since onboarding, with a low Compass Score of 38 reflecting a consistently low-risk profile. A single prescription drug flag has appeared on one product page this cycle, which given the merchant's established clean history is most consistent with an inadvertent new product listing not yet reviewed against AUP requirements. The probability of deliberate policy breach from a merchant with this compliance history is low, making outreach the appropriate first response.",
+    luxreplica: "Merchant luxreplica.co was flagged at borderline confidence during onboarding just three months ago but was conditionally approved — and has since escalated to active counterfeit listings across multiple luxury brands including Gucci, Louis Vuitton, and Chanel. The EverC risk graph shows three connections to known counterfeit distribution networks, and an independent brand enforcement action filed by Gucci in April provides external verification of the IP infringement. This merchant's trajectory from borderline onboarding to active brand enforcement in three months represents one of the clearest termination cases in the current queue.",
+  };
+
+  function startDemoMode() {
+    demoMode = true;
+    apiKey = '';
+    document.getElementById('apiModal').classList.add('hidden');
+    document.getElementById('mainApp').style.display = 'flex';
+    renderSidebar();
+  }
+
+  const merchants = [
+    {
+      id: 'betwin365',
+      url: 'betwin365.com',
+      declared: 'Sports equipment retailer',
+      months: 18,
+      compassScore: 72,
+      compassClass: 'high-risk',
+      severity: 'high',
+      violationType: 'gambling',
+      violationGroup: 'Gambling',
+      violationIcon: '🎰',
+      aupClause: 'AUP §3.2 — Gambling',
+      patternType: 'escalating',
+      patternLabel: '⚠ Escalating · 3rd violation in 90 days',
+      patternBannerClass: 'escalating',
+      everc: {
+        domainAge: '14 months',
+        graphLinks: '2 known gambling connections',
+        traffic: 'Low vs transaction volume ⚠',
+        adverseMedia: 'None found',
+      },
+      timeline: [
+        { type: 'clean', date: 'Jan 2025', event: 'Monthly scan — clean', detail: 'No violations detected' },
+        { type: 'violation', date: 'Feb 2025', event: 'Gambling detected', detail: 'Warning letter sent · Merchant acknowledged' },
+        { type: 'clean', date: 'Mar 2025', event: 'Re-scan — clean', detail: 'Merchant removed content temporarily' },
+        { type: 'violation', date: 'Apr 2025', event: 'Gambling detected again', detail: 'Escalation notice sent · No response' },
+        { type: 'current', date: 'May 2025 · NOW', event: 'Gambling — front page placement', detail: '3rd recurrence · High severity · Deliberate pattern' },
+      ],
+      checklist: [
+        { text: 'Transaction volume vs declared sports equipment norms', why: 'Gambling typically shows high-frequency, low-value transactions' },
+        { text: 'Chargeback rate change since February warning', why: 'Gambling merchants often show elevated dispute rates' },
+        { text: 'February warning acknowledgment on file', why: 'Confirms merchant was formally notified — critical for termination defensibility' },
+        { text: 'Gambling license documentation', why: 'Required if merchant claims licensed jurisdiction exception' },
+      ],
+      outcomes: { terminate: 68, engage: 24, accept: 8 },
+      recommendation: 'Terminate — AUP §3.2 · 3rd recurrence following formal warning. Pattern indicates deliberate non-compliance rather than oversight.',
+      policy: 'Payment processing for gambling services is strictly prohibited unless the merchant holds a valid license in a permitted jurisdiction. Three violations following formal notice constitutes grounds for immediate termination under AUP §3.2.',
+    },
+    {
+      id: 'jackpotstore',
+      url: 'jackpotstore.io',
+      declared: 'Online retail store',
+      months: 6,
+      compassScore: 54,
+      compassClass: 'med-risk',
+      severity: 'medium',
+      violationType: 'gambling',
+      violationGroup: 'Gambling',
+      violationIcon: '🎰',
+      aupClause: 'AUP §3.2 — Gambling',
+      patternType: 'first',
+      patternLabel: '● First occurrence · 6 months in portfolio',
+      patternBannerClass: 'first',
+      everc: {
+        domainAge: '8 months',
+        graphLinks: '1 suspicious link detected',
+        traffic: 'Consistent with declared use',
+        adverseMedia: 'None found',
+      },
+      timeline: [
+        { type: 'clean', date: 'Nov 2024', event: 'Onboarded — clean', detail: 'No violations at onboarding' },
+        { type: 'clean', date: 'Dec 2024', event: 'Monthly scan — clean', detail: '' },
+        { type: 'clean', date: 'Jan 2025', event: 'Monthly scan — clean', detail: '' },
+        { type: 'current', date: 'May 2025 · NOW', event: 'Gambling content detected', detail: 'First occurrence · Sidebar placement · Low confidence 0.81' },
+      ],
+      checklist: [
+        { text: 'Transaction volume and merchant category match', why: 'Verify business model aligns with declared retail activity' },
+        { text: 'Review nature of gambling content — sidebar ad vs product', why: 'Determines whether merchant is operating gambling or hosting ads' },
+        { text: 'Check for gambling-related chargebacks or disputes', why: 'Operational signal of gambling activity' },
+      ],
+      outcomes: { terminate: 28, engage: 58, accept: 14 },
+      recommendation: 'Engage merchant — First occurrence, low confidence 0.81. Outreach to clarify content source (possible ad injection). Allow 14 days to remediate.',
+      policy: 'First-time violations with lower confidence warrant merchant outreach before escalation. Per AUP §3.2, merchants must remove prohibited content within 14 days of formal notice.',
+    },
+    {
+      id: 'pharmadir',
+      url: 'pharmadir.com',
+      declared: 'Health supplements retailer',
+      months: 14,
+      compassScore: 81,
+      compassClass: 'crit-risk',
+      severity: 'critical',
+      violationType: 'prescription',
+      violationGroup: 'Prescription Drugs',
+      violationIcon: '💊',
+      aupClause: 'AUP §4.1 — Prescription Drugs',
+      patternType: 'recurring',
+      patternLabel: '🔄 Recurring · Previously resolved · Now returned',
+      patternBannerClass: 'recurring',
+      everc: {
+        domainAge: '3 years 2 months',
+        graphLinks: 'No suspicious connections',
+        traffic: 'High — consistent with pharmacy activity',
+        adverseMedia: '1 consumer complaint board mention (2024)',
+      },
+      timeline: [
+        { type: 'clean', date: 'Mar 2024', event: 'Onboarded — clean', detail: 'Supplements declared · No prescription content' },
+        { type: 'violation', date: 'Jun 2024', event: 'Prescription drugs detected', detail: 'Formal warning issued · Merchant acknowledged in writing' },
+        { type: 'clean', date: 'Jul 2024', event: 'Remediation confirmed', detail: 'Content removed · Case closed' },
+        { type: 'clean', date: 'Aug–Feb 2025', event: 'Clean scans ×7', detail: 'Portfolio compliant for 8 months' },
+        { type: 'current', date: 'May 2025 · NOW', event: 'Prescription drugs — multiple product pages', detail: 'Recurring violation · Higher volume than first instance · Critical' },
+      ],
+      checklist: [
+        { text: 'Review transaction patterns for pharmacy-type purchases', why: 'Identify whether prescription drug sales are actively processing' },
+        { text: 'Check if merchant holds valid pharmacy license', why: 'Licensed pharmacy exception exists under AUP §4.1' },
+        { text: 'Pull original June 2024 warning acknowledgment', why: 'Confirms merchant knowingly re-introduced prohibited content' },
+        { text: 'Chargeback rate and dispute history since onboarding', why: 'Prescription drug fraud often correlates with elevated disputes' },
+      ],
+      outcomes: { terminate: 74, engage: 20, accept: 6 },
+      recommendation: 'Terminate — AUP §4.1 · Recurring violation following formal warning and documented remediation. Merchant demonstrated willingness to comply then reverted. Termination is the standard resolution.',
+      policy: 'Prescription drugs require valid pharmacy licensing. Recurring violations following documented remediation constitute bad faith and warrant immediate termination under AUP §4.1.',
+    },
+    {
+      id: 'cleanmeds',
+      url: 'cleanmeds.co',
+      declared: 'Vitamins and wellness products',
+      months: 14,
+      compassScore: 38,
+      compassClass: 'low-risk',
+      severity: 'medium',
+      violationType: 'prescription',
+      violationGroup: 'Prescription Drugs',
+      violationIcon: '💊',
+      aupClause: 'AUP §4.1 — Prescription Drugs',
+      patternType: 'first',
+      patternLabel: '● First occurrence · 14 months clean history',
+      patternBannerClass: 'first',
+      everc: {
+        domainAge: '4 years',
+        graphLinks: 'No suspicious connections',
+        traffic: 'Consistent with wellness retail',
+        adverseMedia: 'None found',
+      },
+      timeline: [
+        { type: 'clean', date: 'Mar 2024', event: 'Onboarded — clean', detail: 'Strong Compass Score · Low risk profile' },
+        { type: 'clean', date: 'Apr–Apr 2025', event: 'Clean scans ×13', detail: '14 months fully compliant' },
+        { type: 'current', date: 'May 2025 · NOW', event: 'Prescription drug content detected', detail: 'First occurrence · 1 product page · Confidence 0.88' },
+      ],
+      checklist: [
+        { text: 'Identify which specific product triggered the violation', why: 'Likely a new product listing — merchant may be unaware of classification' },
+        { text: 'Check if product could be mis-classified (OTC vs prescription)', why: 'Some supplements are borderline — confirm with policy team if needed' },
+        { text: 'Review transaction volume for this product', why: 'Low volume suggests new listing not yet actively selling' },
+      ],
+      outcomes: { terminate: 12, engage: 72, accept: 16 },
+      recommendation: 'Engage merchant — First occurrence after 14 months clean. Long clean history and low Compass Score strongly suggest this is an inadvertent new product listing rather than intentional policy breach. Outreach recommended.',
+      policy: 'First-time violations from established, low-risk merchants warrant outreach before escalation. Strong compliance history is a mitigating factor under AUP §4.1 review guidelines.',
+    },
+    {
+      id: 'luxreplica',
+      url: 'luxreplica.co',
+      declared: 'Fashion accessories retailer',
+      months: 3,
+      compassScore: 88,
+      compassClass: 'crit-risk',
+      severity: 'critical',
+      violationType: 'counterfeit',
+      violationGroup: 'Counterfeit Goods',
+      violationIcon: '👜',
+      aupClause: 'AUP §5.3 — IP Infringement',
+      patternType: 'new-merchant',
+      patternLabel: '🚨 New merchant · Multiple violation categories · Fast escalation',
+      patternBannerClass: 'new-merchant',
+      everc: {
+        domainAge: '4 months',
+        graphLinks: '3 known counterfeit networks',
+        traffic: 'High — inconsistent with new merchant',
+        adverseMedia: 'Brand enforcement action filed (Gucci, Apr 2025)',
+      },
+      timeline: [
+        { type: 'violation', date: 'Feb 2025', event: 'Onboarded — violation detected at screening', detail: 'Borderline confidence · Conditionally approved with monitoring' },
+        { type: 'violation', date: 'Mar 2025', event: 'Counterfeit goods — multiple luxury brands', detail: 'Gucci, Louis Vuitton, Chanel listings detected' },
+        { type: 'current', date: 'May 2025 · NOW', event: 'Counterfeit + trademark infringement', detail: 'Multiple categories · Brand enforcement filed · Critical' },
+      ],
+      checklist: [
+        { text: 'Transaction volume since onboarding — 3 months', why: 'High volume for a new merchant is a major red flag' },
+        { text: 'Chargeback rate — counterfeit merchants show elevated disputes', why: 'Buyers who receive fake goods typically dispute charges' },
+        { text: 'Brand enforcement filing details from EverC adverse media', why: 'Gucci filing confirms third-party IP infringement claim' },
+        { text: 'Payment trail — verify no transaction laundering links', why: 'Counterfeit networks often involve hidden laundering relationships' },
+      ],
+      outcomes: { terminate: 91, engage: 7, accept: 2 },
+      recommendation: 'Terminate immediately — AUP §5.3 · Active brand enforcement filing · Multiple luxury brand infringement · New merchant with escalating pattern. No basis for continued relationship.',
+      policy: 'Counterfeit goods and trademark infringement are zero-tolerance violations under AUP §5.3. Third-party brand enforcement actions provide independent verification and create legal liability for continued processing.',
+    },
+  ];
+
+  const groups = [
+    { id: 'gambling', label: 'Gambling', icon: '🎰', aup: 'AUP §3.2', merchantIds: ['betwin365', 'jackpotstore'] },
+    { id: 'prescription', label: 'Prescription Drugs', icon: '💊', aup: 'AUP §4.1', merchantIds: ['pharmadir', 'cleanmeds'] },
+    { id: 'counterfeit', label: 'Counterfeit Goods', icon: '👜', aup: 'AUP §5.3', merchantIds: ['luxreplica'] },
+  ];
+
+  let selectedMerchant = null;
+  let currentTab = 'investigate';
+
+  function startDemo() {
+    const key = document.getElementById('apiKeyInput').value.trim();
+    if (key && key.startsWith('sk-')) {
+      apiKey = key;
+      demoMode = false;
+    } else if (!key) {
+      // No key entered — switch to demo mode silently
+      demoMode = true;
+      apiKey = '';
+    } else {
+      alert('Please enter a valid Anthropic API key starting with sk-ant-... or leave blank to use demo mode.');
+      return;
+    }
+    document.getElementById('apiModal').classList.add('hidden');
+    document.getElementById('mainApp').style.display = 'flex';
+    renderSidebar();
+  }
+
+  function renderSidebar() {
+    const body = document.getElementById('sidebarBody');
+    body.innerHTML = '';
+    groups.forEach(group => {
+      const groupMerchants = merchants.filter(m => group.merchantIds.includes(m.id));
+      const div = document.createElement('div');
+      div.className = 'vgroup';
+      div.innerHTML = `
+        <div class="vgroup-header" onclick="toggleGroup('${group.id}')">
+          <span class="vgroup-icon">${group.icon}</span>
+          <span class="vgroup-label">${group.label}</span>
+          <span class="vgroup-meta">${group.aup} · ${groupMerchants.length}</span>
+          <span class="vgroup-chevron">▾</span>
+        </div>
+        <div class="vgroup-alerts" id="group-${group.id}">
+          ${groupMerchants.map(m => renderAlertCard(m)).join('')}
+        </div>
+      `;
+      body.appendChild(div);
+    });
+  }
+
+  function renderAlertCard(m) {
+    const patternHtml = {
+      escalating: `<span class="alert-pattern pattern-escalating">↑ Escalating</span>`,
+      recurring: `<span class="alert-pattern pattern-recurring">↻ Recurring</span>`,
+      first: `<span class="alert-pattern pattern-first">● First occ.</span>`,
+      'new-merchant': `<span class="alert-pattern pattern-new">! New merchant</span>`,
+    }[m.patternType] || '';
+
+    return `
+      <div class="alert-card ${m.severity === 'critical' ? 'critical-card' : ''}" id="card-${m.id}" onclick="selectMerchant('${m.id}')">
+        <div class="alert-row1">
+          <span class="alert-name">${m.url}</span>
+          <span class="sev-badge sev-${m.severity}">${m.severity.toUpperCase()}</span>
+        </div>
+        <div class="alert-meta">
+          <span>${m.months}mo portfolio</span>
+          ${patternHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  function toggleGroup(id) {
+    const group = document.querySelector(`#group-${id}`).closest('.vgroup');
+    group.classList.toggle('collapsed');
+  }
+
+  async function selectMerchant(id) {
+    const m = merchants.find(x => x.id === id);
+    if (!m) return;
+    selectedMerchant = m;
+
+    document.querySelectorAll('.alert-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById(`card-${id}`).classList.add('selected');
+
+    showLoadingState(m);
+    await generateCaseAnalysis(m);
+  }
+
+  async function analyzeURL() {
+    const url = document.getElementById('urlInput').value.trim();
+    if (!url) return;
+
+    const fakeMerchant = {
+      id: 'custom',
+      url: url,
+      declared: 'Unknown — analyzing...',
+      months: '?',
+      compassScore: '?',
+      compassClass: 'med-risk',
+      severity: 'medium',
+      violationType: 'unknown',
+      violationGroup: 'Unknown',
+      patternType: 'first',
+      patternLabel: '● Analyzing...',
+      patternBannerClass: 'first',
+      everc: { domainAge: 'Analyzing...', graphLinks: 'Analyzing...', traffic: 'Analyzing...', adverseMedia: 'Analyzing...' },
+      timeline: [],
+      checklist: [],
+      outcomes: null,
+      recommendation: '',
+      policy: '',
+      aupClause: 'Analyzing...',
+    };
+
+    selectedMerchant = fakeMerchant;
+    showLoadingState(fakeMerchant);
+    await generateCaseAnalysisFromURL(url);
+    document.getElementById('urlInput').value = '';
+  }
+
+  function showLoadingState(m) {
+    const panel = document.getElementById('rightPanel');
+    panel.innerHTML = `
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <div style="font-size:14px; font-weight:500; color:var(--gray-600)">${m.url}</div>
+        <div class="loading-steps">
+          <div class="loading-step" id="ls1">Loading merchant history...</div>
+          <div class="loading-step" id="ls2">Assembling evidence pack...</div>
+          <div class="loading-step" id="ls3">Loading investigation template...</div>
+          <div class="loading-step" id="ls4">Generating AI case summary...</div>
+        </div>
+        <div class="powered-by"><span class="teal-dot"></span>Powered by Claude API</div>
+      </div>
+    `;
+    ['ls1','ls2','ls3','ls4'].forEach((id, i) => {
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('visible');
+      }, i * 600);
+    });
+  }
+
+  async function generateCaseAnalysis(m) {
+    // Demo mode — use pre-written summary with a realistic delay
+    if (demoMode) {
+      await sleep(1800);
+      const summary = demoSummaries[m.id] || `Merchant ${m.url} has been flagged for ${m.violationType} violations with a ${m.patternType} pattern. Investigation template loaded based on violation category.`;
+      renderCaseView(m, summary);
+      return;
+    }
+
+    const prompt = `You are a merchant risk analyst AI. Generate a risk investigation summary for this merchant.
+
+Merchant: ${m.url}
+Declared business: ${m.declared}
+Months in portfolio: ${m.months}
+Compass Score: ${m.compassScore}/100
+Violation type: ${m.violationType}
+Pattern: ${m.patternType}
+AUP clause: ${m.aupClause}
+
+Generate a concise AI case summary (2-3 sentences, plain language) that explains:
+1. Who this merchant is and what they declared
+2. What was detected and why it's concerning
+3. What the pattern suggests about intent
+
+Be direct and analytical. No bullet points. Just 2-3 sentences of flowing prose.`;
+
+    try {
+      const response = await callClaude(prompt);
+      renderCaseView(m, response);
+    } catch (e) {
+      renderCaseView(m, demoSummaries[m.id] || `Merchant ${m.url} operates as a declared ${m.declared.toLowerCase()} and has been flagged for ${m.violationType} violations. ${m.patternLabel}. Investigation template loaded based on violation category.`);
+    }
+  }
+
+  async function generateCaseAnalysisFromURL(url) {
+    // Demo mode — generate a plausible pre-written response
+    if (demoMode) {
+      await sleep(2000);
+      const fakeMerchant = {
+        ...selectedMerchant,
+        url: url,
+        declared: 'Online retail merchant',
+        months: 9,
+        compassScore: 61,
+        compassClass: 'med-risk',
+        severity: 'medium',
+        violationType: 'counterfeit goods',
+        violationGroup: 'Counterfeit Goods',
+        patternType: 'first',
+        patternLabel: '● First occurrence · New analysis',
+        patternBannerClass: 'first',
+        everc: {
+          domainAge: '11 months',
+          graphLinks: '1 suspicious connection detected',
+          traffic: 'Moderate — consistent with retail',
+          adverseMedia: 'None found',
+        },
+        timeline: [{ type: 'current', date: 'Today · NOW', event: 'Violation detected — URL analysis', detail: 'First scan · Pending investigation' }],
+        checklist: [
+          { text: 'Review product listings for brand authenticity indicators', why: 'Counterfeit goods often use near-identical brand imagery and names' },
+          { text: 'Check transaction volume and average order value', why: 'Counterfeit merchants typically show high volume, low AOV patterns' },
+          { text: 'Verify merchant legal entity and registered address', why: 'Counterfeit operations frequently use shell entities or offshore registrations' },
+        ],
+        outcomes: { terminate: 48, engage: 38, accept: 14 },
+        recommendation: 'Engage merchant for clarification — First occurrence, moderate confidence. Request product sourcing documentation before escalation.',
+        policy: 'Counterfeit goods and IP infringement are zero-tolerance violations under AUP §5.3. First occurrences warrant outreach and documentation request before formal escalation.',
+        aupClause: 'AUP §5.3 — IP Infringement',
+      };
+      selectedMerchant = fakeMerchant;
+      renderCaseView(fakeMerchant, `Merchant ${url} has been flagged during routine URL analysis for content that may infringe on third-party intellectual property rights. Initial scanning detected product listings with brand imagery and naming conventions consistent with counterfeit luxury goods distribution. The merchant's domain age and traffic patterns warrant further investigation using internal transaction and chargeback data before a final disposition is reached.`);
+      return;
+    }
+
+    const prompt = `You are a merchant risk analyst AI. Generate a realistic but fictional merchant risk case for the URL: ${url}
+
+Invent a plausible risk scenario. Include:
+1. What kind of business this appears to be
+2. What violation was detected (choose from: gambling, prescription drugs, counterfeit goods, illicit substances, adult content)
+3. The severity level (critical, high, or medium)
+4. A brief 2-3 sentence plain language summary of the risk
+
+Format your response as JSON like this:
+{
+  "declared": "what business they claim to be",
+  "violationType": "violation category",
+  "severity": "critical/high/medium",
+  "patternType": "first/escalating/recurring",
+  "summary": "2-3 sentence plain language summary",
+  "checklistItems": ["item 1", "item 2", "item 3"],
+  "recommendation": "one sentence recommendation"
+}`;
+
+    try {
+      const raw = await callClaude(prompt);
+      let parsed;
+      try {
+        const jsonMatch = raw.match(/\{[\s\S]*\}/);
+        parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
+      } catch {
+        parsed = {
+          declared: 'Online retailer',
+          violationType: 'counterfeit goods',
+          severity: 'high',
+          patternType: 'first',
+          summary: `Merchant ${url} has been flagged for potential policy violations. Initial analysis detected content inconsistent with declared business type. Further investigation recommended.`,
+          checklistItems: ['Review transaction patterns', 'Verify declared business type', 'Check chargeback rate'],
+          recommendation: 'Engage merchant for clarification before escalation.',
+        };
+      }
+
+      const fakeMerchant = {
+        ...selectedMerchant,
+        url: url,
+        declared: parsed.declared || 'Online retailer',
+        months: Math.floor(Math.random() * 24) + 1,
+        compassScore: Math.floor(Math.random() * 40) + 50,
+        compassClass: 'med-risk',
+        severity: parsed.severity || 'medium',
+        violationType: parsed.violationType || 'unknown',
+        patternType: parsed.patternType || 'first',
+        patternLabel: `● ${parsed.patternType === 'first' ? 'First occurrence' : parsed.patternType}`,
+        patternBannerClass: parsed.patternType || 'first',
+        everc: {
+          domainAge: `${Math.floor(Math.random() * 36) + 1} months`,
+          graphLinks: 'Analysis pending',
+          traffic: 'Analysis pending',
+          adverseMedia: 'Analysis pending',
+        },
+        timeline: [{ type: 'current', date: 'Today · NOW', event: `${parsed.violationType} detected`, detail: 'First analysis — ' + (parsed.patternType || 'first occurrence') }],
+        checklist: (parsed.checklistItems || []).map(t => ({ text: t, why: '' })),
+        outcomes: { terminate: 45, engage: 40, accept: 15 },
+        recommendation: parsed.recommendation || 'Further investigation required.',
+        policy: `Policy violation under applicable AUP. Analyst judgment required.`,
+        aupClause: 'AUP — Violation detected',
+      };
+
+      selectedMerchant = fakeMerchant;
+      renderCaseView(fakeMerchant, parsed.summary);
+    } catch (e) {
+      renderCaseView(selectedMerchant, `Analysis complete for ${url}. Violation detected. Manual review required.`);
+    }
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  async function callClaude(prompt) {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 500,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    const data = await response.json();
+    if (data.error) throw new Error(data.error.message);
+    return data.content[0].text;
+  }
+
+  function renderCaseView(m, aiSummary) {
+    const panel = document.getElementById('rightPanel');
+
+    const compassHtml = m.compassScore !== '?'
+      ? `<span class="compass-score ${m.compassClass}">Compass ${m.compassScore}</span>`
+      : '';
+
+    const timelineHtml = m.timeline.map((t, i) => `
+      <div class="tl-item" style="animation-delay:${i * 0.08}s">
+        <div class="tl-dot ${t.type}"></div>
+        <div class="tl-date">${t.date}</div>
+        <div class="tl-event">
+          ${t.event}
+          ${t.type === 'current' ? '<span class="tl-current-badge">Now</span>' : ''}
+        </div>
+        ${t.detail ? `<div class="tl-detail">${t.detail}</div>` : ''}
+      </div>
+    `).join('');
+
+    const checklistHtml = m.checklist.map((c, i) => `
+      <div class="checklist-item" id="check-${i}" onclick="toggleCheck(${i})">
+        <div class="check-box" id="checkbox-${i}"></div>
+        <div>
+          <div class="check-text">${c.text}</div>
+          ${c.why ? `<div class="check-why">${c.why}</div>` : ''}
+        </div>
+      </div>
+    `).join('');
+
+    const outcomesHtml = m.outcomes ? `
+      <div class="outcome-bars">
+        <div class="outcome-bar-row">
+          <span class="outcome-bar-label">Terminate</span>
+          <div class="outcome-bar-track"><div class="outcome-bar-fill fill-terminate" style="width:${m.outcomes.terminate}%"></div></div>
+          <span class="outcome-pct">${m.outcomes.terminate}%</span>
+        </div>
+        <div class="outcome-bar-row">
+          <span class="outcome-bar-label">Engage</span>
+          <div class="outcome-bar-track"><div class="outcome-bar-fill fill-engage" style="width:${m.outcomes.engage}%"></div></div>
+          <span class="outcome-pct">${m.outcomes.engage}%</span>
+        </div>
+        <div class="outcome-bar-row">
+          <span class="outcome-bar-label">Accept risk</span>
+          <div class="outcome-bar-track"><div class="outcome-bar-fill fill-accept" style="width:${m.outcomes.accept}%"></div></div>
+          <span class="outcome-pct">${m.outcomes.accept}%</span>
+        </div>
+      </div>
+      <div class="recommendation-box">
+        <div class="rec-label">Recommended action</div>
+        <div class="rec-text">${m.recommendation}</div>
+      </div>
+    ` : '';
+
+    const rationaleText = `Merchant ${m.url} has been identified with ${m.violationType} violations (${m.patternLabel.replace(/[⚠🔄🚨●]/g, '').trim()}). ${aiSummary} Based on ${m.aupClause} and the investigation findings, the recommended course of action is: ${m.recommendation}`;
+
+    panel.innerHTML = `
+      <div class="case-view">
+
+        <!-- Case Header -->
+        <div class="case-header">
+          <div class="case-header-top">
+            <div>
+              <div class="case-merchant-name">${m.url}</div>
+              <div class="case-meta-row">
+                <div class="case-meta-item">
+                  <span class="case-meta-label">Declared:</span>
+                  ${m.declared}
+                </div>
+                <div class="case-meta-item">
+                  <span class="case-meta-label">Portfolio:</span>
+                  ${m.months} months
+                </div>
+                ${compassHtml}
+                <span class="sev-badge sev-${m.severity}">${m.severity.toUpperCase()}</span>
+              </div>
+            </div>
+            <div class="decision-buttons">
+              <button class="btn btn-terminate" onclick="recordDecision('terminate')">Terminate</button>
+              <button class="btn btn-engage" onclick="recordDecision('engage')">Engage</button>
+              <button class="btn btn-accept" onclick="recordDecision('accept')">Accept risk</button>
+            </div>
+          </div>
+          <div class="pattern-banner ${m.patternBannerClass}">
+            ${m.patternLabel}
+          </div>
+        </div>
+
+        <!-- Case Body -->
+        <div class="case-body">
+
+          <!-- Left column — Merchant Intelligence + History -->
+          <div class="col-left">
+
+            <div class="card">
+              <div class="card-title teal"><span class="teal-dot"></span>AI Case Summary</div>
+              <div class="ai-summary-text" id="aiSummaryText">${aiSummary}</div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">EverC Signals</div>
+              <div class="signal-row">
+                <span class="signal-label">Domain age</span>
+                <span class="signal-value">${m.everc.domainAge}</span>
+              </div>
+              <div class="signal-row">
+                <span class="signal-label">Risk graph</span>
+                <span class="signal-value ${m.everc.graphLinks.includes('No') ? 'ok' : 'warning'}">${m.everc.graphLinks}</span>
+              </div>
+              <div class="signal-row">
+                <span class="signal-label">Traffic vs txn</span>
+                <span class="signal-value ${m.everc.traffic.includes('⚠') ? 'warning' : ''}">${m.everc.traffic}</span>
+              </div>
+              <div class="signal-row">
+                <span class="signal-label">Adverse media</span>
+                <span class="signal-value ${m.everc.adverseMedia.includes('None') ? 'ok' : 'warning'}">${m.everc.adverseMedia}</span>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Violation History</div>
+              <div class="timeline">
+                ${timelineHtml}
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right column — Tabs -->
+          <div class="col-right">
+
+            <div class="tabs">
+              <div class="tab active" onclick="switchTab('investigate')" id="tab-investigate">Investigate</div>
+              <div class="tab" onclick="switchTab('insights')" id="tab-insights">AI Insights</div>
+              <div class="tab" onclick="switchTab('document')" id="tab-document">Document</div>
+            </div>
+
+            <div class="tab-content">
+
+              <!-- Investigate tab -->
+              <div class="tab-pane active" id="pane-investigate">
+                <div class="card">
+                  <div class="card-title teal">
+                    Verify Internally
+                    <span class="template-label">${m.violationGroup} template</span>
+                  </div>
+                  ${checklistHtml || '<p style="color:var(--gray-400); font-size:12px">No checklist items available.</p>'}
+                </div>
+                <div class="card">
+                  <div class="card-title">Policy Reference · ${m.aupClause}</div>
+                  <div class="policy-box">
+                    <div class="policy-ref">${m.aupClause}</div>
+                    ${m.policy}
+                  </div>
+                </div>
+              </div>
+
+              <!-- AI Insights tab -->
+              <div class="tab-pane" id="pane-insights">
+                <div class="card">
+                  <div class="card-title navy">Outcome Prediction</div>
+                  <p style="font-size:11px; color:var(--gray-400); margin-bottom:12px">Based on ${m.violationType === 'gambling' ? '47' : m.violationType === 'prescription' ? '38' : '29'} similar historical cases with this pattern</p>
+                  ${outcomesHtml}
+                </div>
+              </div>
+
+              <!-- Document tab -->
+              <div class="tab-pane" id="pane-document">
+                <div class="card">
+                  <div class="card-title">Pre-drafted Rationale <span style="color:var(--gray-400); font-weight:400; text-transform:none; letter-spacing:0">— edit before approving</span></div>
+                  <textarea class="rationale-text" id="rationaleText">${rationaleText}</textarea>
+                  <button class="approve-btn" onclick="approveAndClose()">Approve & Close Case ✓</button>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="powered-by"><span class="teal-dot"></span>${demoMode ? 'Demo mode · Pre-loaded analysis' : 'Generated by Claude API · ' + new Date().toLocaleTimeString()}</div>
+
+          </div>
+
+        </div>
+      </div>
+    `;
+  }
+
+  function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.getElementById(`tab-${tab}`).classList.add('active');
+    document.getElementById(`pane-${tab}`).classList.add('active');
+  }
+
+  function toggleCheck(i) {
+    const item = document.getElementById(`check-${i}`);
+    const box = document.getElementById(`checkbox-${i}`);
+    const isChecked = item.classList.toggle('checked');
+    box.textContent = isChecked ? '✓' : '';
+  }
+
+  function recordDecision(decision) {
+    const labels = { terminate: 'Terminate', engage: 'Engage Merchant', accept: 'Accept Risk' };
+    const colors = { terminate: 'var(--critical)', engage: 'var(--high)', accept: 'var(--low)' };
+
+    const card = document.getElementById(`card-${selectedMerchant?.id}`);
+    if (card) {
+      card.style.opacity = '0.5';
+      const meta = card.querySelector('.alert-meta');
+      if (meta) meta.innerHTML = `<span style="color:${colors[decision]}; font-size:10px; font-family:'DM Mono',monospace">✓ ${labels[decision]}</span>`;
+    }
+
+    const header = document.querySelector('.case-header');
+    if (header) {
+      const banner = document.createElement('div');
+      banner.style.cssText = `padding: 8px 14px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; font-size: 12px; font-weight: 500; color: var(--low); margin-top: 8px; display: flex; align-items: center; gap: 8px;`;
+      banner.innerHTML = `✓ Decision recorded: <strong>${labels[decision]}</strong> · ${new Date().toLocaleTimeString()} · Pending documentation`;
+      header.appendChild(banner);
+    }
+
+    switchTab('document');
+  }
+
+  function approveAndClose() {
+    alert('Case closed and documented. Decision recorded to audit trail.\n\nIn production, this would update the merchant record and notify relevant teams.');
+  }
+</script>
+</body>
+</html>

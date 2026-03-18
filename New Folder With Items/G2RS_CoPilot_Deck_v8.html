@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Merchant Risk Co-Pilot · G2RS / EverC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ========== BASE RESET ========== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f8f7fc;
+      color: #1a1a2e;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ========== SLIDE POSITIONING ========== */
+    .deck {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      padding: 48px 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: #ffffff;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      z-index: 2;
+    }
+    .slide.prev {
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* ========== PROGRESS BAR ========== */
+    .progress-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: rgba(0,0,0,0.06);
+      z-index: 100;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #7c3aed, #0d9488);
+      transition: width 0.3s ease;
+    }
+
+    /* ========== NAVIGATION ========== */
+    .nav-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      padding: 20px 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.95);
+      border-top: 1px solid #e5e5e5;
+      z-index: 100;
+    }
+    .slide-counter {
+      font-size: 14px;
+      font-weight: 500;
+      color: #888;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 12px;
+    }
+    .nav-btn {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      border: 1px solid rgba(124,58,237,0.3);
+      background: #ffffff;
+      color: #7c3aed;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .nav-btn:hover {
+      background: #7c3aed;
+      color: white;
+      border-color: #7c3aed;
+    }
+    .nav-btn:focus {
+      outline: 2px solid #7c3aed;
+      outline-offset: 2px;
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* ========== TYPOGRAPHY ========== */
+    .label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #7c3aed;
+      margin-bottom: 8px;
+    }
+    .slide-title {
+      font-size: 38px;
+      font-weight: 800;
+      color: #1a1a2e;
+      line-height: 1.2;
+      margin-bottom: 20px;
+    }
+    .body-text {
+      font-size: 17px;
+      font-weight: 400;
+      color: #555;
+      line-height: 1.6;
+    }
+    .card-text { font-size: 15px; }
+
+    /* ========== CARD VARIANTS ========== */
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #e5e5e5;
+      padding: 20px 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+    .card-accent-red { border-left: 4px solid #ef4444; }
+    .card-accent-amber { border-left: 4px solid #f59e0b; }
+    .card-accent-teal { border-left: 4px solid #0d9488; }
+    .card-accent-purple { border-left: 4px solid #7c3aed; }
+    .card-accent-green { border-left: 4px solid #10b981; }
+
+    /* ========== DARK SLIDES ========== */
+    .slide-dark {
+      background: #1a1a2e;
+    }
+    .slide-dark .slide-title,
+    .slide-dark .body-text,
+    .slide-dark h2 { color: #ffffff; }
+    .slide-dark .label { color: #a78bfa; }
+    .slide-dark .body-text { color: rgba(255,255,255,0.85); }
+    .slide-dark .card {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.15);
+    }
+    .slide-dark .card .body-text { color: rgba(255,255,255,0.85); }
+    .slide-dark .card p { color: rgba(255,255,255,0.85); }
+
+    /* ========== SLIDE 1 — TITLE ========== */
+    .slide-1 {
+      background: linear-gradient(135deg, #1a1a2e, #2d1b69);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    .slide-1 .title-main {
+      font-size: 56px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 16px;
+    }
+    .slide-1 .subtitle {
+      font-size: 20px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.7);
+      max-width: 700px;
+      margin: 0 auto 40px;
+      line-height: 1.5;
+    }
+    .slide-1 .footer {
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.5);
+    }
+    .slide-1 .deco-circle {
+      position: absolute;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 50%;
+    }
+    .slide-1 .deco-circle-1 { top: 10%; right: 5%; width: 300px; height: 300px; }
+    .slide-1 .deco-circle-2 { bottom: 15%; left: 3%; width: 200px; height: 200px; }
+
+    /* ========== SLIDE 2 — MEET THE ANALYST ========== */
+    .container { max-width: 1100px; margin: 0 auto; width: 100%; }
+    .alert-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 24px 0;
+    }
+    .alert-card {
+      padding: 16px 20px;
+      border-radius: 8px;
+      border: 1px solid #e5e5e5;
+      background: #fff;
+      border-left-width: 4px;
+    }
+    .alert-card.critical { border-left-color: #ef4444; }
+    .alert-card.high { border-left-color: #f59e0b; }
+    .alert-card.medium { border-left-color: #eab308; }
+    .alert-card .severity { font-size: 10px; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; }
+    .alert-card .domain { font-weight: 600; color: #1a1a2e; }
+    .alert-card .type { font-size: 13px; color: #555; }
+    .alert-card .context { font-size: 12px; font-style: italic; color: #888; margin-top: 6px; }
+
+    /* ========== SLIDE 3 — SCALABILITY GAP ========== */
+    .flow-boxes {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+    .flow-box {
+      padding: 14px 20px;
+      border-radius: 8px;
+      background: #f8f7fc;
+      border: 1px solid #e5e5e5;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .flow-box.red { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+    .flow-arrow { font-size: 20px; color: #888; }
+
+    /* ========== SLIDE 4 — ALTERNATIVES ========== */
+    .alt-cards { display: flex; flex-direction: column; gap: 10px; }
+    .alt-card {
+      padding: 12px 18px;
+      border-radius: 10px;
+      border: 1px solid #e5e5e5;
+      background: #fff;
+      border-left-width: 4px;
+    }
+    .alt-card.rejected { border-left-color: #ef4444; opacity: 0.85; }
+    .alt-card.complementary { border-left-color: #f59e0b; }
+    .alt-card.chosen { border-left-color: #10b981; background: linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%); }
+    .alt-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 4px;
+    }
+    .alt-badge.rejected { background: #fee2e2; color: #b91c1c; }
+    .alt-badge.complementary { background: #fef3c7; color: #b45309; }
+    .alt-badge.chosen { background: #d1fae5; color: #047857; }
+    .alt-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 6px; }
+    .alt-callout { margin-top: 6px; padding: 8px 14px; border-radius: 8px; border-left: 4px solid #0d9488; background: #f0fdfa; }
+
+    /* ========== SLIDE 5 — ONE ALERT'S JOURNEY ========== */
+    .journey-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .journey-step {
+      padding: 14px 16px;
+      border-radius: 8px;
+      background: #f8f7fc;
+      border: 1px solid #e5e5e5;
+      text-align: center;
+    }
+    .journey-step .num { font-size: 18px; font-weight: 800; color: #7c3aed; margin-bottom: 4px; }
+    .journey-step .title { font-size: 13px; font-weight: 600; color: #1a1a2e; }
+    .journey-step .pain { font-size: 11px; color: #888; font-style: italic; margin-top: 4px; }
+    .callout-bar {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 16px 24px;
+      text-align: center;
+      font-weight: 700;
+      color: #b91c1c;
+      margin-top: 20px;
+    }
+
+    /* ========== SLIDE 6 — REPETITION ========== */
+    .lanes { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+    .lane {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: #f8f7fc;
+      border: 1px solid #e5e5e5;
+    }
+    .lane.faded { opacity: 0.7; }
+    .lane.more-faded { opacity: 0.5; }
+    .lane-label { font-weight: 600; min-width: 180px; }
+    .lane-steps { display: flex; gap: 8px; flex-wrap: wrap; }
+    .lane-step { font-size: 12px; padding: 4px 8px; background: #fff; border-radius: 4px; }
+    .reset-badge { font-size: 10px; font-weight: 700; color: #ef4444; margin-left: auto; }
+
+    /* ========== SLIDE 7 — DIAGNOSIS ========== */
+    .slide-7 .card { margin: 12px 0; }
+
+    /* ========== SLIDE 8 — OBVIOUS FIX ========== */
+    .before-after {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 24px;
+      align-items: center;
+      margin: 24px 0;
+    }
+    .panel { padding: 20px; border-radius: 12px; border: 1px solid #e5e5e5; }
+    .panel.before { border-left: 4px solid #ef4444; }
+    .panel.after { border-left: 4px solid #0d9488; }
+    .panel-title { font-weight: 700; margin-bottom: 12px; font-size: 14px; }
+    .group-section { margin: 12px 0; }
+    .group-section h4 { font-size: 14px; color: #7c3aed; margin-bottom: 6px; }
+
+    /* ========== SLIDE 9 — GROUPING ALONE ========== */
+    .layers { display: flex; flex-direction: column; gap: 8px; margin: 20px 0; }
+    .layer {
+      padding: 16px 20px;
+      border-radius: 8px;
+      border: 1px solid #e5e5e5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .layer-1 { background: linear-gradient(90deg, #ede9fe, #fff); border-left: 4px solid #7c3aed; }
+    .layer-2 { background: #f8f7fc; margin-left: 24px; }
+    .layer-3 { background: #f8f7fc; margin-left: 48px; }
+    .layer-4 { background: linear-gradient(90deg, #ccfbf1, #f0fdfa); margin-left: 72px; border-left: 4px solid #0d9488; }
+    .layer-label { font-weight: 600; color: #1a1a2e; }
+    .layer-desc { font-size: 13px; color: #555; }
+    .copilot-pill { background: #7c3aed; color: white; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 13px; }
+
+    /* ========== SLIDE 10 — INTRODUCING CO-PILOT ========== */
+    .flow-diagram {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 24px 0;
+    }
+    .flow-node {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffffff;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .flow-node:nth-child(1) { background: #7c3aed; }
+    .flow-node:nth-child(2) { background: #8b5cf6; }
+    .flow-node:nth-child(3) { background: #0d9488; }
+    .flow-node:nth-child(4) { background: #0d9488; }
+    .flow-node:nth-child(5) { background: #10b981; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px; }
+
+    /* ========== SLIDE 11 — JOURNEY TRANSFORMED ========== */
+    .comparison { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; margin: 20px 0; }
+    .comp-panel { padding: 20px; border-radius: 12px; }
+    .comp-panel.without { background: #fef2f2; border: 1px solid #fecaca; }
+    .comp-panel.with { background: #f0fdfa; border: 1px solid #99f6e4; }
+    .comp-panel h4 { font-size: 14px; margin-bottom: 16px; }
+    .comp-panel.without h4 { color: #b91c1c; }
+    .comp-panel.with h4 { color: #0d9488; }
+    .comp-row { display: flex; align-items: flex-start; gap: 12px; margin: 10px 0; font-size: 14px; }
+    .comp-row .arrow { color: #888; flex-shrink: 0; }
+    .comp-punch { text-align: center; font-weight: 700; font-size: 18px; margin-top: 20px; color: #1a1a2e; }
+
+    /* ========== SLIDE 12 — MVP ========== */
+    .mvp-list { margin: 20px 0; }
+    .mvp-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 16px 20px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #e5e5e5;
+      background: #fff;
+    }
+    .mvp-item.foundation {
+      background: linear-gradient(135deg, #f5f3ff, #fff);
+      border-left: 4px solid #7c3aed;
+    }
+    .mvp-num { font-size: 18px; font-weight: 800; color: #7c3aed; min-width: 28px; }
+    .mvp-item .title { font-weight: 600; color: #1a1a2e; }
+    .mvp-item .desc { font-size: 14px; color: #555; margin-top: 4px; }
+    .foundation-badge { font-size: 10px; font-weight: 700; background: #7c3aed; color: white; padding: 2px 8px; border-radius: 4px; margin-left: 8px; }
+
+    /* ========== SLIDE 13 — ROADMAP ========== */
+    .roadmap-mvp { background: #7c3aed; color: white; padding: 10px 20px; border-radius: 8px; font-weight: 600; margin-bottom: 20px; text-align: center; }
+    .roadmap-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .roadmap-card { padding: 20px; border-radius: 12px; border: 1px solid #e5e5e5; background: #fff; }
+    .roadmap-card h4 { font-size: 15px; color: #7c3aed; margin-bottom: 8px; }
+    .roadmap-card p { font-size: 14px; color: #555; line-height: 1.5; }
+
+    /* ========== SLIDE 14 — CUSTOMER SEGMENTS ========== */
+    .segments-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+    .segment-card {
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #e5e5e5;
+      background: #fff;
+    }
+    .segment-card h4 { font-size: 16px; color: #1a1a2e; margin-bottom: 8px; }
+    .segment-card .pain { font-size: 13px; color: #555; margin-bottom: 8px; }
+    .segment-card .lever { font-size: 13px; font-weight: 600; color: #7c3aed; }
+    .segment-card .phase { font-size: 11px; color: #888; margin-top: 8px; }
+
+    /* ========== SLIDE 15 — EXECUTION ========== */
+    .phases { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; margin: 20px 0; }
+    .phase-card {
+      min-width: 220px;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #e5e5e5;
+      background: #fff;
+    }
+    .phase-card h4 { font-size: 14px; color: #7c3aed; margin-bottom: 8px; }
+    .phase-card .build { font-size: 13px; color: #555; margin: 8px 0; }
+    .phase-card .learn { font-size: 13px; color: #555; margin: 8px 0; }
+    .phase-card .gate { font-size: 12px; font-weight: 600; color: #0d9488; margin-top: 12px; }
+
+    /* ========== SLIDE 16 — METRICS ========== */
+    .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 24px 0; }
+    .metric-card {
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid #e5e5e5;
+      background: #fff;
+    }
+    .metric-card .icon { margin-bottom: 12px; }
+    .metric-card .label { font-size: 10px; font-weight: 700; letter-spacing: 2px; margin-bottom: 8px; }
+    .metric-card .name { font-size: 15px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
+    .metric-card .body { font-size: 14px; color: #555; line-height: 1.5; }
+    .metric-card .how { font-size: 12px; color: #888; margin-top: 12px; }
+    .metric-card.teal .label { color: #0d9488; }
+    .metric-card.teal { border-top: 4px solid #0d9488; }
+    .metric-card.purple .label { color: #7c3aed; }
+    .metric-card.purple { border-top: 4px solid #7c3aed; }
+
+    /* ========== SLIDE 17 — CLOSING ========== */
+    .slide-17 {
+      background: linear-gradient(135deg, #1a1a2e, #2d1b69);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    .slide-17 .quote { font-size: 28px; font-weight: 600; color: #ffffff; margin-bottom: 20px; max-width: 800px; }
+    .slide-17 .punch { font-size: 24px; font-weight: 700; color: #2dd4bf; margin-bottom: 16px; }
+    .slide-17 .final { font-size: 20px; font-weight: 800; color: #ffffff; }
+    .slide-17 .footer { font-size: 12px; letter-spacing: 2px; color: rgba(255,255,255,0.5); margin-top: 40px; }
+
+    /* ========== PRINT STYLES ========== */
+    @media print {
+      body { background: #fff; }
+      .slide { position: relative; page-break-after: always; opacity: 1 !important; }
+      .slide.active, .slide.prev { opacity: 1 !important; }
+      .progress-bar, .nav-bar { display: none !important; }
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 900px) {
+      .slide { padding: 32px 24px; }
+      .slide-title { font-size: 28px; }
+      .slide-1 .title-main { font-size: 36px; }
+      .alert-grid { grid-template-columns: 1fr 1fr; }
+      .before-after { grid-template-columns: 1fr; }
+      .journey-grid { grid-template-columns: repeat(2, 1fr); }
+      .alt-two-col { grid-template-columns: 1fr; }
+      .metrics-grid { grid-template-columns: 1fr; }
+      .roadmap-cols { grid-template-columns: 1fr; }
+      .segments-grid { grid-template-columns: 1fr; }
+      .phases { flex-direction: column; }
+      .nav-bar { padding: 16px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+  <main class="deck">
+    <!-- SLIDE 1 — TITLE -->
+    <section class="slide slide-1 slide-dark active" data-slide="0">
+      <div class="deco-circle deco-circle-1"></div>
+      <div class="deco-circle deco-circle-2"></div>
+      <h1 class="title-main">Merchant Risk Co-Pilot</h1>
+      <p class="subtitle">G2RS detects violations. This is about giving customers the scalability to act on all of them.</p>
+      <p class="footer">SENIOR PM CASE INTERVIEW · G2RS / EVERC · MARCH 2026</p>
+    </section>
+
+    <!-- SLIDE 2 — MEET THE ANALYST -->
+    <section class="slide" data-slide="1">
+      <div class="container">
+        <p class="label">THE PROBLEM</p>
+        <h2 class="slide-title">47 alerts. Monday morning. Where do you start?</h2>
+        <p class="body-text">A risk analyst opens their queue. 47 violations across different merchants. No grouping. No order. Just a list.</p>
+        <div class="alert-grid">
+          <div class="alert-card critical"><span class="severity">CRITICAL</span><div class="domain">betwin365.com</div><div class="type">Gambling</div><div class="context">No context loaded</div></div>
+          <div class="alert-card critical"><span class="severity">CRITICAL</span><div class="domain">pharmadir.com</div><div class="type">Prescription</div><div class="context">No context loaded</div></div>
+          <div class="alert-card high"><span class="severity">HIGH</span><div class="domain">luxreplica.co</div><div class="type">Counterfeit</div><div class="context">No context loaded</div></div>
+          <div class="alert-card high"><span class="severity">HIGH</span><div class="domain">jackpotstore.io</div><div class="type">Gambling</div><div class="context">No context loaded</div></div>
+          <div class="alert-card medium"><span class="severity">MEDIUM</span><div class="domain">cleanmeds.co</div><div class="type">Prescription</div><div class="context">No context loaded</div></div>
+          <div class="alert-card high"><span class="severity">HIGH</span><div class="domain">sportzgear.com</div><div class="type">Counterfeit</div><div class="context">No context loaded</div></div>
+        </div>
+        <p class="body-text"><strong>No grouping. No order. No context. Every alert opens cold.</strong></p>
+      </div>
+    </section>
+
+    <!-- SLIDE 3 — SCALABILITY GAP -->
+    <section class="slide" data-slide="2">
+      <div class="container">
+        <p class="label">THE SCALABILITY GAP</p>
+        <h2 class="slide-title">G2RS gives customers detection. It doesn't give them scalability.</h2>
+        <div class="flow-boxes">
+          <span class="flow-box">Customer's merchant portfolio ↑</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-box">Violation volume ↑</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-box">Investigation time × volume</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-box red">Customer's team capacity = FIXED</span>
+        </div>
+        <div class="card card-accent-purple" style="margin: 20px 0;">
+          <p class="body-text">G2RS has no scalability layer for what happens after detection. Every true positive becomes a unit of work the customer cannot absorb at scale.</p>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="card card-accent-red"><p class="card-text"><strong>Existing customers</strong> cap their portfolio at analyst capacity</p></div>
+          <div class="card card-accent-amber"><p class="card-text"><strong>Prospective customers</strong> don't adopt — the math doesn't work for them</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4 — ALTERNATIVES -->
+    <section class="slide" data-slide="3">
+      <div class="container">
+        <p class="label">ALTERNATIVES CONSIDERED</p>
+        <h2 class="slide-title" style="font-size: 32px; margin-bottom: 12px;">Three paths. Here's how I evaluated them.</h2>
+        <div class="alt-cards">
+          <div class="alt-card rejected">
+            <span class="alt-badge rejected">REJECTED</span>
+            <h3 style="font-size: 14px; margin-bottom: 4px;">Automate the investigation — connect to bank's internal systems</h3>
+            <p class="body-text" style="font-size: 13px; margin-bottom: 0;">Run checks automatically using customer's transaction logs, chargebacks, and invoices.</p>
+            <p class="body-text" style="font-size: 13px; margin-top: 4px; margin-bottom: 0;"><strong>Why rejected:</strong> Security boundary. Banks won't allow third-party vendor access to internal investigation data. The customer is legally liable for risk decisions.</p>
+          </div>
+          <div class="alt-card complementary">
+            <span class="alt-badge complementary">COMPLEMENTARY</span>
+            <h3 style="font-size: 14px; margin-bottom: 4px;">Risk-Based Monitoring Tiers</h3>
+            <p class="body-text" style="font-size: 13px; margin-bottom: 0;">Segment portfolio: High → continuous, Medium → monthly, Low → quarterly. If 60–70% of merchants are low risk, this reduces volume at the source.</p>
+            <div class="alt-two-col">
+              <div>
+                <p style="font-weight: 600; font-size: 12px; margin-bottom: 3px;">Why it's strong:</p>
+                <p style="font-size: 12px; color: #555; margin: 0;">Reduces alert volume · No behavior change · No adoption friction · Respects data constraint · Deploys quickly</p>
+              </div>
+              <div>
+                <p style="font-weight: 600; font-size: 12px; margin-bottom: 3px;">Where it falls short:</p>
+                <p style="font-size: 12px; color: #555; margin: 0;">Doesn't reduce per-case effort · Miscategorization → regulatory risk · Static tiering, no learning · No workflow improvement</p>
+              </div>
+            </div>
+            <div class="alt-callout">
+              <p style="font-size: 13px; margin: 0;"><strong>Complementary, not rejected.</strong> Best deployed alongside the Co-Pilot as a second layer.</p>
+            </div>
+          </div>
+          <div class="alt-card chosen">
+            <span class="alt-badge chosen">CHOSEN ✓</span>
+            <h3 style="font-size: 14px; margin-bottom: 4px;">Merchant Risk Co-Pilot</h3>
+            <p class="body-text" style="font-size: 13px; margin-bottom: 0;">A workflow layer that transforms how customers consume violation findings. Attacks the root cause — the structural mismatch between how alerts arrive and how investigations run. Scales as software. Works within the data constraint.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5 — ONE ALERT'S JOURNEY -->
+    <section class="slide" data-slide="4">
+      <div class="container">
+        <p class="label">THE ANALYST'S DAY</p>
+        <h2 class="slide-title">What happens when the analyst opens one alert.</h2>
+        <div class="journey-grid">
+          <div class="journey-step"><span class="num">1</span><div class="title">Opens alert</div><div class="pain">No context loaded</div></div>
+          <div class="journey-step"><span class="num">2</span><div class="title">Looks up merchant</div><div class="pain">Manually, across 3+ tools</div></div>
+          <div class="journey-step"><span class="num">3</span><div class="title">Figures out violation type</div><div class="pain">Reads & interprets the finding</div></div>
+          <div class="journey-step"><span class="num">4</span><div class="title">Recalls the policy</div><div class="pain">Opens AUP, finds right clause</div></div>
+          <div class="journey-step"><span class="num">5</span><div class="title">Figures out what to check</div><div class="pain">No guidance — starts guessing</div></div>
+          <div class="journey-step"><span class="num">6</span><div class="title">Runs investigation</div><div class="pain">Transaction logs, chargebacks, invoices</div></div>
+          <div class="journey-step"><span class="num">7</span><div class="title">Writes rationale</div><div class="pain">Blank page</div></div>
+          <div class="journey-step"><span class="num">8</span><div class="title">Closes case</div><div class="pain">Done</div></div>
+        </div>
+        <div class="callout-bar">40–60 minutes gone. For one alert. 46 more waiting.</div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6 — REPETITION -->
+    <section class="slide" data-slide="5">
+      <div class="container">
+        <p class="label">THE REAL PAIN</p>
+        <h2 class="slide-title">Same violation type. Different merchant. Full reset.</h2>
+        <div class="lanes">
+          <div class="lane">
+            <span class="lane-label">Merchant A · Gambling</span>
+            <span class="lane-steps"><span class="lane-step">Open</span><span class="lane-step">Lookup</span><span class="lane-step">Policy</span><span class="lane-step">Checklist</span><span class="lane-step">Write</span></span>
+            <span class="reset-badge">FULL RESET</span>
+          </div>
+          <div class="lane faded">
+            <span class="lane-label">Merchant B · Gambling</span>
+            <span class="lane-steps"><span class="lane-step">Open</span><span class="lane-step">Lookup</span><span class="lane-step">Policy</span><span class="lane-step">Checklist</span><span class="lane-step">Write</span></span>
+            <span class="reset-badge">FULL RESET</span>
+          </div>
+          <div class="lane more-faded">
+            <span class="lane-label">Merchant C · Gambling</span>
+            <span class="lane-steps"><span class="lane-step">Open</span><span class="lane-step">Lookup</span><span class="lane-step">Policy</span><span class="lane-step">Checklist</span><span class="lane-step">Write</span></span>
+            <span class="reset-badge">FULL RESET</span>
+          </div>
+        </div>
+        <p style="text-align: right; font-size: 14px; color: #888; margin-bottom: 12px;">Same work 3× over</p>
+        <div class="card card-accent-purple">
+          <p class="body-text">The investigation for a gambling violation is essentially the same investigation every time. The merchant changes. The process doesn't. But the analyst starts from zero every single time.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 7 — DIAGNOSIS -->
+    <section class="slide slide-7 slide-dark" data-slide="6">
+      <div class="container">
+        <h2 class="slide-title" style="font-size: 32px;">Alerts arrive ungrouped. Investigation is violation-type-specific.</h2>
+        <p class="body-text" style="font-size: 20px; margin-bottom: 24px;">That mismatch is the bottleneck.</p>
+        <div class="card" style="margin: 12px 0;"><p class="body-text">1. No grouping by violation type → context switching after every case</p></div>
+        <div class="card" style="margin: 12px 0;"><p class="body-text">2. No violation-type checklist → analyst rebuilds guidance from scratch</p></div>
+        <div class="card" style="margin: 12px 0;"><p class="body-text">3. No pre-loaded context → merchant story reconstructed manually every time</p></div>
+        <div class="card" style="border-color: #0d9488; margin-top: 24px;">
+          <p class="body-text" style="color: white;">This is why G2RS customers can't scale. Not their team size — the structure of how alerts arrive.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 8 — OBVIOUS FIX -->
+    <section class="slide" data-slide="7">
+      <div class="container">
+        <p class="label">THE FIX</p>
+        <h2 class="slide-title">Group by violation type. Load context once. Work the batch.</h2>
+        <div class="before-after">
+          <div class="panel before">
+            <div class="panel-title">BEFORE</div>
+            <p style="font-size: 14px; color: #555;">betwin365.com, pharmadir.com, luxreplica.co, jackpotstore.io, cleanmeds.co, sportzgear.com</p>
+          </div>
+          <div style="text-align: center; font-weight: 600; color: #7c3aed;">GROUP BY TYPE →</div>
+          <div class="panel after">
+            <div class="panel-title">AFTER</div>
+            <div class="group-section"><h4>Gambling (2)</h4><p style="font-size: 14px;">betwin365.com, jackpotstore.io — Context loaded once</p></div>
+            <div class="group-section"><h4>Prescription (2)</h4><p style="font-size: 14px;">pharmadir.com, cleanmeds.co — Context loaded once</p></div>
+            <div class="group-section"><h4>Counterfeit (2)</h4><p style="font-size: 14px;">luxreplica.co, sportzgear.com — Context loaded once</p></div>
+          </div>
+        </div>
+        <p class="body-text"><strong>The analyst becomes an expert in that violation type for the duration of the batch — instead of a generalist starting cold on every alert.</strong></p>
+      </div>
+    </section>
+
+    <!-- SLIDE 9 — GROUPING ALONE -->
+    <section class="slide" data-slide="8">
+      <div class="container">
+        <p class="label">THE FULL SOLUTION</p>
+        <h2 class="slide-title">Grouping solves the switching cost. These solve the rest.</h2>
+        <div class="layers">
+          <div class="layer layer-1"><div><span class="layer-label">Violation-type grouping</span><span class="layer-desc" style="display: block;">eliminates context switching</span></div><span class="copilot-pill">Merchant Risk Co-Pilot</span></div>
+          <div class="layer layer-2"><div><span class="layer-label">Targeted verification checklist</span><span class="layer-desc" style="display: block;">exactly what to verify internally for this type</span></div></div>
+          <div class="layer layer-3"><div><span class="layer-label">Evidence pack</span><span class="layer-desc" style="display: block;">merchant history, Compass Score, EverC signals, pre-assembled</span></div></div>
+          <div class="layer layer-4"><div><span class="layer-label">AI case summary</span><span class="layer-desc" style="display: block;">plain language: who is this merchant, what's the pattern</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 10 — INTRODUCING CO-PILOT -->
+    <section class="slide slide-dark" data-slide="9">
+      <div class="container">
+        <p class="label" style="color: #a78bfa;">THE SOLUTION</p>
+        <h2 class="slide-title">The scalability layer G2RS is missing.</h2>
+        <p class="body-text" style="margin-bottom: 24px;">Not a new detection product. The layer between detection and decision.</p>
+        <div class="flow-diagram">
+          <span class="flow-node">Violation detected</span>
+          <span style="color: white;">→</span>
+          <span class="flow-node">Grouped by type</span>
+          <span style="color: white;">→</span>
+          <span class="flow-node">Evidence assembled</span>
+          <span style="color: white;">→</span>
+          <span class="flow-node">Analyst verifies</span>
+          <span style="color: white;">→</span>
+          <span class="flow-node">Decision + audit trail</span>
+        </div>
+        <div class="card" style="border-color: #0d9488; margin: 20px 0;">
+          <p class="body-text" style="color: white;">G2RS cannot access customer transaction data. The Co-Pilot is designed around this — it tells analysts exactly what to verify internally, without crossing that line.</p>
+        </div>
+        <div class="two-col">
+          <div><p style="font-weight: 600; margin-bottom: 8px; color: white;">What changes:</p><p class="body-text" style="font-size: 15px;">Investigation is structured, Context is pre-loaded, Checklist is violation-type specific</p></div>
+          <div><p style="font-weight: 600; margin-bottom: 8px; color: white;">What stays the same:</p><p class="body-text" style="font-size: 15px;">Analyst makes the decision, Internal data stays internal, Customer remains liable</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 11 — JOURNEY TRANSFORMED -->
+    <section class="slide" data-slide="10">
+      <div class="container">
+        <p class="label">THE TRANSFORMATION</p>
+        <h2 class="slide-title">Same analyst. Same Monday morning. Different experience.</h2>
+        <div class="comparison">
+          <div class="comp-panel without"><h4>WITHOUT CO-PILOT</h4>
+            <div class="comp-row"><span class="arrow">→</span><span>47 unstructured alerts</span></div>
+            <div class="comp-row"><span class="arrow">→</span><span>Opens cold — no context</span></div>
+            <div class="comp-row"><span class="arrow">→</span><span>Figures out what to check</span></div>
+            <div class="comp-row"><span class="arrow">→</span><span>40–60 minutes per case</span></div>
+            <div class="comp-row"><span class="arrow">→</span><span>Pulls history from 3+ tools</span></div>
+            <div class="comp-row"><span class="arrow">→</span><span>Writes rationale from blank page</span></div>
+            <div class="comp-row"><span class="arrow">→</span><span>Queue never empties</span></div>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: center;"><span style="font-size: 24px; color: #7c3aed;">→</span></div>
+          <div class="comp-panel with"><h4>WITH CO-PILOT</h4>
+            <div class="comp-row"><span class="arrow">→</span><span>3 grouped batches by violation type</span></div>
+            <div class="comp-row"><span class="arrow">→</span><span>Evidence pack pre-assembled</span></div>
+            <div class="comp-row"><span class="arrow">→</span><span>Checklist: exactly 3 things to verify</span></div>
+            <div class="comp-row"><span class="arrow">→</span><span>8–12 minutes per case</span></div>
+            <div class="comp-row"><span class="arrow">→</span><span>AI summary loads in 20 seconds</span></div>
+            <div class="comp-row"><span class="arrow">→</span><span>Edit pre-drafted rationale</span></div>
+            <div class="comp-row"><span class="arrow">→</span><span>Queue empty by noon — capacity for more</span></div>
+          </div>
+        </div>
+        <p class="comp-punch">Same alerts. Different system. 3× output.</p>
+      </div>
+    </section>
+
+    <!-- SLIDE 12 — MVP -->
+    <section class="slide" data-slide="11">
+      <div class="container">
+        <p class="label">MVP</p>
+        <h2 class="slide-title">Five features. Sequenced by dependency.</h2>
+        <p class="body-text" style="margin-bottom: 20px;">Each layer enables the next.</p>
+        <div class="mvp-list">
+          <div class="mvp-item foundation">
+            <span class="mvp-num">1</span>
+            <div><span class="title">Violation-Type Grouping</span><span class="foundation-badge">THE FOUNDATION</span><p class="desc">Foundation. Without this, nothing else delivers full value.</p></div>
+          </div>
+          <div class="mvp-item"><span class="mvp-num">2</span><div><span class="title">Evidence Pack</span><p class="desc">Pre-loads context. Eliminates 3-tool manual lookup.</p></div></div>
+          <div class="mvp-item"><span class="mvp-num">3</span><div><span class="title">AI Case Summary</span><p class="desc">Plain language: who is this merchant, what's the pattern.</p></div></div>
+          <div class="mvp-item"><span class="mvp-num">4</span><div><span class="title">Targeted Verification Checklist</span><p class="desc">Exactly what internal data to check for this violation type.</p></div></div>
+          <div class="mvp-item"><span class="mvp-num">5</span><div><span class="title">Risk-Tier Routing + Decision Buttons</span><p class="desc">Critical/High first. SLA timer. Audit trail.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 13 — ROADMAP -->
+    <section class="slide" data-slide="12">
+      <div class="container">
+        <p class="label">ROADMAP</p>
+        <h2 class="slide-title">What we build after the workflow is proven.</h2>
+        <div class="roadmap-mvp">MVP — Foundation</div>
+        <div class="roadmap-cols">
+          <div class="roadmap-card"><h4>Layer 1: AI Insights Button</h4><p>On-demand outcome prediction, recommended action, pre-drafted rationale</p></div>
+          <div class="roadmap-card"><h4>Layer 2: Remediation Workflow</h4><p>Outreach templates, deadline timer, instant re-scan via EverC</p></div>
+          <div class="roadmap-card"><h4>Layer 3: Feedback Loop</h4><p>Outcome capture → tier calibration + AI improvement</p></div>
+        </div>
+        <div class="card card-accent-teal" style="margin-top: 20px;">
+          <p class="body-text"><strong>Complementary:</strong> Risk-based monitoring tiers reduce alert volume entering the Co-Pilot. Deploy as a second layer once core workflow is proven.</p>
+          <p class="body-text" style="margin-top: 8px;"><strong>Recommended:</strong> Launch Co-Pilot first → prove efficiency → then introduce tiers.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 14 — CUSTOMER SEGMENTS -->
+    <section class="slide" data-slide="13">
+      <div class="container">
+        <p class="label">CUSTOMER SEGMENTS</p>
+        <h2 class="slide-title">Same platform. Different primary lever per segment.</h2>
+        <div class="segments-grid">
+          <div class="segment-card"><h4>Growing PayFac</h4><p class="pain">Pain: Alert volume overwhelming team.</p><p class="lever">Primary lever: Violation-type grouping.</p><p class="phase">Phase: MVP</p></div>
+          <div class="segment-card"><h4>Established Acquirer</h4><p class="pain">Pain: SLA breach risk on Critical cases.</p><p class="lever">Primary lever: Evidence pack + SLA timer.</p><p class="phase">Phase: MVP</p></div>
+          <div class="segment-card"><h4>Risk-Averse Prospect</h4><p class="pain">Pain: Fear of adoption — "too many alerts."</p><p class="lever">Primary lever: Structured workflow removes the fear.</p><p class="phase">Phase: Phase 2</p></div>
+          <div class="segment-card"><h4>Marketplace / Platform</h4><p class="pain">Pain: Millions of sellers, can't review individually.</p><p class="lever">Primary lever: Full automation + EverC Smart Scan.</p><p class="phase">Phase: Phase 3</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 15 — EXECUTION -->
+    <section class="slide" data-slide="14">
+      <div class="container">
+        <p class="label">EXECUTION</p>
+        <h2 class="slide-title">Four phases. Each gated by a signal — not a date.</h2>
+        <div class="phases">
+          <div class="phase-card">
+            <h4>Phase 0 — Discover (4–6 wks)</h4>
+            <p class="build"><strong>Build:</strong> Shadow analysts, capture baselines, 2–3 design partners</p>
+            <p class="learn"><strong>Learn:</strong> How analysts actually work, real time-per-case</p>
+            <p class="gate">Gate → Partners committed + baselines captured</p>
+          </div>
+          <div class="phase-card">
+            <h4>Phase 1 — MVP (3–4 mo)</h4>
+            <p class="build"><strong>Build:</strong> 5 MVP features, design partners only</p>
+            <p class="learn"><strong>Learn:</strong> Does grouping reduce context switches? Does checklist reduce investigation time?</p>
+            <p class="gate">Gate → Measurable improvement + "we could handle more"</p>
+          </div>
+          <div class="phase-card">
+            <h4>Phase 2 — Deepen (4–6 mo)</h4>
+            <p class="build"><strong>Build:</strong> AI insights, remediation workflow, broader rollout</p>
+            <p class="learn"><strong>Learn:</strong> Do customers increase screening volume?</p>
+            <p class="gate">Gate → Screening requests rising</p>
+          </div>
+          <div class="phase-card">
+            <h4>Phase 3 — Scale (Ongoing)</h4>
+            <p class="build"><strong>Build:</strong> Full rollout, Co-Pilot priced distinct, feedback loop</p>
+            <p class="learn"><strong>Learn:</strong> Does the system compound?</p>
+            <p class="gate">Gate → Portfolio expansion across customer base</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 16 — METRICS -->
+    <section class="slide" data-slide="15">
+      <div class="container">
+        <p class="label">METRICS</p>
+        <h2 class="slide-title">One north star. One guardrail. One growth signal.</h2>
+        <div class="metrics-grid">
+          <div class="metric-card teal">
+            <div class="icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+            <p class="label">NORTH STAR</p>
+            <p class="name">Alerts investigated per analyst per working week</p>
+            <p class="body">Direct expression of "more with less." If this moves, the Co-Pilot is working.</p>
+            <p class="how">How: Case open → decision timestamp, per analyst.</p>
+          </div>
+          <div class="metric-card purple">
+            <div class="icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <p class="label">GUARDRAIL</p>
+            <p class="name">Average time from case creation to decision, by tier</p>
+            <p class="body">Speed gains must not come at the cost of SLA discipline.</p>
+            <p class="how">How: Both timestamps owned by G2RS. Per tier.</p>
+          </div>
+          <div class="metric-card teal">
+            <div class="icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+            <p class="label">GROWTH SIGNAL</p>
+            <p class="name">Screening requests submitted per customer per week</p>
+            <p class="body">Customers were capping their portfolio before. If this rises, they are growing with G2RS — not despite it.</p>
+            <p class="how">How: Measured directly in G2RS API. Baseline from Phase 0.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 17 — CLOSING -->
+    <section class="slide slide-17 slide-dark" data-slide="16">
+      <div class="deco-circle deco-circle-1"></div>
+      <div class="deco-circle deco-circle-2"></div>
+      <p class="quote">Without the Co-Pilot, G2RS growth is capped by its customers' analyst capacity.</p>
+      <p class="punch">With it, a customer with 100,000 merchants can monitor all of them — and tell G2RS to send more.</p>
+      <p class="final">That's what scalability means.</p>
+      <p class="footer">Merchant Risk Co-Pilot · G2RS / EverC · March 2026</p>
+    </section>
+  </main>
+
+  <div class="nav-bar">
+    <span class="slide-counter" id="slideCounter">1 / 17</span>
+    <div class="nav-buttons">
+      <button class="nav-btn" id="prevBtn" aria-label="Previous slide">←</button>
+      <button class="nav-btn" id="nextBtn" aria-label="Next slide">→</button>
+    </div>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const total = slides.length;
+    let current = 0;
+
+    function goTo(idx) {
+      if (idx < 0 || idx >= total || idx === current) return;
+      const oldSlide = slides[current];
+      const newSlide = slides[idx];
+      const forward = idx > current;
+      oldSlide.classList.remove('active');
+      oldSlide.classList.add('prev');
+      newSlide.style.transition = 'none';
+      newSlide.style.transform = forward ? 'translateX(40px)' : 'translateX(-40px)';
+      newSlide.style.opacity = '0';
+      newSlide.classList.add('active');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          newSlide.style.transition = '';
+          newSlide.style.transform = '';
+          newSlide.style.opacity = '';
+        });
+      });
+      setTimeout(() => { oldSlide.classList.remove('prev'); }, 550);
+      current = idx;
+      renderNav();
+    }
+
+    function renderNav() {
+      document.getElementById('slideCounter').textContent = `${current + 1} / ${total}`;
+      document.getElementById('progressFill').style.width = `${((current + 1) / total) * 100}%`;
+      document.getElementById('prevBtn').disabled = current === 0;
+      document.getElementById('nextBtn').disabled = current === total - 1;
+    }
+
+    document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+    document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goTo(Math.min(current + 1, total - 1)); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(Math.max(current - 1, 0)); }
+      else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+      else if (e.key === 'End') { e.preventDefault(); goTo(total - 1); }
+    });
+
+    let touchStartX = 0;
+    document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    document.addEventListener('touchend', (e) => {
+      const diff = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 50) diff > 0 ? goTo(Math.min(current + 1, total - 1)) : goTo(Math.max(current - 1, 0));
+    }, { passive: true });
+
+    renderNav();
+  </script>
+</body>
+</html>
+
+<!--
+================================================================================
+SPEAKER NOTES — G2RS MERCHANT RISK CO-PILOT
+================================================================================
+
+NARRATIVE ARC SUMMARY
+--------------------
+1. Hook: Analyst's Monday morning (47 alerts, chaos)
+2. Problem: G2RS detects but doesn't scale — structural gap
+3. Alternatives: Why automate (rejected), tiers (complementary), Co-Pilot (chosen)
+4. Deep dive: One alert's journey (40-60 min), repetition problem
+5. Diagnosis: Alerts ungrouped vs violation-type-specific investigation = bottleneck
+6. Fix: Group, load context once, work the batch
+7. Full solution: 4 layers (grouping, checklist, evidence, AI summary)
+8. Introducing Co-Pilot: The missing layer
+9. Transformation: Before/after comparison
+10. MVP: 5 features, dependency-sequenced
+11. Roadmap: Post-MVP layers + tiers as complementary
+12. Segments: Different levers per segment
+13. Execution: 4 phases, signal-gated
+14. Metrics: North star, guardrail, growth signal
+15. Closing: Scalability = customers can grow with G2RS
+
+KEY MESSAGES
+------------
+- G2RS has detection. It lacks a scalability layer for what happens after.
+- The bottleneck is structural: alerts arrive ungrouped, investigation is violation-type-specific.
+- Co-Pilot attacks the root cause without crossing the data boundary.
+- Same alerts, different system, 3× output.
+- Without Co-Pilot, growth is capped by analyst capacity. With it, customers can monitor 100K+ merchants.
+
+PER-SLIDE NOTES
+---------------
+Slide 1: Set the frame. "This isn't about detection — G2RS already does that. It's about scalability."
+Slide 2: Empathy moment. Make them feel the analyst's overwhelm.
+Slide 3: The math. Portfolio grows, volume grows, team doesn't. Dead end.
+Slide 4: Show rigor. We considered alternatives. Automation = security boundary. Tiers = complementary, not replacement.
+Slide 5: Walk through the 8 steps. Emphasize "blank page," "no guidance," "3+ tools."
+Slide 6: The repetition insight. Same violation type = same investigation. But we reset every time.
+Slide 7: Pause. This is the diagnosis. Let it land.
+Slide 8: The obvious fix. Grouping is the foundation.
+Slide 9: Grouping alone isn't enough. The 4 layers.
+Slide 10: Co-Pilot = the layer between detection and decision. Constraint callout is critical.
+Slide 11: The transformation. 47 → 3 batches. 40-60 min → 8-12 min. Queue empty by noon.
+Slide 12: MVP rationale. Violation-type grouping is THE foundation. Others build on it.
+Slide 13: Tiers come after. Prove workflow first.
+Slide 14: Same platform, different primary lever. PayFac vs Acquirer vs Prospect vs Marketplace.
+Slide 15: Phase gates are signals, not dates. Discover → MVP → Deepen → Scale.
+Slide 16: North star = alerts per analyst per week. Guardrail = SLA. Growth = screening requests.
+Slide 17: Land the punch. "That's what scalability means."
+
+Q&A PREP — 5 HARDEST QUESTIONS
+------------------------------
+Q1: "Why not just hire more analysts?"
+A: Hiring doesn't fix the structural problem. Each analyst still does 40-60 min per case, context-switching constantly. The bottleneck is how work arrives, not headcount. Co-Pilot changes the structure — same analyst, 3× output.
+
+Q2: "Won't banks resist another workflow tool?"
+A: Co-Pilot integrates into their existing flow. It doesn't replace their decision — it structures the input. The analyst still makes the call. We're reducing friction, not adding process. Design partners in Phase 0 validate adoption.
+
+Q3: "What if Risk-Based Tiers alone is enough?"
+A: Tiers reduce volume at the source — valuable. But each remaining alert still needs the same 40-60 min investigation. No workflow improvement. And miscategorization risk means missed violations for months. Co-Pilot + Tiers is the full answer.
+
+Q4: "How do you prove 3× improvement?"
+A: Phase 0 captures baseline: time per case, alerts per week per analyst. Phase 1 measures the same with Co-Pilot. North star metric = alerts investigated per analyst per week. Gate is "measurable improvement + we could handle more."
+
+Q5: "What's the pricing model?"
+A: Co-Pilot priced distinct in Phase 3. Value prop: customers can expand portfolio without proportional headcount. Pricing tied to screening volume or seats. Not defined in MVP — prove value first.
+
+ALTERNATIVES DEEP DIVE — RISK-BASED TIERS
+-----------------------------------------
+Full analysis for Card B:
+- STRENGTH: Reduces alert volume 60-70% if portfolio is correctly tiered. No behavior change. No adoption friction. Respects data constraint. Fast to deploy.
+- WEAKNESS: Volume reduction ≠ time reduction. Each finding still needs full investigation. Static tiering = no learning. Miscategorization = violations missed for months (Low tier = quarterly scan). No workflow improvement.
+- VERDICT: Complementary. Deploy as second layer once Co-Pilot workflow is proven. Recommended sequence: Co-Pilot first → prove efficiency → then introduce tiers. Tiers optimize what enters the funnel; Co-Pilot optimizes what happens inside.
+
+MVP BUILD RATIONALE
+-------------------
+1. Violation-Type Grouping: Without this, Evidence Pack and Checklist deliver partial value. Analyst still context-switches. Foundation.
+2. Evidence Pack: Enables Checklist and AI Summary. Pre-loading eliminates 3-tool lookup.
+3. AI Case Summary: Depends on Evidence Pack. Plain language accelerates "who is this merchant."
+4. Targeted Verification Checklist: Depends on grouping (violation-type-specific). Tells analyst exactly what to check.
+5. Risk-Tier Routing + Decision Buttons: Can build in parallel. SLA timer and audit trail are table stakes for enterprise.
+
+PHASE GATE RATIONALE
+--------------------
+Phase 0 → 1: "Partners committed + baselines captured" — need real data and design partner buy-in before building.
+Phase 1 → 2: "Measurable improvement + we could handle more" — qualitative + quantitative. Not just speed, but willingness to expand.
+Phase 2 → 3: "Screening requests rising" — customers are actually growing their use of G2RS. The growth signal.
+Phase 3: "Portfolio expansion across customer base" — compound effect. Co-Pilot enables scale; scale proves Co-Pilot.
+
+CLOSING VARIATIONS
+------------------
+- Short: "Without Co-Pilot, growth is capped. With it, customers can scale. That's what we're building."
+- Technical: "The Co-Pilot is the scalability layer between detection and decision. It respects the data boundary and attacks the structural bottleneck."
+- Customer-centric: "A customer with 100,000 merchants can finally monitor all of them — and ask us for more. That's the future we're enabling."
+
+SLIDE TIMING (~35 min total)
+----------------------------
+1: 1 min | 2: 2 min | 3: 2 min | 4: 4 min | 5: 2 min | 6: 2 min | 7: 2 min | 8: 2 min | 9: 2 min | 10: 3 min | 11: 3 min | 12: 2 min | 13: 2 min | 14: 2 min | 15: 2 min | 16: 2 min | 17: 1 min
+-->
